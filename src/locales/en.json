@@ -1,0 +1,99 @@
+{
+  "common": {
+    "fetched": "Data fetched successfully.",
+    "action_success": "Action completed successfully."
+  },
+  "admin": {
+    "package_updated": "Package settings updated successfully. New purchases will use the new rates."
+  },
+  "user": {
+    "profile_fetched": "Profile fetched successfully.",
+    "wallet_fetched": "Wallet balance fetched successfully.",
+    "language_updated": "Language preference updated successfully."
+  },
+  "auth": {
+    "register_success": "Account created successfully. Please check your email for the verification code.",
+    "otp_sent": "Verification code sent to your email.",
+    "admin_otp_sent": "A verification code was sent to your admin email. Enter it to complete sign-in.",
+    "otp_verified": "Email verified successfully.",
+    "otp_invalid": "Invalid or expired verification code.",
+    "login_success": "Logged in successfully.",
+    "invalid_credentials": "Invalid email or password.",
+    "email_already_exists": "An account with this email already exists.",
+    "account_not_verified": "Please verify your email before logging in.",
+    "account_suspended": "Your account has been suspended. Contact support.",
+    "account_pending": "Your account is pending admin approval. You will be able to log in once approved.",
+    "id_already_exists": "An account with this ID / Passport number already exists.",
+    "id_document_required": "Please upload a clear photo of your ID or passport.",
+    "user_not_found": "No account was found with this email address.",
+    "already_verified": "This account is already verified.",
+    "otp_resend_cooldown": "Please wait {{seconds}} second(s) before requesting a new code.",
+    "invalid_referral_code": "The referral code you entered is invalid.",
+    "self_referral_not_allowed": "You cannot use your own referral code.",
+    "forgot_password_sent": "If an account exists for that email, a password reset link has been sent.",
+    "reset_password_success": "Your password has been updated. You can now log in.",
+    "reset_token_invalid": "This password reset link is invalid or has expired."
+  },
+  "mail": {
+    "otp_subject": "Your TrustCoin verification code",
+    "otp_greeting": "Verify your email address",
+    "otp_body": "Use the code below to verify your TrustCoin account. Do not share it with anyone.",
+    "otp_expiry_notice": "This code will expire in {{minutes}} minutes.",
+    "otp_ignore": "If you did not request this code, you can safely ignore this email.",
+    "withdraw_otp_subject": "Confirm your TrustCoin withdrawal",
+    "withdraw_otp_greeting": "Confirm your withdrawal",
+    "withdraw_otp_body": "Enter this code to confirm your withdrawal request. Do not share it with anyone.",
+    "withdraw_otp_ignore": "If you did not initiate a withdrawal, ignore this email and secure your account."
+  },
+  "investments": {
+    "package_not_found": "Investment package not found.",
+    "amount_below_minimum": "Amount is below the minimum limit for this package (minimum {{minLimit}} USDT).",
+    "amount_must_match_package": "Investment amount must be exactly {{packageAmount}} USDT for this package.",
+    "insufficient_balance": "Insufficient balance to create this investment.",
+    "insufficient_available_balance": "Purchase amount exceeds your available balance of {{availableBalance}} USDT. Locked package funds cannot be reinvested.",
+    "created": "Investment created successfully.",
+    "purchased": "Package purchased successfully. Funds moved from available to locked balance.",
+    "not_found": "Investment not found.",
+    "not_active": "This investment is not active.",
+    "packages_fetched": "Packages fetched successfully.",
+    "list_fetched": "Investments fetched successfully."
+  },
+  "transactions": {
+    "deposit_created": "Deposit request submitted successfully.",
+    "withdrawal_created": "Withdrawal request submitted successfully. The amount is reserved from your available balance pending admin review.",
+    "insufficient_balance": "Insufficient available balance for this withdrawal.",
+    "insufficient_available_balance": "Withdrawal amount exceeds your available balance of {{availableBalance}} USDT. Locked package funds cannot be withdrawn.",
+    "not_found": "Transaction not found.",
+    "list_fetched": "Transactions fetched successfully."
+  },
+  "referrals": {
+    "stats_fetched": "Referral statistics fetched successfully.",
+    "reward_not_found": "Referral reward not found.",
+    "reward_already_processed": "This referral reward has already been processed.",
+    "reward_not_ready": "This referral reward can only be processed after the referred package completes.",
+    "insufficient_pending_bonus": "Referrer pending referral balance is insufficient for this release.",
+    "referrer_no_active_investment": "The referrer has no active investment to receive this bonus.",
+    "approved": "Referral commission approved and released to available balance.",
+    "rejected": "Referral reward rejected and pending lock cleared."
+  },
+  "deposits": {
+    "networks_fetched": "Deposit networks fetched successfully.",
+    "address_fetched": "Deposit address fetched successfully.",
+    "requested": "Manual deposit submit is disabled. Send USDT to your deposit address.",
+    "manual_disabled": "Manual deposit submit is disabled. Send USDT to your unique deposit address — balance is credited automatically after on-chain confirmation.",
+    "history_fetched": "Deposit history fetched successfully.",
+    "sweep_triggered": "Deposit sweep run completed."
+  },
+  "errors": {
+    "unauthorized": "Authentication required.",
+    "forbidden": "You do not have permission to perform this action.",
+    "not_found": "Resource not found.",
+    "too_many_requests": "Too many requests. Please try again later.",
+    "internal_server_error": "Something went wrong. Please try again later.",
+    "validation_failed": "Validation failed.",
+    "ip_banned": "Your IP address has been banned due to suspicious activity.",
+    "database_unavailable": "We couldn't reach the database. Please try again in a moment.",
+    "invalid_file_type": "Unsupported file type. Please upload a JPG, PNG, or WEBP image.",
+    "file_too_large": "The uploaded file is too large."
+  }
+}

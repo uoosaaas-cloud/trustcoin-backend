@@ -1,0 +1,20 @@
+node_modules/
+dist/
+build/
+
+# User-uploaded files (deposit proof images, etc.) — created at runtime by src/utils/upload.ts
+uploads/
+
+.env
+.env.local
+.env.*.local
+
+*.log
+npm-debug.log*
+
+.DS_Store
+
+coverage/
+
+.vscode/
+.idea/

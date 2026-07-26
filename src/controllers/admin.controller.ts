@@ -1,0 +1,166 @@
+import { Request, Response } from "express";
+import { asyncHandler } from "../utils/asyncHandler";
+import { sendSuccess } from "../utils/apiResponse";
+import { translate } from "../utils/i18n";
+import * as adminService from "../services/admin.service";
+import { getClientIp, recordFailedAdminAttempt, clearFailedAdminAttempts } from "../middlewares/ipGuard.middleware";
+import { ApiError } from "../utils/apiError";
+import { runDepositSweepJob } from "../jobs/depositSweep.job";
+import type { TriggerSweepInput } from "../validators/sweep.validator";
+
+export const login = asyncHandler(async (req: Request, res: Response) => {
+  const { email, password } = req.body as { email: string; password: string };
+  const ip = getClientIp(req);
+
+  try {
+    const challenge = await adminService.loginAdmin(email, password);
+    clearFailedAdminAttempts(ip);
+
+    sendSuccess(res, 200, translate("auth.admin_otp_sent", req.lang), challenge);
+  } catch (error) {
+    if (error instanceof ApiError && error.statusCode === 401) {
+      await recordFailedAdminAttempt(ip);
+    }
+    throw error;
+  }
+});
+
+export const verifyLoginOtp = asyncHandler(async (req: Request, res: Response) => {
+  const { email, code } = req.body as { email: string; code: string };
+  const ip = getClientIp(req);
+
+  try {
+    const { user, token } = await adminService.verifyAdminLoginOtp(email, code);
+    clearFailedAdminAttempts(ip);
+
+    sendSuccess(res, 200, translate("auth.login_success", req.lang), {
+      token,
+      user: { id: user.id, email: user.email, role: user.role },
+    });
+  } catch (error) {
+    if (error instanceof ApiError && (error.statusCode === 401 || error.statusCode === 400)) {
+      await recordFailedAdminAttempt(ip);
+    }
+    throw error;
+  }
+});
+
+export const getUsers = asyncHandler(async (req: Request, res: Response) => {
+  const search = typeof req.query.search === "string" ? req.query.search : undefined;
+  const status = typeof req.query.status === "string" ? req.query.status : undefined;
+  const users = await adminService.listUsers(search, status);
+  sendSuccess(res, 200, translate("common.fetched", req.lang), users);
+});
+
+export const approveUser = asyncHandler(async (req: Request, res: Response) => {
+  const user = await adminService.approveUser(req.params.userId, req.user!.id);
+  sendSuccess(res, 200, translate("common.action_success", req.lang), user);
+});
+
+export const blockUser = asyncHandler(async (req: Request, res: Response) => {
+  const user = await adminService.blockUser(req.params.userId, req.user!.id);
+  sendSuccess(res, 200, translate("common.action_success", req.lang), user);
+});
+
+export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
+  const result = await adminService.deleteUser(req.params.userId, req.user!.id);
+  sendSuccess(res, 200, translate("common.action_success", req.lang), result);
+});
+
+export const getReferralOverview = asyncHandler(async (req: Request, res: Response) => {
+  const overview = await adminService.getReferralAdminOverview();
+  sendSuccess(res, 200, translate("common.fetched", req.lang), overview);
+});
+
+export const getOverview = asyncHandler(async (req: Request, res: Response) => {
+  const stats = await adminService.getOverviewStats();
+  sendSuccess(res, 200, translate("common.fetched", req.lang), stats);
+});
+
+export const getAdminLogs = asyncHandler(async (req: Request, res: Response) => {
+  const logs = await adminService.listAdminLogs();
+  sendSuccess(res, 200, translate("common.fetched", req.lang), logs);
+});
+
+export const getBannedIps = asyncHandler(async (req: Request, res: Response) => {
+  const ips = await adminService.listBannedIps();
+  sendSuccess(res, 200, translate("common.fetched", req.lang), ips);
+});
+
+export const unbanIp = asyncHandler(async (req: Request, res: Response) => {
+  const { ip } = req.params;
+  await adminService.unbanIp(ip);
+  sendSuccess(res, 200, translate("common.action_success", req.lang));
+});
+
+export const getPendingTransactions = asyncHandler(async (req: Request, res: Response) => {
+  const transactions = await adminService.listPendingTransactions();
+  sendSuccess(res, 200, translate("common.fetched", req.lang), transactions);
+});
+
+export const getPendingWithdrawals = asyncHandler(async (req: Request, res: Response) => {
+  const withdrawals = await adminService.listPendingWithdrawals();
+  sendSuccess(res, 200, translate("common.fetched", req.lang), withdrawals);
+});
+
+export const approveDeposit = asyncHandler(async (req: Request, res: Response) => {
+  const { transactionId } = req.params;
+  const transaction = await adminService.approveDeposit(transactionId, req.user!.id);
+  sendSuccess(res, 200, translate("common.action_success", req.lang), transaction);
+});
+
+export const approveWithdrawal = asyncHandler(async (req: Request, res: Response) => {
+  const { transactionId } = req.params;
+  const transaction = await adminService.approveWithdrawal(transactionId, req.user!.id);
+  sendSuccess(res, 200, translate("common.action_success", req.lang), transaction);
+});
+
+export const rejectWithdrawal = asyncHandler(async (req: Request, res: Response) => {
+  const { transactionId } = req.params;
+  const transaction = await adminService.rejectWithdrawal(transactionId, req.user!.id);
+  sendSuccess(res, 200, translate("common.action_success", req.lang), transaction);
+});
+
+export const getPendingReferralRewards = asyncHandler(async (req: Request, res: Response) => {
+  const rewards = await adminService.listPendingReferralRewards();
+  sendSuccess(res, 200, translate("common.fetched", req.lang), rewards);
+});
+
+export const approveReferralReward = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await adminService.approveReferralReward(id, req.user!.id);
+  sendSuccess(res, 200, translate("referrals.approved", req.lang), result);
+});
+
+export const rejectReferralReward = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const reward = await adminService.rejectReferralReward(id, req.user!.id);
+  sendSuccess(res, 200, translate("referrals.rejected", req.lang), reward);
+});
+
+export const triggerDepositSweep = asyncHandler(async (req: Request, res: Response) => {
+  const input = req.body as TriggerSweepInput;
+  const summary = await runDepositSweepJob({
+    depositAddressId: input.depositAddressId,
+    address: input.address,
+    network: input.network,
+    dryRun: input.dryRun,
+    force: input.force,
+  });
+  sendSuccess(res, 200, translate("deposits.sweep_triggered", req.lang), summary);
+});
+
+export const getPackages = asyncHandler(async (req: Request, res: Response) => {
+  const packages = await adminService.listAdminPackages();
+  sendSuccess(res, 200, translate("common.fetched", req.lang), packages);
+});
+
+export const updatePackage = asyncHandler(async (req: Request, res: Response) => {
+  const updated = await adminService.updateAdminPackage(req.params.packageId, req.user!.id, req.body);
+  sendSuccess(res, 200, translate("admin.package_updated", req.lang), updated);
+});
+
+export const getDepositMonitoring = asyncHandler(async (req: Request, res: Response) => {
+  const overview = await adminService.getDepositMonitoringOverview();
+  sendSuccess(res, 200, translate("common.fetched", req.lang), overview);
+});

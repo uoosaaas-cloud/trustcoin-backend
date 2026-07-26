@@ -1,0 +1,597 @@
+{
+  "brand": {
+    "name": "TrustCoin",
+    "tagline": "Invest with confidence, grow with trust."
+  },
+  "languageSwitcher": {
+    "label": "Language",
+    "en": "English",
+    "ar": "العربية"
+  },
+  "register": {
+    "eyebrow": "Create your account",
+    "title": "Start your investment journey",
+    "subtitle": "Join TrustCoin and unlock secure, high-yield crypto investment plans.",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "you@example.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Create a strong password",
+    "passwordHint": "At least 8 characters, with uppercase, lowercase, a number, and a symbol.",
+    "confirmPasswordLabel": "Confirm password",
+    "confirmPasswordPlaceholder": "Re-enter your password",
+    "idPassportLabel": "ID / Passport number",
+    "idPassportPlaceholder": "Enter your national ID or passport number",
+    "idPassportHint": "Must be unique — each ID can only register once.",
+    "idDocumentLabel": "ID / Passport document",
+    "idDocumentHint": "Upload a clear photo (JPG, PNG, or WEBP, max 5MB).",
+    "referralCodeLabel": "Referral code",
+    "referralCodeOptional": "optional",
+    "referralCodePlaceholder": "e.g. BRMB3DY4",
+    "submit": "Create account",
+    "submitting": "Creating account...",
+    "haveAccount": "Already have an account?",
+    "login": "Log in",
+    "success": "Account created. Check your email for the verification code.",
+    "errors": {
+      "emailRequired": "Please enter a valid email address.",
+      "passwordWeak": "Password must contain at least 8 characters, including uppercase, lowercase, a number, and a symbol.",
+      "passwordMismatch": "Passwords do not match.",
+      "idRequired": "Please enter your ID or passport number.",
+      "idDocumentRequired": "Please upload a photo of your ID or passport.",
+      "idDocumentType": "Unsupported file type. Please upload a JPG, PNG, or WEBP image.",
+      "idDocumentTooLarge": "The selected file is too large. Maximum size is 5MB.",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "login": {
+    "eyebrow": "Welcome back",
+    "title": "Log in to your account",
+    "subtitle": "Enter your credentials to access your TrustCoin dashboard.",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "you@example.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "forgotPassword": "Forgot password?",
+    "submit": "Log in",
+    "submitting": "Logging in...",
+    "noAccount": "Don't have an account?",
+    "register": "Create one",
+    "errors": {
+      "emailRequired": "Please enter a valid email address.",
+      "passwordRequired": "Please enter your password.",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "forgotPassword": {
+    "eyebrow": "Account recovery",
+    "title": "Forgot your password?",
+    "subtitle": "Enter your email and we will send you a secure link to reset your password.",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "you@example.com",
+    "submit": "Send reset link",
+    "submitting": "Sending...",
+    "successTitle": "Check your email",
+    "successBody": "If an account exists for that address, a reset link has been sent. The link expires in about 30 minutes.",
+    "devLinkNotice": "Development mode — open this reset link:",
+    "backToLogin": "Back to login",
+    "errors": {
+      "emailRequired": "Please enter a valid email address.",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "resetPassword": {
+    "eyebrow": "New password",
+    "title": "Set a new password",
+    "subtitle": "Choose a strong password for your TrustCoin account.",
+    "passwordLabel": "New password",
+    "passwordPlaceholder": "Enter a strong password",
+    "confirmLabel": "Confirm password",
+    "confirmPlaceholder": "Re-enter your new password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "submit": "Update password",
+    "submitting": "Updating...",
+    "successTitle": "Password updated",
+    "successBody": "Your password has been changed. You can now log in with the new password.",
+    "goToLogin": "Go to login",
+    "missingTokenTitle": "Invalid reset link",
+    "missingTokenBody": "This password reset link is missing or incomplete. Request a new link from the login page.",
+    "requestNewLink": "Request a new link",
+    "errors": {
+      "passwordWeak": "Password must contain at least 8 characters, including uppercase, lowercase, a number, and a symbol.",
+      "passwordMismatch": "Passwords do not match.",
+      "generic": "Could not reset the password. The link may be invalid or expired."
+    }
+  },
+  "otp": {
+    "eyebrow": "Verify your email",
+    "title": "Enter the verification code",
+    "subtitle": "We sent a 6-digit code to",
+    "codeLabel": "Verification code",
+    "submit": "Verify account",
+    "submitting": "Verifying...",
+    "resend": "Resend code",
+    "resending": "Sending...",
+    "resendCooldown": "Resend available in {seconds}s",
+    "changeEmail": "Use a different email",
+    "success": "Your email has been verified! You can now log in.",
+    "successPending": "Email verified — awaiting admin approval",
+    "successPendingHint": "Your account is pending review. You will be able to log in and invest once an administrator approves your KYC.",
+    "goToLogin": "Go to login",
+    "devCodeNotice": "Development mode — code auto-filled below:",
+    "toasts": {
+      "sent": "Verification code sent to your email",
+      "verified": "Email verified successfully",
+      "invalid": "Invalid or expired OTP"
+    },
+    "errors": {
+      "incomplete": "Please enter the full 6-digit code.",
+      "invalid": "Invalid or expired verification code.",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "verifyEmail": {
+    "eyebrow": "Already registered",
+    "title": "Verify your email",
+    "subtitle": "Enter the email you registered with and the 6-digit code from your inbox.",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "you@example.com",
+    "toasts": {
+      "sent": "Verification code sent to your email",
+      "verified": "Email verified successfully"
+    },
+    "errors": {
+      "emailRequired": "Please enter a valid email address."
+    }
+  },
+  "common": {
+    "or": "or",
+    "backendUnreachable": "Could not reach the server. Please check your connection and try again.",
+    "unknownError": "An unexpected error occurred. Please try again.",
+    "securedBy": "Bank-grade encryption & secure OTP verification",
+    "back": "Back"
+  },
+  "nav": {
+    "dashboard": "Trading Room",
+    "invest": "Invest",
+    "deposit": "Deposit",
+    "withdraw": "Withdraw",
+    "referrals": "Referrals",
+    "about": "About Us",
+    "logout": "Log out",
+    "available": "Available",
+    "locked": "Locked"
+  },
+  "about": {
+    "eyebrow": "About the platform",
+    "title": "The Vision of TrustCoin & AI Trading — Your Trusted Partner in Global Markets",
+    "close": "Close",
+    "footer": "TrustCoin · Powered by AXS intelligent trading infrastructure",
+    "badges": {
+      "errorRate": "Error Rate ≤ 2%",
+      "axsSystem": "AXS Smart System",
+      "coverage": "24/7 Coverage"
+    },
+    "sections": {
+      "axs": {
+        "title": "Automated Trading via AXS Global Systems",
+        "body": "Our platform executes trades utilizing cutting-edge intelligent systems developed by AXS, a world-renowned leader with a proven track record of success in building advanced algorithmic trading software."
+      },
+      "precision": {
+        "title": "Exceptional Algorithmic Precision",
+        "body": "The AXS trading bot operates under precise analytical strategies and targeted AI technologies, maintaining a margin of error below 2%. This guarantees peak financial discipline and safety, entirely removing emotional bias from market execution."
+      },
+      "risk": {
+        "title": "Smart Risk & Liquidity Management",
+        "body": "Featuring real-time 24/7 market monitoring, the system automatically activates capital protection protocols and intelligently redistributes assets to secure maximum yield."
+      },
+      "security": {
+        "title": "Transparent & Secured Investment Environment",
+        "body": "We integrated state-of-the-art encryption protocols to ensure total security for your deposits and withdrawals, backed by continuous support and real-time tracking for all your trades and profits."
+      }
+    }
+  },
+  "dashboard": {
+    "eyebrow": "Live portfolio",
+    "title": "Trading Room",
+    "subtitle": "Monitor capital, locked packages, and available liquidity — then execute in one tap.",
+    "liveBadge": "Markets live",
+    "portfolioLabel": "Portfolio overview",
+    "actionsLabel": "Quick actions",
+    "totalBalance": "Total Balance",
+    "totalHint": "Locked package capital plus available funds.",
+    "lockedBalance": "Active Package (Locked)",
+    "lockedHint": "Tied up in active investments until they expire.",
+    "availableBalance": "Available for Withdrawal",
+    "availableHint": "Profits, uninvested deposits, and referral rewards.",
+    "pendingWithdrawal": "{amount} USDT is reserved in pending withdrawal requests.",
+    "ctaDeposit": "Deposit funds",
+    "ctaWithdraw": "Withdraw",
+    "ctaInvest": "Invest now",
+    "ctaReferrals": "Invite friends",
+    "markets": {
+      "eyebrow": "Global markets",
+      "title": "Market Overview",
+      "subtitle": "Live crypto & commodity quotes with 24h momentum — terminal-grade precision.",
+      "live": "LIVE FEED",
+      "error": "Market feed temporarily unavailable. Retrying…"
+    }
+  },
+  "invest": {
+    "eyebrow": "Grow your capital",
+    "title": "Investment Packages",
+    "subtitle": "Choose a fixed-amount tier and duration. Funds move from your available balance into a locked package until maturity.",
+    "availableLabel": "Available to Invest",
+    "availableHint": "Only your available balance can be used for new package purchases.",
+    "tierTitle": "Tier {amount} USDT",
+    "tierFixedAmount": "Fixed package amount: {amount} USDT",
+    "fixedAmountLabel": "Package amount",
+    "periodReturn": {
+      "duration1m": "1-month return",
+      "duration3m": "3-month return",
+      "duration6m": "6-month return"
+    },
+    "durationLabel": "Duration",
+    "days": "days",
+    "investNow": "Invest Now",
+    "successBanner": "Package purchased successfully. Your wallet balances have been updated.",
+    "duration": {
+      "duration1m": "1 Month",
+      "duration3m": "3 Months",
+      "duration6m": "6 Months"
+    },
+    "modal": {
+      "eyebrow": "Confirm investment",
+      "duration1m": "1-month lock-in period",
+      "duration3m": "3-month lock-in period",
+      "duration6m": "6-month lock-in period",
+      "duration": "Duration",
+      "days": "days",
+      "fixedAmount": "Package amount",
+      "fixedAmountHint": "This package is a fixed purchase of {amount} USDT.",
+      "available": "Your available",
+      "cancel": "Cancel",
+      "submit": "Confirm purchase",
+      "submitting": "Processing..."
+    },
+    "errors": {
+      "exceedsAvailable": "Amount exceeds your available balance of {available} USDT.",
+      "generic": "Could not complete your purchase. Please try again."
+    }
+  },
+  "referrals": {
+    "eyebrow": "Invite & earn",
+    "title": "Referral Program",
+    "subtitle": "Earn 25% of your invitee's package profit. Commissions stay locked until their package finishes and an admin verifies the payout.",
+    "linkLabel": "Your referral link",
+    "codeLabel": "Referral code",
+    "copyLink": "Copy Link",
+    "copied": "Copied!",
+    "totalReferrals": "Total Invited Users",
+    "totalReferralsHint": "Accounts that registered successfully via your link.",
+    "pendingEarnings": "Pending Referral Earnings",
+    "pendingEarningsHint": "Locked until packages finish and admin verification.",
+    "releasedEarnings": "Released / Total Earned",
+    "releasedEarningsHint": "Referral bonuses already released to your available balance.",
+    "tableTitle": "Referred Users",
+    "empty": "No referrals yet. Share your link to get started.",
+    "accountActive": "Registration: Success",
+    "accountPending": "Registration: Pending KYC",
+    "noPackage": "No package yet",
+    "profit": "Expected profit",
+    "table": {
+      "user": "User",
+      "registered": "Registered",
+      "package": "Package",
+      "bonus": "Referral Bonus",
+      "status": "Bonus Status"
+    },
+    "bonusStatus": {
+      "NONE": "No bonus yet",
+      "PENDING_PACKAGE_ACTIVE": "Pending — package active",
+      "PACKAGE_COMPLETED_AWAITING_ADMIN": "Awaiting admin release",
+      "APPROVED_RELEASED": "Released",
+      "REJECTED": "Rejected"
+    }
+  },
+  "withdraw": {
+    "eyebrow": "Cash out",
+    "title": "Withdraw Funds",
+    "subtitle": "You can only withdraw from your available balance. Locked package capital stays invested until maturity.",
+    "availableLabel": "Available for Withdrawal",
+    "availableHint": "This is the maximum you can request. Pending requests temporarily reserve funds until an admin reviews them.",
+    "lockedNote": "{amount} USDT remains locked in active packages and cannot be withdrawn.",
+    "amountLabel": "Withdrawal amount (USDT)",
+    "amountPlaceholder": "e.g. 50.00",
+    "maxButton": "Max",
+    "maxHint": "Maximum: {available} USDT",
+    "addressLabel": "Destination wallet address",
+    "addressPlaceholder": "Paste your USDT wallet address",
+    "noteLabel": "Note",
+    "noteOptional": "optional",
+    "notePlaceholder": "e.g. TRC20 personal wallet",
+    "submit": "Submit withdrawal request",
+    "submitting": "Submitting...",
+    "successBanner": "Withdrawal request submitted. The amount is reserved from your available balance pending admin review.",
+    "otpModal": {
+      "eyebrow": "Security check",
+      "title": "Confirm with email OTP",
+      "subtitle": "We sent a 6-digit confirmation code to",
+      "confirm": "Confirm withdrawal",
+      "submitting": "Confirming...",
+      "cancel": "Cancel",
+      "toasts": {
+        "sent": "Verification code sent to your email"
+      },
+      "errors": {
+        "sendFailed": "Could not send the verification code. Please try again.",
+        "invalid": "Invalid or expired OTP"
+      }
+    },
+    "historyTitle": "Withdrawal History",
+    "historyEmpty": "You haven't submitted any withdrawals yet.",
+    "table": {
+      "amount": "Amount",
+      "status": "Status",
+      "address": "Address",
+      "date": "Date"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "COMPLETED": "Completed",
+      "FAILED": "Rejected",
+      "REJECTED": "Rejected"
+    },
+    "errors": {
+      "amountRequired": "Please enter a valid amount greater than zero.",
+      "exceedsAvailable": "Amount exceeds your available balance of {available} USDT.",
+      "addressRequired": "Please enter a valid destination wallet address.",
+      "generic": "Could not submit your withdrawal request. Please try again."
+    }
+  },
+  "deposit": {
+    "eyebrow": "Add funds",
+    "title": "Deposit Funds",
+    "subtitle": "Send USDT to your unique deposit address. Balance is credited only after on-chain confirmation.",
+    "networkLabel": "Select Network",
+    "addressLabel": "Your Unique Deposit Address",
+    "copy": "Copy Address",
+    "copied": "Copied!",
+    "listeningHint": "Your balance updates within 30 seconds.",
+    "historyTitle": "Deposit History",
+    "historyEmpty": "No deposits detected yet. Send USDT to the address above.",
+    "table": {
+      "amount": "Amount",
+      "network": "Network",
+      "status": "Status",
+      "date": "Date",
+      "txHash": "Sweep Tx"
+    },
+    "status": {
+      "PENDING": "Processing",
+      "APPROVED": "Credited",
+      "REJECTED": "Failed"
+    },
+    "errors": {
+      "addressGeneric": "Could not load your deposit address. Please try again."
+    }
+  },
+  "admin": {
+    "nav": {
+      "brand": "TrustCoin Admin",
+      "subtitle": "Management console",
+      "overview": "Overview",
+      "withdrawals": "Withdrawals",
+      "deposits": "Deposits",
+      "users": "Users",
+      "packages": "Packages",
+      "referrals": "Referrals",
+      "logout": "Log out"
+    },
+    "login": {
+      "eyebrow": "Staff access",
+      "title": "Admin sign in",
+      "subtitle": "Only accounts with the ADMIN role can access this console.",
+      "emailLabel": "Admin email",
+      "emailPlaceholder": "admin@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "submit": "Continue",
+      "submitting": "Checking credentials...",
+      "otpEyebrow": "Two-step verification",
+      "otpTitle": "Enter verification code",
+      "otpSubtitle": "We sent a 6-digit code to {email}. Enter it to finish signing in.",
+      "otpLabel": "Verification code",
+      "otpSubmit": "Verify and sign in",
+      "otpSubmitting": "Verifying...",
+      "backToCredentials": "Use a different account",
+      "devCodeNotice": "Development mode — code:",
+      "errors": {
+        "emailRequired": "Please enter a valid email address.",
+        "passwordRequired": "Please enter your password.",
+        "otpRequired": "Enter the 6-digit code from your email.",
+        "otpInvalid": "Invalid or expired verification code.",
+        "generic": "Could not sign in. Check your credentials and role."
+      }
+    },
+    "overview": {
+      "eyebrow": "Control center",
+      "title": "Admin Overview",
+      "subtitle": "Platform totals at a glance — users, deposits, withdrawals, and active packages.",
+      "totalUsers": "Total Users",
+      "totalUsersHint": "Registered users (excluding admins).",
+      "totalDeposits": "Total Deposits",
+      "totalDepositsHint": "Sum of completed deposit transactions.",
+      "totalWithdrawals": "Total Withdrawals",
+      "totalWithdrawalsHint": "Sum of completed withdrawal transactions.",
+      "activeInvestments": "Active Investments",
+      "activeInvestmentsHint": "Packages currently locked and earning.",
+      "pendingAlert": "{count} withdrawal request(s) awaiting review.",
+      "reviewWithdrawals": "Review withdrawals",
+      "goWithdrawals": "Pending withdrawals",
+      "goUsers": "Manage users"
+    },
+    "withdrawals": {
+      "eyebrow": "Cash-out queue",
+      "title": "Pending Withdrawals",
+      "subtitle": "Approve to finalize payout, or reject to refund the amount to the user's available balance.",
+      "empty": "No pending withdrawal requests.",
+      "approve": "Approve",
+      "reject": "Reject",
+      "approved": "Withdrawal approved and marked completed.",
+      "rejected": "Withdrawal rejected. Amount refunded to available balance.",
+      "availableNow": "Available: {amount} USDT",
+      "copyAddress": "Copy address",
+      "copied": "Copied!",
+      "table": {
+        "user": "User",
+        "amount": "Amount",
+        "address": "Wallet address",
+        "date": "Requested",
+        "actions": "Actions"
+      },
+      "errors": {
+        "actionFailed": "Could not update this withdrawal. Please try again."
+      }
+    },
+    "users": {
+      "eyebrow": "Accounts",
+      "title": "Users",
+      "subtitle": "Review KYC documents, approve pending accounts, and manage Available vs Locked balances.",
+      "searchPlaceholder": "Search by email…",
+      "search": "Search",
+      "statusFilter": "Filter by status",
+      "statusAll": "All statuses",
+      "statusPending": "Pending KYC",
+      "statusActive": "Active",
+      "statusBlocked": "Blocked",
+      "empty": "No users matched your search.",
+      "registered": "Joined {date}",
+      "available": "Available",
+      "locked": "Locked",
+      "total": "Total",
+      "packages": "Packages",
+      "idNumber": "ID / Passport",
+      "idMissing": "Not provided",
+      "referralCode": "Referral code",
+      "verified": "Email verified",
+      "yes": "Yes",
+      "no": "No",
+      "viewIdPhoto": "View ID photo",
+      "noIdPhoto": "No ID photo uploaded",
+      "idPreviewTitle": "ID / Passport document",
+      "approve": "Approve Account",
+      "block": "Block User",
+      "delete": "Delete User",
+      "confirmDelete": "Permanently delete this user and related data? This cannot be undone.",
+      "activePackagesTitle": "Active packages",
+      "noPackages": "No active investment packages.",
+      "messages": {
+        "approved": "User account approved and activated.",
+        "blocked": "User account blocked.",
+        "deleted": "User deleted."
+      },
+      "errors": {
+        "actionFailed": "Could not update this user. Please try again."
+      },
+      "pkg": {
+        "name": "Package",
+        "amount": "Capital",
+        "daily": "Daily %",
+        "end": "Ends"
+      }
+    },
+    "referrals": {
+      "eyebrow": "Growth network",
+      "title": "Referrals Management",
+      "subtitle": "Audit every referral commission (25% of package profit). Release funds only after the referred package completes.",
+      "stats": {
+        "referrers": "Active referrers",
+        "referred": "Referred users",
+        "pending": "Pending commissions",
+        "commission": "Released commissions"
+      },
+      "awaitingAlert": "{count} commission(s) awaiting admin approval after package completion.",
+      "auditTitle": "Referral commission audit",
+      "auditSubtitle": "Full trail of referrer → referee ties, package profit, and 25% commission status.",
+      "emptyAudit": "No referral commissions yet.",
+      "noWallet": "No deposit wallet yet",
+      "regSuccess": "Registration: Success",
+      "regPendingKyc": "Registration: Pending KYC",
+      "ofProfit": "of profit",
+      "actions": {
+        "approve": "Approve & Release Funds",
+        "reject": "Reject",
+        "working": "Working…",
+        "approved": "Commission released to referrer available balance.",
+        "rejected": "Commission rejected and pending lock cleared."
+      },
+      "table": {
+        "referrer": "Referrer",
+        "referee": "Referred user",
+        "package": "Package / deposit",
+        "profit": "Expected profit",
+        "commission": "25% commission",
+        "status": "Status",
+        "actions": "Actions"
+      }
+    },
+    "packages": {
+      "eyebrow": "Yield control",
+      "title": "Package Profit Rates",
+      "subtitle": "Update daily profit percentages live. Changes apply to new purchases; active investments keep their snapshotted rate.",
+      "save": "Save rate",
+      "saving": "Saving…",
+      "saved": "Updated {name}.",
+      "note": "Rates are stored as daily % (e.g. 0.7500 = 0.75% per day). No redeploy required.",
+      "table": {
+        "name": "Package",
+        "amount": "Amount",
+        "duration": "Duration",
+        "rate": "Daily profit %",
+        "active": "Active locks",
+        "actions": "Actions"
+      },
+      "errors": {
+        "invalidRate": "Enter a valid daily profit percent greater than zero."
+      }
+    },
+    "deposits": {
+      "eyebrow": "Treasury ops",
+      "title": "Deposit Monitoring",
+      "subtitle": "Deposits credit users instantly (no admin approval). This page monitors sub-wallets and automatic sweeps to the master wallet.",
+      "drySweep": "Dry-run sweep",
+      "runSweep": "Run sweep",
+      "sweeping": "Sweeping…",
+      "sweepDone": "Sweep job completed.",
+      "sweepDryDone": "Dry-run sweep completed (no broadcasts).",
+      "systemTitle": "System master wallets",
+      "systemSubtitle": "Destination addresses for automatic sweeps (from environment).",
+      "claimsTitle": "Leftover pending claims (should stay empty)",
+      "claimsEmpty": "No pending deposit claims — all deposits are auto-credited.",
+      "walletsTitle": "User sub-wallets",
+      "walletsEmpty": "No deposit addresses issued yet.",
+      "sweepsTitle": "Recent sweeps",
+      "sweepsEmpty": "No sweep records yet.",
+      "stats": {
+        "pendingClaims": "Pending claims",
+        "approvedClaims": "Credited claims",
+        "subWallets": "Sub-wallets",
+        "sweepOk": "Sweeps OK",
+        "sweepFail": "Sweeps failed"
+      },
+      "table": {
+        "user": "User",
+        "amount": "Amount",
+        "network": "Network",
+        "address": "Address",
+        "date": "Date",
+        "status": "Status",
+        "swept": "Last swept",
+        "from": "From"
+      }
+    }
+  }
+}

@@ -1,0 +1,414 @@
+// TrustCoin — Prisma Schema
+// Hybrid multilingual (EN default / AR supported) crypto investment platform.
+// Currently configured for MySQL (e.g. MAMP). All UUID columns are pinned to
+// VARCHAR(36) and every table defaults to utf8mb4 (via Prisma's MySQL default)
+// so Arabic content is stored correctly.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum AccountStatus {
+  PENDING
+  ACTIVE
+  BLOCKED
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  PROFIT_DISTRIBUTION
+  PACKAGE_RETURN
+  PACKAGE_PURCHASE
+  REFERRAL_BONUS_ADDED
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REJECTED
+}
+
+enum InvestmentStatus {
+  ACTIVE
+  COMPLETED
+}
+
+enum ReferralRewardStatus {
+  PENDING_PACKAGE_ACTIVE
+  PACKAGE_COMPLETED_AWAITING_ADMIN
+  APPROVED_RELEASED
+  REJECTED
+}
+
+enum DepositStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum SweepStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  SKIPPED
+}
+
+enum OtpPurpose {
+  EMAIL_VERIFY
+  WITHDRAWAL
+  ADMIN_LOGIN
+}
+
+// ---------------------------------------------------------------------------
+// Users
+// ---------------------------------------------------------------------------
+
+model User {
+  id                  String        @id @default(uuid()) @db.VarChar(36)
+  email               String        @unique
+  password_hash       String
+  balance                 Decimal       @default(0.00) @db.Decimal(18, 4)
+  /// Locked referral commissions awaiting package maturity + admin release.
+  pending_referral_bonus  Decimal       @default(0.00) @db.Decimal(18, 4)
+  /// Email verified via OTP (`emailVerified` in product language).
+  is_verified             Boolean       @default(false)
+  role                Role          @default(USER)
+  status              AccountStatus @default(PENDING)
+  language            String        @default("en")
+  referral_code       String        @unique @db.VarChar(20)
+  referred_by_id      String?       @db.VarChar(36)
+  /// Denormalized count of users who registered with this user's referral code.
+  referrals_count     Int           @default(0)
+  id_passport_number  String?       @unique @db.VarChar(64)
+  id_document_path    String?       @db.VarChar(500)
+  created_at          DateTime      @default(now())
+
+  investments      Investment[]
+  transactions     Transaction[]
+  adminLogsAsAdmin AdminLog[]    @relation("AdminLogsAsAdmin")
+  adminLogsAsUser  AdminLog[]    @relation("AdminLogsAsUser")
+
+  // Self-relation: the user who referred this account, and the accounts this user has referred.
+  referredBy User?  @relation("UserReferrals", fields: [referred_by_id], references: [id], onDelete: SetNull)
+  referrals  User[] @relation("UserReferrals")
+
+  referralRewardsAsReferrer ReferralReward[] @relation("ReferralRewardsAsReferrer")
+  referralRewardsAsReferee  ReferralReward[] @relation("ReferralRewardsAsReferee")
+  referralRewardsApprovedBy ReferralReward[] @relation("ReferralRewardsApprovedByAdmin")
+
+  depositRequests         DepositRequest[]     @relation("DepositRequestsAsUser")
+  depositRequestsReviewed DepositRequest[]     @relation("DepositRequestsReviewedByAdmin")
+  depositAddresses        UserDepositAddress[]
+  passwordResetTokens     PasswordResetToken[]
+
+  @@index([referred_by_id])
+  @@map("users")
+}
+
+// ---------------------------------------------------------------------------
+// Password reset tokens (hashed; raw token only in email link)
+// ---------------------------------------------------------------------------
+
+model PasswordResetToken {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  user_id    String   @db.VarChar(36)
+  /// SHA-256 hex of the opaque reset token sent by email.
+  token_hash String   @unique @db.VarChar(64)
+  expires_at DateTime
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@map("password_reset_tokens")
+}
+
+// ---------------------------------------------------------------------------
+// OTP Verifications
+// ---------------------------------------------------------------------------
+
+model OtpVerification {
+  id         String     @id @default(uuid()) @db.VarChar(36)
+  email      String
+  /// 6-digit numeric OTP (`otpCode`).
+  code       String     @db.VarChar(6)
+  purpose    OtpPurpose @default(EMAIL_VERIFY)
+  /// Expiry timestamp (`otpExpiresAt`), typically 10–15 minutes from issue.
+  expires_at DateTime
+  created_at DateTime   @default(now())
+
+  @@index([email])
+  @@index([email, purpose])
+  @@map("otp_verifications")
+}
+
+// ---------------------------------------------------------------------------
+// Packages
+// ---------------------------------------------------------------------------
+
+model Package {
+  id                   String  @id @default(uuid()) @db.VarChar(36)
+  name                 String  @unique
+  /// Fixed investment amount for this package (exact purchase size).
+  amount               Decimal @db.Decimal(18, 4)
+  daily_profit_percent Decimal @db.Decimal(5, 4)
+  duration_days        Int
+
+  // Referral bonus percentage paid to the referrer, selected by the
+  // purchased package's duration bucket (1 / 3 / 6 months). Decimal(6,4)
+  // allows up to 99.9999%, unlike the tighter Decimal(5,4) daily rate.
+  referral_bonus_1m Decimal @default(0.00) @db.Decimal(6, 4)
+  referral_bonus_3m Decimal @default(0.00) @db.Decimal(6, 4)
+  referral_bonus_6m Decimal @default(0.00) @db.Decimal(6, 4)
+
+  investments Investment[]
+
+  @@map("packages")
+}
+
+// ---------------------------------------------------------------------------
+// Investments (user subscriptions to packages — a user may hold many)
+// ---------------------------------------------------------------------------
+
+model Investment {
+  id                   String           @id @default(uuid()) @db.VarChar(36)
+  user_id              String           @db.VarChar(36)
+  package_id           String           @db.VarChar(36)
+  invested_amount      Decimal          @db.Decimal(18, 4)
+  // Immutable snapshot of the original principal at creation time (for auditing).
+  base_amount          Decimal          @db.Decimal(18, 4)
+  // Working capital the daily ROI is computed on (equals invested_amount in
+  // the live simple-interest model). Principal return at maturity pays this.
+  current_amount       Decimal          @db.Decimal(18, 4)
+  daily_profit_percent Decimal          @db.Decimal(5, 4)
+  total_earned         Decimal          @default(0.00) @db.Decimal(18, 4)
+  status               InvestmentStatus @default(ACTIVE)
+  start_date           DateTime         @default(now())
+  end_date             DateTime
+
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  package Package @relation(fields: [package_id], references: [id], onDelete: Restrict)
+
+  referralRewards ReferralReward[]
+
+  @@index([user_id])
+  @@index([package_id])
+  @@map("investments")
+}
+
+// ---------------------------------------------------------------------------
+// Referral Rewards — 25% of package expected profit, locked until the
+// referee's package completes AND an admin releases the payout.
+// ---------------------------------------------------------------------------
+
+model ReferralReward {
+  id                   String               @id @default(uuid()) @db.VarChar(36)
+  referrer_id          String               @db.VarChar(36)
+  referee_id           String               @db.VarChar(36)
+  investment_id        String               @db.VarChar(36)
+  /// Commission rate applied to expected package profit (e.g. 25 = 25%).
+  bonus_percentage     Decimal              @db.Decimal(6, 4)
+  /// Expected package profit (yield) used as the commission base.
+  expected_profit      Decimal              @default(0.00) @db.Decimal(18, 4)
+  /// Commission amount = expected_profit × (bonus_percentage / 100).
+  bonus_amount         Decimal              @db.Decimal(18, 4)
+  status               ReferralRewardStatus @default(PENDING_PACKAGE_ACTIVE)
+  approved_by_admin_id String?              @db.VarChar(36)
+  created_at           DateTime             @default(now())
+  updated_at           DateTime             @updatedAt
+
+  referrer        User       @relation("ReferralRewardsAsReferrer", fields: [referrer_id], references: [id], onDelete: Cascade)
+  referee         User       @relation("ReferralRewardsAsReferee", fields: [referee_id], references: [id], onDelete: Cascade)
+  investment      Investment @relation(fields: [investment_id], references: [id], onDelete: Cascade)
+  approvedByAdmin User?      @relation("ReferralRewardsApprovedByAdmin", fields: [approved_by_admin_id], references: [id], onDelete: SetNull)
+
+  @@unique([investment_id])
+  @@index([referrer_id])
+  @@index([referee_id])
+  @@index([status])
+  @@map("referral_rewards")
+}
+
+// ---------------------------------------------------------------------------
+// Deposit Requests (user-submitted on-chain deposit claims, pending admin
+// verification before the equivalent balance/Transaction ledger entry is
+// created). Kept separate from `Transaction` because a deposit *request* is
+// an unverified claim — it only affects the user's balance once an admin
+// approves it and a corresponding `Transaction` (type DEPOSIT) is recorded.
+// ---------------------------------------------------------------------------
+
+model DepositRequest {
+  id                   String        @id @default(uuid()) @db.VarChar(36)
+  user_id              String        @db.VarChar(36)
+  amount               Decimal       @db.Decimal(18, 4)
+  currency             String        @default("USDT") @db.VarChar(10)
+  network              String        @default("TRC20") @db.VarChar(20)
+  tx_hash              String?       @db.VarChar(191)
+  // Relative URL (e.g. /uploads/deposit-proofs/<file>) to an optional
+  // screenshot/receipt uploaded as evidence of the on-chain transfer.
+  proof_image          String?       @db.VarChar(500)
+  status               DepositStatus @default(PENDING)
+  reviewed_by_admin_id String?       @db.VarChar(36)
+  // Which of the user's unique per-network deposit addresses this claim was
+  // made against — lets an admin/sweep worker correlate the on-chain
+  // transfer with the exact address (and therefore user) that received it.
+  deposit_address_id   String?       @db.VarChar(36)
+  // On-chain hash of the auto-sweep that forwarded USDT from the user's
+  // unique address to the admin master wallet (null until swept).
+  sweep_tx_hash        String?       @db.VarChar(191)
+  swept_at             DateTime?
+  created_at           DateTime      @default(now())
+  updated_at           DateTime      @updatedAt
+
+  user            User                @relation("DepositRequestsAsUser", fields: [user_id], references: [id], onDelete: Cascade)
+  reviewedByAdmin User?               @relation("DepositRequestsReviewedByAdmin", fields: [reviewed_by_admin_id], references: [id], onDelete: SetNull)
+  depositAddress  UserDepositAddress? @relation(fields: [deposit_address_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id])
+  @@index([status])
+  @@index([deposit_address_id])
+  @@map("deposit_requests")
+}
+
+// ---------------------------------------------------------------------------
+// User Deposit Addresses (unique, HD-derived per-user, per-network receiving
+// addresses — the "auto-forwarding gateway" layer). Each address is
+// deterministically derived from DEPOSIT_HD_MNEMONIC so it never needs to be
+// re-derived from scratch; a future sweep worker can decrypt the private key
+// to forward received funds to the admin master wallet
+// (DEPOSIT_WALLET_TRC20/BEP20/ERC20) while still knowing exactly which user
+// they belong to via this table.
+// ---------------------------------------------------------------------------
+
+model UserDepositAddress {
+  id                    String       @id @default(uuid()) @db.VarChar(36)
+  user_id               String       @db.VarChar(36)
+  network               String       @db.VarChar(20)
+  address               String       @db.VarChar(191)
+  // BIP-44 (non-hardened) derivation index this address was derived from —
+  // deterministically computed from (user_id, network), so it's reproducible
+  // even if this row were ever lost. See src/utils/depositWallet.ts.
+  derivation_index      Int
+  // AES-256-GCM ciphertext (iv:authTag:ciphertext, base64) of the derived
+  // private key. Used by the sweep worker to move funds to the admin master
+  // wallet. Never returned by any API response.
+  encrypted_private_key String       @db.Text
+  last_sweep_status     SweepStatus?
+  last_sweep_tx_hash    String?      @db.VarChar(191)
+  last_swept_at         DateTime?
+  // Soft lock preventing concurrent sweep attempts on the same address.
+  sweep_lock_until      DateTime?
+  created_at            DateTime     @default(now())
+
+  user            User             @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  depositRequests DepositRequest[]
+  sweeps          DepositSweep[]
+
+  @@unique([user_id, network])
+  @@unique([network, address])
+  @@index([user_id])
+  @@index([last_sweep_status])
+  @@map("user_deposit_addresses")
+}
+
+// ---------------------------------------------------------------------------
+// Deposit Sweeps (audit log of every auto-forward attempt from a user's
+// unique deposit address → admin master wallet)
+// ---------------------------------------------------------------------------
+
+model DepositSweep {
+  id                 String      @id @default(uuid()) @db.VarChar(36)
+  deposit_address_id String      @db.VarChar(36)
+  network            String      @db.VarChar(20)
+  amount_usdt        Decimal     @db.Decimal(18, 6)
+  from_address       String      @db.VarChar(191)
+  to_address         String      @db.VarChar(191)
+  sweep_tx_hash      String?     @db.VarChar(191)
+  // Native-gas top-up tx (TRX / BNB / ETH) sent before the USDT transfer, if any.
+  gas_topup_tx_hash  String?     @db.VarChar(191)
+  status             SweepStatus @default(PENDING)
+  // Human-readable failure reason. NEVER contains private keys.
+  error_message      String?     @db.Text
+  attempt_count      Int         @default(1)
+  created_at         DateTime    @default(now())
+  updated_at         DateTime    @updatedAt
+
+  depositAddress UserDepositAddress @relation(fields: [deposit_address_id], references: [id], onDelete: Cascade)
+
+  @@index([deposit_address_id])
+  @@index([status])
+  @@index([network])
+  @@map("deposit_sweeps")
+}
+
+// ---------------------------------------------------------------------------
+// Transactions (deposits, withdrawals, profits, package returns)
+// ---------------------------------------------------------------------------
+
+model Transaction {
+  id              String            @id @default(uuid()) @db.VarChar(36)
+  user_id         String            @db.VarChar(36)
+  amount          Decimal           @db.Decimal(18, 4)
+  type            TransactionType
+  status          TransactionStatus
+  tx_hash         String?           @unique @db.VarChar(191)
+  payment_address String?           @db.VarChar(255)
+  private_key     String?           @db.Text // Encrypted at rest — never store plaintext keys.
+  note            String?           @db.Text
+  created_at      DateTime          @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@map("transactions")
+}
+
+// ---------------------------------------------------------------------------
+// Banned IPs (admin panel protection)
+// ---------------------------------------------------------------------------
+
+model BannedIp {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  ip_address String   @unique @db.VarChar(45)
+  reason     String   @db.Text
+  attempts   Int      @default(5)
+  banned_at  DateTime @default(now())
+
+  @@map("banned_ips")
+}
+
+// ---------------------------------------------------------------------------
+// Admin Logs (records of administrative actions)
+// ---------------------------------------------------------------------------
+
+model AdminLog {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  admin_id   String   @db.VarChar(36)
+  user_id    String?  @db.VarChar(36)
+  action     String   @db.VarChar(191)
+  details    String?  @db.Text
+  created_at DateTime @default(now())
+
+  admin User  @relation("AdminLogsAsAdmin", fields: [admin_id], references: [id], onDelete: Cascade)
+  user  User? @relation("AdminLogsAsUser", fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@index([admin_id])
+  @@index([user_id])
+  @@map("admin_logs")
+}

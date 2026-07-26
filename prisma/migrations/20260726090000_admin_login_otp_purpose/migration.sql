@@ -1,0 +1,3 @@
+-- Admin login 2FA OTP purpose
+ALTER TABLE `otp_verifications`
+  MODIFY COLUMN `purpose` ENUM('EMAIL_VERIFY', 'WITHDRAWAL', 'ADMIN_LOGIN') NOT NULL DEFAULT 'EMAIL_VERIFY';
