@@ -1,8 +1,4 @@
-import { NextResponse } from "next/server";
-import type { MarketAssetId, MarketAssetPayload } from "@/lib/markets";
-
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+import type { MarketAssetId, MarketAssetPayload } from "./markets";
 
 const CRYPTO_IDS: Record<string, MarketAssetId> = {
   bitcoin: "btc",
@@ -23,7 +19,6 @@ const CRYPTO_META: Record<
   wti: { symbol: "WTI", name: "Crude Oil", pair: "WTI/USD" },
 };
 
-/** Deterministic fallback sparkline so the UI never collapses if an upstream fails. */
 function fallbackSparkline(base: number, changePct: number, points = 32): number[] {
   const series: number[] = [];
   let value = base / (1 + changePct / 100);
@@ -41,14 +36,8 @@ async function fetchCryptoAssets(): Promise<MarketAssetPayload[]> {
   const url =
     "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,binancecoin,tron&order=market_cap_desc&sparkline=true&price_change_percentage=24h";
 
-  const response = await fetch(url, {
-    headers: { Accept: "application/json" },
-    next: { revalidate: 30 },
-  });
-
-  if (!response.ok) {
-    throw new Error(`CoinGecko ${response.status}`);
-  }
+  const response = await fetch(url, { headers: { Accept: "application/json" } });
+  if (!response.ok) throw new Error(`CoinGecko ${response.status}`);
 
   const rows = (await response.json()) as Array<{
     id: string;
@@ -65,7 +54,6 @@ async function fetchCryptoAssets(): Promise<MarketAssetPayload[]> {
       const price = Number(row.current_price);
       const change24h = Number(row.price_change_percentage_24h ?? 0);
       const sparkRaw = row.sparkline_in_7d?.price ?? [];
-      // Keep last ~36 points for a clean 24h-feel mini chart
       const sparkline =
         sparkRaw.length > 8
           ? sparkRaw.slice(-36).map((n) => Number(n))
@@ -95,16 +83,9 @@ async function fetchYahooAsset(
   )}?interval=15m&range=1d`;
 
   const response = await fetch(url, {
-    headers: {
-      Accept: "application/json",
-      "User-Agent": "TrustCoin/1.0",
-    },
-    next: { revalidate: 30 },
+    headers: { Accept: "application/json", "User-Agent": "TrustCoin/1.0" },
   });
-
-  if (!response.ok) {
-    throw new Error(`Yahoo ${yahooSymbol} ${response.status}`);
-  }
+  if (!response.ok) throw new Error(`Yahoo ${yahooSymbol} ${response.status}`);
 
   const json = (await response.json()) as {
     chart?: {
@@ -116,18 +97,14 @@ async function fetchYahooAsset(
   };
 
   const result = json.chart?.result?.[0];
-  if (!result) {
-    throw new Error(`Yahoo ${yahooSymbol} empty`);
-  }
+  if (!result) throw new Error(`Yahoo ${yahooSymbol} empty`);
 
   const closes = (result.indicators?.quote?.[0]?.close ?? []).filter(
     (n): n is number => typeof n === "number" && Number.isFinite(n)
   );
 
   const price =
-    Number(result.meta?.regularMarketPrice) ||
-    closes[closes.length - 1] ||
-    0;
+    Number(result.meta?.regularMarketPrice) || closes[closes.length - 1] || 0;
   const previous =
     Number(result.meta?.previousClose ?? result.meta?.chartPreviousClose) ||
     closes[0] ||
@@ -162,7 +139,11 @@ function fallbackAsset(id: MarketAssetId, price: number, change24h: number): Mar
   };
 }
 
-export async function GET() {
+/** Fetches live market cards directly from public APIs (static-export safe). */
+export async function fetchMarketAssets(): Promise<{
+  assets: MarketAssetPayload[];
+  refreshedAt: string;
+}> {
   const [cryptoResult, goldResult, oilResult] = await Promise.allSettled([
     fetchCryptoAssets(),
     fetchYahooAsset("GC=F", "xau"),
@@ -200,16 +181,20 @@ export async function GET() {
       byId.get(id) ??
       fallbackAsset(
         id,
-        id === "btc" ? 97000 : id === "eth" ? 3400 : id === "bnb" ? 640 : id === "trx" ? 0.24 : id === "xau" ? 2680 : 72,
+        id === "btc"
+          ? 97000
+          : id === "eth"
+            ? 3400
+            : id === "bnb"
+              ? 640
+              : id === "trx"
+                ? 0.24
+                : id === "xau"
+                  ? 2680
+                  : 72,
         0
       )
   );
 
-  return NextResponse.json({
-    success: true,
-    data: {
-      assets,
-      refreshedAt: new Date().toISOString(),
-    },
-  });
+  return { assets, refreshedAt: new Date().toISOString() };
 }

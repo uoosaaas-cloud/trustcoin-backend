@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Noto_Sans_Arabic } from "next/font/google";
-import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages } from "next-intl/server";
 import { Providers } from "@/components/Providers";
-import { isRtl } from "@/i18n/config";
+import { ClientIntlProvider } from "@/components/ClientIntlProvider";
+import { defaultLocale, isRtl } from "@/i18n/config";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -28,13 +27,12 @@ export const metadata: Metadata = {
     "TrustCoin is a secure, multilingual crypto investment platform. Create your account to start earning daily returns.",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const locale = await getLocale();
-  const messages = await getMessages();
+  const locale = defaultLocale;
   const dir = isRtl(locale) ? "rtl" : "ltr";
 
   return (
@@ -44,9 +42,9 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${notoSansArabic.variable} h-full`}
     >
       <body className="min-h-full bg-[#F6F7FB] font-sans text-slate-900 antialiased">
-        <NextIntlClientProvider locale={locale} messages={messages}>
+        <ClientIntlProvider initialLocale={locale}>
           <Providers>{children}</Providers>
-        </NextIntlClientProvider>
+        </ClientIntlProvider>
       </body>
     </html>
   );

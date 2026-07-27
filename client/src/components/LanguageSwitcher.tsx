@@ -1,14 +1,12 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { locales, persistLocaleCookie, type Locale } from "@/i18n/config";
 
 export function LanguageSwitcher() {
   const locale = useLocale() as Locale;
   const t = useTranslations("languageSwitcher");
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
 
@@ -22,7 +20,7 @@ export function LanguageSwitcher() {
     setOpen(false);
 
     startTransition(() => {
-      router.refresh();
+      window.location.reload();
     });
   }
 

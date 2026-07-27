@@ -8,7 +8,8 @@ import {
   ResponsiveContainer,
   YAxis,
 } from "recharts";
-import type { MarketAssetId, MarketAssetPayload, MarketsApiResponse } from "@/lib/markets";
+import type { MarketAssetId, MarketAssetPayload } from "@/lib/markets";
+import { fetchMarketAssets } from "@/lib/marketData";
 
 const REFRESH_MS = 45_000;
 
@@ -250,12 +251,10 @@ export function MarketOverview() {
 
     async function load() {
       try {
-        const response = await fetch("/api/markets", { cache: "no-store" });
-        if (!response.ok) throw new Error("Failed to load markets");
-        const json = (await response.json()) as MarketsApiResponse;
+        const data = await fetchMarketAssets();
         if (cancelled) return;
-        setAssets(json.data.assets);
-        setRefreshedAt(json.data.refreshedAt);
+        setAssets(data.assets);
+        setRefreshedAt(data.refreshedAt);
         setError(null);
       } catch {
         if (!cancelled) setError(t("error"));
