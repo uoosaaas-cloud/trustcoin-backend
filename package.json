@@ -21,7 +21,8 @@
     "deposit:reset-addresses": "ts-node src/scripts/reset-deposit-addresses.ts",
     "deposit:ready": "ts-node src/scripts/check-deposit-ready.ts",
     "roi": "ts-node src/scripts/trigger-daily-roi.ts",
-    "roi:dry": "ts-node src/scripts/trigger-daily-roi.ts --dry-run"
+    "roi:dry": "ts-node src/scripts/trigger-daily-roi.ts --dry-run",
+    "upsert-admin": "ts-node src/scripts/upsert-admin.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
