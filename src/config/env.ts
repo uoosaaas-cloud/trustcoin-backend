@@ -10,6 +10,54 @@ function required(name: string, fallback?: string): string {
   return value;
 }
 
+const isProductionEnv = (process.env.NODE_ENV ?? "development") === "production";
+const PRODUCTION_APP_BASE_URL = "https://trustcoin.cc";
+
+function isLocalHostname(urlOrOrigin: string): boolean {
+  try {
+    const host = new URL(urlOrOrigin).hostname;
+    return host === "localhost" || host === "127.0.0.1" || host === "::1";
+  } catch {
+    return false;
+  }
+}
+
+/** Prefer configured URL; never ship localhost as the public site origin in production. */
+function resolveAppBaseUrl(): string {
+  const raw = process.env.FRONTEND_URL ?? process.env.APP_BASE_URL ?? "http://localhost:3000";
+  if (isProductionEnv && isLocalHostname(raw)) {
+    return PRODUCTION_APP_BASE_URL;
+  }
+  return raw;
+}
+
+/**
+ * Browser CORS allow-list. In production, drop localhost leftovers and never keep bare "*".
+ */
+function resolveCorsOrigin(appBaseUrl: string): string {
+  const raw = (process.env.CORS_ORIGIN ?? "*").trim();
+  if (!isProductionEnv) {
+    return raw || "*";
+  }
+  if (!raw || raw === "*") {
+    return appBaseUrl;
+  }
+  const parts = raw
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .filter((value) => value === "*" || !isLocalHostname(value));
+  if (!parts.length || parts.includes("*")) {
+    return appBaseUrl;
+  }
+  if (!parts.includes(appBaseUrl)) {
+    parts.push(appBaseUrl);
+  }
+  return parts.join(",");
+}
+
+const appBaseUrl = resolveAppBaseUrl();
+
 export const env = {
   NODE_ENV: process.env.NODE_ENV ?? "development",
   PORT: Number(process.env.PORT ?? 4000),
@@ -28,14 +76,14 @@ export const env = {
    * Browser CORS allow-list. In production set to the exact frontend origin
    * (e.g. https://app.example.com). Default "*" is for local development only.
    */
-  CORS_ORIGIN: process.env.CORS_ORIGIN ?? "*",
+  CORS_ORIGIN: resolveCorsOrigin(appBaseUrl),
 
   /** When true (or "1"), Express trusts X-Forwarded-* from a reverse proxy. */
   TRUST_PROXY: (process.env.TRUST_PROXY ?? "false") === "true" || process.env.TRUST_PROXY === "1",
 
   // Public-facing frontend base URL, used to build shareable referral links.
   // FRONTEND_URL is accepted as an alias of APP_BASE_URL.
-  APP_BASE_URL: process.env.FRONTEND_URL ?? process.env.APP_BASE_URL ?? "http://localhost:3000",
+  APP_BASE_URL: appBaseUrl,
 
   RATE_LIMIT_WINDOW_MS: Number(process.env.RATE_LIMIT_WINDOW_MS ?? 15 * 60 * 1000),
   // Dev/testing default is generous; production stays stricter unless overridden.
@@ -57,7 +105,8 @@ export const env = {
 
   // --- Email (Resend primary; SMTP kept as legacy fallback for mailer.ts) ---
   RESEND_API_KEY: process.env.RESEND_API_KEY ?? "",
-  EMAIL_FROM: process.env.EMAIL_FROM ?? "TrustCoin <onboarding@resend.dev>",
+  /** Must use a verified Resend domain in production, e.g. TrustCoin <noreply@trustcoin.cc>. */
+  EMAIL_FROM: process.env.EMAIL_FROM ?? "TrustCoin <noreply@trustcoin.cc>",
   /** Inbox for new-withdrawal admin alerts (falls back to ADMIN_EMAIL). */
   ADMIN_ALERT_EMAIL: (process.env.ADMIN_ALERT_EMAIL ?? process.env.ADMIN_EMAIL ?? "").trim(),
 
@@ -68,7 +117,7 @@ export const env = {
   SMTP_USER: process.env.SMTP_USER ?? "",
   SMTP_PASSWORD: process.env.SMTP_PASS ?? process.env.SMTP_PASSWORD ?? "",
   MAIL_FROM_NAME: process.env.MAIL_FROM_NAME ?? "TrustCoin",
-  MAIL_FROM_ADDRESS: process.env.MAIL_FROM_ADDRESS ?? "onboarding@resend.dev",
+  MAIL_FROM_ADDRESS: process.env.MAIL_FROM_ADDRESS ?? "noreply@trustcoin.cc",
 
   // --- Deposits ---
   // Admin master wallet addresses — the final destination once a user's
