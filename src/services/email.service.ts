@@ -107,8 +107,17 @@ async function deliverEmail(params: {
     return;
   }
 
+  const from = env.EMAIL_FROM.trim();
+  // Resend's onboarding address can only deliver to the account owner — reject
+  // it in production so user OTPs fail loudly instead of silently vanishing.
+  if (isProduction && /@resend\.dev\b/i.test(from)) {
+    throw new Error(
+      `EMAIL_FROM must use your verified domain (got "${from}"). Set EMAIL_FROM to e.g. TrustCoin <noreply@trustcoin.cc>.`
+    );
+  }
+
   const { error } = await client.emails.send({
-    from: env.EMAIL_FROM,
+    from,
     to: params.to,
     subject: params.subject,
     html: params.html,
