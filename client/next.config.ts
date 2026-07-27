@@ -6,6 +6,10 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   output: "export",
+  trailingSlash: true,
+  images: {
+    unoptimized: true,
+  },
   // Pin the workspace root explicitly: the backend's package-lock.json one
   // level up would otherwise make Next.js guess (and warn about) the root.
   turbopack: {

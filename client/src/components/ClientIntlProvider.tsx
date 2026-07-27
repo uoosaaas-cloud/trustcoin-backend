@@ -35,7 +35,12 @@ export function ClientIntlProvider({
   }, []);
 
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
+    <NextIntlClientProvider
+      locale={locale}
+      messages={messages}
+      timeZone="UTC"
+      now={new Date(0)}
+    >
       {children}
     </NextIntlClientProvider>
   );
