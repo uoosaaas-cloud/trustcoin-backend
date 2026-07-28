@@ -1,0 +1,18 @@
+# Next.js static export uses trailingSlash: true (…/path/index.html).
+# Redirect bare paths so bookmarks and typed URLs land on the real page.
+/secret-admin-portal /secret-admin-portal/ 301
+/secret-admin-portal/login /secret-admin-portal/login/ 301
+/secret-admin-portal/withdrawals /secret-admin-portal/withdrawals/ 301
+/secret-admin-portal/users /secret-admin-portal/users/ 301
+/secret-admin-portal/referrals /secret-admin-portal/referrals/ 301
+/secret-admin-portal/packages /secret-admin-portal/packages/ 301
+/secret-admin-portal/deposits /secret-admin-portal/deposits/ 301
+/login /login/ 301
+/register /register/ 301
+/dashboard /dashboard/ 301
+/deposit /deposit/ 301
+/withdraw /withdraw/ 301
+/invest /invest/ 301
+/referrals /referrals/ 301
+/forgot-password /forgot-password/ 301
+/reset-password /reset-password/ 301
