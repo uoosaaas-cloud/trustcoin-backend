@@ -120,9 +120,9 @@ export default function AdminUsersPage() {
 
       <main className="relative z-10 mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <div className="mb-8">
-          <p className="text-xs font-semibold uppercase tracking-widest text-gold-500">{t("eyebrow")}</p>
-          <h1 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">{t("title")}</h1>
-          <p className="mt-2 text-sm text-slate-600">{t("subtitle")}</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-cyan-300">{t("eyebrow")}</p>
+          <h1 className="mt-2 text-2xl font-bold text-white sm:text-3xl">{t("title")}</h1>
+          <p className="mt-2 text-sm text-slate-400">{t("subtitle")}</p>
         </div>
 
         <form onSubmit={handleSearch} className="mb-6 flex flex-col gap-3 sm:flex-row">
@@ -146,27 +146,27 @@ export default function AdminUsersPage() {
           </select>
           <button
             type="submit"
-            className="rounded-xl bg-gradient-to-r from-brand-500 to-gold-500 px-5 py-3 text-sm font-semibold text-white shadow-md"
+            className="rounded-xl bg-gradient-to-r from-cyan-400 to-brand-500 px-5 py-3 text-sm font-bold text-[#041016] shadow-md"
           >
             {t("search")}
           </button>
         </form>
 
         {errorMessage ? (
-          <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <div className="mb-4 rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
             {errorMessage}
           </div>
         ) : null}
         {successMessage ? (
-          <div className="mb-4 rounded-2xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-700">
+          <div className="mb-4 rounded-2xl border border-cyan-400/25 bg-cyan-400/10 px-4 py-3 text-sm text-cyan-200">
             {successMessage}
           </div>
         ) : null}
 
         {isLoading ? (
-          <div className="h-40 animate-pulse rounded-2xl border border-slate-200 bg-white" />
+          <div className="h-40 animate-pulse rounded-2xl border border-white/10 bg-white/5" />
         ) : users.length === 0 ? (
-          <p className="text-sm text-slate-500">{t("empty")}</p>
+          <p className="text-sm text-slate-400">{t("empty")}</p>
         ) : (
           <div className="space-y-3">
             {users.map((user) => {
@@ -181,34 +181,34 @@ export default function AdminUsersPage() {
                     className="flex w-full flex-col gap-3 px-4 py-4 text-left sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div>
-                      <p className="font-semibold text-slate-900">{user.email}</p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="font-semibold text-white">{user.email}</p>
+                      <p className="mt-1 text-xs text-slate-400">
                         {t("registered", { date: formatDate(user.created_at) })} · {user.role} ·{" "}
                         <StatusBadge status={user.status} />
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-4 text-xs sm:text-sm">
                       <div>
-                        <p className="text-slate-500">{t("available")}</p>
-                        <p className="font-semibold text-green-600">{formatUsdt(user.availableBalance)}</p>
+                        <p className="text-slate-400">{t("available")}</p>
+                        <p className="font-semibold text-emerald-400">{formatUsdt(user.availableBalance)}</p>
                       </div>
                       <div>
-                        <p className="text-slate-500">{t("locked")}</p>
-                        <p className="font-semibold text-blue-600">{formatUsdt(user.lockedBalance)}</p>
+                        <p className="text-slate-400">{t("locked")}</p>
+                        <p className="font-semibold text-cyan-300">{formatUsdt(user.lockedBalance)}</p>
                       </div>
                       <div>
-                        <p className="text-slate-500">{t("total")}</p>
-                        <p className="font-semibold text-slate-900">{formatUsdt(user.totalBalance)}</p>
+                        <p className="text-slate-400">{t("total")}</p>
+                        <p className="font-semibold text-white">{formatUsdt(user.totalBalance)}</p>
                       </div>
                       <div>
-                        <p className="text-slate-500">{t("packages")}</p>
-                        <p className="font-semibold text-brand-600">{user.activePackages.length}</p>
+                        <p className="text-slate-400">{t("packages")}</p>
+                        <p className="font-semibold text-cyan-300">{user.activePackages.length}</p>
                       </div>
                     </div>
                   </button>
 
                   {open ? (
-                    <div className="space-y-4 border-t border-slate-200 px-4 py-4">
+                    <div className="space-y-4 border-t border-white/10 px-4 py-4">
                       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                         <InfoItem label={t("idNumber")} value={user.id_passport_number ?? t("idMissing")} />
                         <InfoItem label={t("referralCode")} value={user.referral_code} />
@@ -223,12 +223,12 @@ export default function AdminUsersPage() {
                           <button
                             type="button"
                             onClick={() => setPreviewUser(user)}
-                            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/5"
                           >
                             {t("viewIdPhoto")}
                           </button>
                         ) : (
-                          <span className="rounded-xl border border-dashed border-slate-200 px-3 py-2 text-xs text-slate-400">
+                          <span className="rounded-xl border border-dashed border-white/10 px-3 py-2 text-xs text-slate-400">
                             {t("noIdPhoto")}
                           </span>
                         )}
@@ -249,7 +249,7 @@ export default function AdminUsersPage() {
                             type="button"
                             disabled={busy}
                             onClick={() => void runAction(user.id, "block")}
-                            className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800 disabled:opacity-50"
+                            className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-200 disabled:opacity-50"
                           >
                             {t("block")}
                           </button>
@@ -260,7 +260,7 @@ export default function AdminUsersPage() {
                             type="button"
                             disabled={busy}
                             onClick={() => void runAction(user.id, "delete", t("confirmDelete"))}
-                            className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 disabled:opacity-50"
+                            className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-rose-300 disabled:opacity-50"
                           >
                             {t("delete")}
                           </button>
@@ -268,13 +268,13 @@ export default function AdminUsersPage() {
                       </div>
 
                       <div>
-                        <h3 className="text-sm font-semibold text-slate-900">{t("activePackagesTitle")}</h3>
+                        <h3 className="text-sm font-semibold text-white">{t("activePackagesTitle")}</h3>
                         {user.activePackages.length === 0 ? (
-                          <p className="mt-2 text-sm text-slate-500">{t("noPackages")}</p>
+                          <p className="mt-2 text-sm text-slate-400">{t("noPackages")}</p>
                         ) : (
                           <div className="table-surface mt-3 border-0 shadow-none">
                             <table className="w-full min-w-[480px] text-left text-sm">
-                              <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+                              <thead className="border-b border-white/10 bg-white/[0.03] text-xs uppercase tracking-wider text-slate-400">
                                 <tr>
                                   <th className="px-4 py-2 font-medium">{t("pkg.name")}</th>
                                   <th className="px-4 py-2 font-medium">{t("pkg.amount")}</th>
@@ -282,13 +282,13 @@ export default function AdminUsersPage() {
                                   <th className="px-4 py-2 font-medium">{t("pkg.end")}</th>
                                 </tr>
                               </thead>
-                              <tbody className="divide-y divide-slate-100 text-slate-700">
+                              <tbody className="divide-y divide-slate-100 text-slate-300">
                                 {user.activePackages.map((pkg) => (
-                                  <tr key={pkg.id} className="hover:bg-slate-50/80">
-                                    <td className="px-4 py-2 text-slate-900">{pkg.packageName}</td>
+                                  <tr key={pkg.id} className="hover:bg-white/5/80">
+                                    <td className="px-4 py-2 text-white">{pkg.packageName}</td>
                                     <td className="px-4 py-2">{formatUsdt(pkg.currentAmount)} USDT</td>
-                                    <td className="px-4 py-2 text-blue-600">{pkg.dailyProfitPercent}%</td>
-                                    <td className="px-4 py-2 text-xs text-slate-500">
+                                    <td className="px-4 py-2 text-cyan-300">{pkg.dailyProfitPercent}%</td>
+                                    <td className="px-4 py-2 text-xs text-slate-400">
                                       {formatDate(pkg.endDate)}
                                     </td>
                                   </tr>
@@ -324,10 +324,10 @@ export default function AdminUsersPage() {
 function StatusBadge({ status }: { status: string }) {
   const tone =
     status === "ACTIVE"
-      ? "bg-green-50 text-green-700"
+      ? "bg-emerald-400/15 text-emerald-300"
       : status === "PENDING"
         ? "bg-amber-50 text-amber-700"
-        : "bg-rose-50 text-rose-700";
+        : "bg-rose-400/15 text-rose-300";
   return (
     <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${tone}`}>
       {status}
@@ -337,9 +337,9 @@ function StatusBadge({ status }: { status: string }) {
 
 function InfoItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
-      <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500">{label}</p>
-      <p className="mt-1 break-all text-sm font-semibold text-slate-900" dir="ltr">
+    <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+      <p className="text-[11px] font-medium uppercase tracking-wider text-slate-400">{label}</p>
+      <p className="mt-1 break-all text-sm font-semibold text-white" dir="ltr">
         {value}
       </p>
     </div>
@@ -373,10 +373,10 @@ function IdPreviewModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <button type="button" aria-label={closeLabel} className="absolute inset-0 bg-slate-900/50" onClick={onClose} />
       <div className="card-surface relative z-10 max-h-[90vh] w-full max-w-lg overflow-auto rounded-3xl p-5">
-        <h2 className="text-lg font-bold text-slate-900">{title}</h2>
-        <p className="mt-1 text-sm text-slate-600">{email}</p>
+        <h2 className="text-lg font-bold text-white">{title}</h2>
+        <p className="mt-1 text-sm text-slate-400">{email}</p>
         {idNumber ? (
-          <p className="mt-1 text-xs text-slate-500" dir="ltr">
+          <p className="mt-1 text-xs text-slate-400" dir="ltr">
             ID: {idNumber}
           </p>
         ) : null}
@@ -385,7 +385,7 @@ function IdPreviewModal({
         <button
           type="button"
           onClick={onClose}
-          className="mt-4 w-full rounded-xl border border-slate-200 bg-white py-2.5 text-sm font-semibold text-slate-700"
+          className="mt-4 w-full rounded-xl border border-white/10 bg-white/5 py-2.5 text-sm font-semibold text-slate-300"
         >
           {closeLabel}
         </button>

@@ -211,7 +211,7 @@ function MarketCard({ asset }: { asset: MarketAssetPayload }) {
           <span className="me-1 text-base font-medium text-slate-400">$</span>
           {formatUsdPrice(asset.price, asset.id)}
         </p>
-        <p className="mt-1.5 text-[11px] font-medium uppercase tracking-[0.16em] text-slate-500">
+        <p className="mt-1.5 text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400">
           USD · 24h
         </p>
       </div>
@@ -275,19 +275,19 @@ export function MarketOverview() {
     <section className="mt-10" aria-label={t("title")}>
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 sm:text-xs">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300/90 sm:text-xs">
             {t("eyebrow")}
           </p>
-          <h2 className="mt-1.5 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+          <h2 className="mt-1.5 text-xl font-bold tracking-tight text-white sm:text-2xl">
             {t("title")}
           </h2>
-          <p className="mt-1 text-[13px] text-slate-500 sm:text-sm">{t("subtitle")}</p>
+          <p className="mt-1 text-[13px] text-slate-400 sm:text-sm">{t("subtitle")}</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200/80 bg-emerald-50/90 px-3 py-1 text-[11px] font-semibold text-emerald-700">
+          <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-[11px] font-semibold text-emerald-300">
             <span className="relative flex h-1.5 w-1.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
             </span>
             {t("live")}
           </span>
@@ -304,7 +304,7 @@ export function MarketOverview() {
       </div>
 
       {error ? (
-        <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50/90 px-4 py-3 text-sm text-rose-700">
+        <div className="mb-4 rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
           {error}
         </div>
       ) : null}

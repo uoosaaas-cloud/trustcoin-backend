@@ -103,27 +103,27 @@ export default function AdminLoginPage() {
     <div className="page-shell flex flex-col">
       <header className="relative z-10 flex items-center justify-between px-6 py-6 sm:px-10">
         <Link href="/" className="flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-gold-500 text-lg font-bold text-white shadow-md">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-brand-500 text-lg font-bold text-white shadow-md">
             A
           </span>
-          <span className="text-lg font-semibold text-slate-900">TrustCoin Admin</span>
+          <span className="text-lg font-semibold text-white">TrustCoin Admin</span>
         </Link>
         <LanguageSwitcher />
       </header>
 
       <main className="relative z-10 mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 pb-16">
-        <p className="text-xs font-semibold uppercase tracking-widest text-gold-500">
+        <p className="text-xs font-semibold uppercase tracking-widest text-cyan-300">
           {step === "otp" ? t("otpEyebrow") : t("eyebrow")}
         </p>
-        <h1 className="mt-2 text-3xl font-bold text-slate-900">
+        <h1 className="mt-2 text-3xl font-bold text-white">
           {step === "otp" ? t("otpTitle") : t("title")}
         </h1>
-        <p className="mt-2 text-sm text-slate-600">
+        <p className="mt-2 text-sm text-slate-400">
           {step === "otp" ? t("otpSubtitle", { email }) : t("subtitle")}
         </p>
 
         {errorMessage ? (
-          <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <div className="mt-6 rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
             {errorMessage}
           </div>
         ) : null}
@@ -131,7 +131,7 @@ export default function AdminLoginPage() {
         {step === "credentials" ? (
           <form onSubmit={handleCredentialsSubmit} className="card-surface mt-6 space-y-4 rounded-3xl p-6">
             <div>
-              <label htmlFor="admin-email" className="block text-sm font-medium text-slate-700">
+              <label htmlFor="admin-email" className="block text-sm font-medium text-slate-300">
                 {t("emailLabel")}
               </label>
               <input
@@ -145,7 +145,7 @@ export default function AdminLoginPage() {
               />
             </div>
             <div>
-              <label htmlFor="admin-password" className="block text-sm font-medium text-slate-700">
+              <label htmlFor="admin-password" className="block text-sm font-medium text-slate-300">
                 {t("passwordLabel")}
               </label>
               <input
@@ -161,7 +161,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full rounded-xl bg-gradient-to-r from-brand-500 to-gold-500 py-3 text-sm font-semibold text-white shadow-md transition hover:brightness-110 disabled:opacity-50"
+              className="w-full rounded-xl bg-gradient-to-r from-cyan-400 to-brand-500 py-3 text-sm font-bold text-[#041016] shadow-md transition hover:brightness-110 disabled:opacity-50"
             >
               {isSubmitting ? t("submitting") : t("submit")}
             </button>
@@ -169,12 +169,12 @@ export default function AdminLoginPage() {
         ) : (
           <form onSubmit={handleOtpSubmit} className="card-surface mt-6 space-y-4 rounded-3xl p-6">
             {devOtpHint ? (
-              <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+              <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-200">
                 {t("devCodeNotice")} <span className="font-mono font-semibold tracking-widest">{devOtpHint}</span>
               </p>
             ) : null}
             <div>
-              <label htmlFor="admin-otp" className="block text-sm font-medium text-slate-700">
+              <label htmlFor="admin-otp" className="block text-sm font-medium text-slate-300">
                 {t("otpLabel")}
               </label>
               <input
@@ -192,7 +192,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full rounded-xl bg-gradient-to-r from-brand-500 to-gold-500 py-3 text-sm font-semibold text-white shadow-md transition hover:brightness-110 disabled:opacity-50"
+              className="w-full rounded-xl bg-gradient-to-r from-cyan-400 to-brand-500 py-3 text-sm font-bold text-[#041016] shadow-md transition hover:brightness-110 disabled:opacity-50"
             >
               {isSubmitting ? t("otpSubmitting") : t("otpSubmit")}
             </button>
@@ -200,14 +200,14 @@ export default function AdminLoginPage() {
               type="button"
               onClick={handleBackToCredentials}
               disabled={isSubmitting}
-              className="w-full text-sm font-medium text-slate-600 transition hover:text-slate-900 disabled:opacity-50"
+              className="w-full text-sm font-medium text-slate-400 transition hover:text-white disabled:opacity-50"
             >
               {t("backToCredentials")}
             </button>
           </form>
         )}
 
-        <p className="mt-4 text-center text-xs text-slate-500">{tCommon("securedBy")}</p>
+        <p className="mt-4 text-center text-xs text-slate-400">{tCommon("securedBy")}</p>
       </main>
     </div>
   );

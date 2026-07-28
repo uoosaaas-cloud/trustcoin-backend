@@ -41,7 +41,7 @@ export default function RootLayout({
       dir={dir}
       className={`${geistSans.variable} ${geistMono.variable} ${notoSansArabic.variable} h-full`}
     >
-      <body className="min-h-full bg-[#F6F7FB] font-sans text-slate-900 antialiased">
+      <body className="min-h-full bg-[#071018] font-sans text-slate-100 antialiased">
         <ClientIntlProvider initialLocale={locale}>
           <Providers>{children}</Providers>
         </ClientIntlProvider>

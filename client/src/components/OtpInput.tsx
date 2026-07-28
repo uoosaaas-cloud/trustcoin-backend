@@ -80,7 +80,7 @@ export function OtpInput({ length = 6, value, onChange, disabled, autoFocus }: O
           onChange={(event) => handleChange(index, event.target.value)}
           onKeyDown={(event) => handleKeyDown(index, event)}
           onPaste={handlePaste}
-          className="otp-input h-12 w-10 rounded-xl border border-slate-200 bg-white text-center text-xl font-semibold text-slate-900 shadow-sm outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-400/20 disabled:opacity-50 sm:h-14 sm:w-12"
+          className="otp-input h-12 w-10 rounded-xl border border-white/15 bg-white/5 text-center text-xl font-semibold text-white outline-none transition focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/20 disabled:opacity-50 sm:h-14 sm:w-12"
         />
       ))}
     </div>

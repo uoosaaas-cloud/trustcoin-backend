@@ -58,11 +58,11 @@ export default function DashboardPage() {
           hint: t("totalHint"),
           value: wallet.totalBalance,
           badge: "TOTAL",
-          valueClass: "text-slate-900",
+          valueClass: "text-white",
           shell:
-            "border-brand-200/80 bg-gradient-to-br from-brand-50/90 via-white/80 to-white/70 shadow-[0_8px_32px_rgba(239,68,68,0.12)]",
-          glow: "bg-brand-400/25",
-          bar: "from-brand-400 to-brand-600",
+            "border-cyan-400/25 bg-gradient-to-br from-cyan-400/10 via-white/[0.04] to-[#0a1220] shadow-[0_8px_32px_rgba(34,211,238,0.12)]",
+          glow: "bg-cyan-400/25",
+          bar: "from-cyan-400 to-cyan-300",
         },
         {
           key: "locked",
@@ -70,9 +70,9 @@ export default function DashboardPage() {
           hint: t("lockedHint"),
           value: wallet.lockedBalance,
           badge: "LOCKED",
-          valueClass: "text-blue-600",
+          valueClass: "text-cyan-300",
           shell:
-            "border-blue-200/80 bg-gradient-to-br from-blue-50/90 via-white/80 to-cyan-50/50 shadow-[0_8px_32px_rgba(59,130,246,0.14)]",
+            "border-cyan-400/30 bg-gradient-to-br from-blue-400/10 via-white/[0.04] to-[#0a1220] shadow-[0_8px_32px_rgba(59,130,246,0.14)]",
           glow: "bg-blue-400/30",
           bar: "from-blue-400 to-cyan-500",
         },
@@ -82,9 +82,9 @@ export default function DashboardPage() {
           hint: t("availableHint"),
           value: wallet.availableBalance,
           badge: "LIQUID",
-          valueClass: "text-green-600",
+          valueClass: "text-emerald-400",
           shell:
-            "border-green-200/80 bg-gradient-to-br from-green-50/90 via-white/80 to-emerald-50/40 shadow-[0_8px_32px_rgba(34,197,94,0.14)]",
+            "border-emerald-400/30 bg-gradient-to-br from-emerald-400/10 via-white/[0.04] to-[#0a1220] shadow-[0_8px_32px_rgba(34,197,94,0.14)]",
           glow: "bg-emerald-400/30",
           bar: "from-emerald-400 to-green-600",
         },
@@ -110,7 +110,7 @@ export default function DashboardPage() {
       href: "/deposit",
       label: t("ctaDeposit"),
       primary: false,
-      tone: "border-blue-200/80 text-blue-700 hover:bg-blue-50/80",
+      tone: "border-cyan-400/30 text-cyan-300 hover:bg-cyan-400/10",
       icon: (
         <path
           d="M12 5v14M5 12h14"
@@ -124,7 +124,7 @@ export default function DashboardPage() {
       href: "/withdraw",
       label: t("ctaWithdraw"),
       primary: false,
-      tone: "border-emerald-200/80 text-emerald-700 hover:bg-emerald-50/80",
+      tone: "border-emerald-400/30 text-emerald-300 hover:bg-emerald-400/10",
       icon: (
         <path
           d="M12 19V5M5 12l7-7 7 7"
@@ -139,7 +139,7 @@ export default function DashboardPage() {
       href: "/referrals",
       label: t("ctaReferrals"),
       primary: false,
-      tone: "border-slate-200 text-slate-700 hover:bg-slate-50",
+      tone: "border-white/10 text-slate-300 hover:bg-white/5",
       icon: (
         <path
           d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M16 3.13a4 4 0 0 1 0 7.75M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"
@@ -158,7 +158,7 @@ export default function DashboardPage() {
 
       <main className="relative z-10 mx-auto w-full max-w-6xl flex-1 px-4 pb-20 pt-7 sm:px-6">
         {/* Hero header */}
-        <section className="relative mb-8 overflow-hidden rounded-[1.75rem] border border-white/70 bg-white/55 p-6 shadow-[0_12px_40px_rgba(15,23,42,0.06)] backdrop-blur-xl sm:p-8">
+        <section className="relative mb-8 overflow-hidden rounded-[1.75rem] border border-white/70 bg-white/5 p-6 shadow-[0_12px_40px_rgba(15,23,42,0.06)] backdrop-blur-xl sm:p-8">
           <div
             aria-hidden
             className="pointer-events-none absolute -end-16 -top-20 h-56 w-56 rounded-full bg-blue-400/20 blur-3xl"
@@ -174,18 +174,18 @@ export default function DashboardPage() {
 
           <div className="relative flex flex-wrap items-start justify-between gap-4">
             <div className="max-w-2xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand-500 sm:text-xs">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-300 sm:text-xs">
                 {t("eyebrow")}
               </p>
-              <h1 className="mt-2.5 text-3xl font-bold tracking-tight text-slate-900 sm:text-[2.35rem] sm:leading-tight">
+              <h1 className="mt-2.5 text-3xl font-bold tracking-tight text-white sm:text-[2.35rem] sm:leading-tight">
                 {t("title")}
               </h1>
-              <p className="mt-3 text-[15px] leading-relaxed text-slate-600 sm:text-base">
+              <p className="mt-3 text-[15px] leading-relaxed text-slate-400 sm:text-base">
                 {t("subtitle")}
               </p>
             </div>
 
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200/80 bg-emerald-50/90 px-3.5 py-1.5 text-xs font-semibold text-emerald-700 shadow-[0_0_20px_rgba(34,197,94,0.18)]">
+            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-semibold text-emerald-300 shadow-[0_0_20px_rgba(34,197,94,0.18)]">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
@@ -201,14 +201,14 @@ export default function DashboardPage() {
         </div>
 
         {error ? (
-          <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50/90 px-4 py-3 text-sm text-rose-700 backdrop-blur-sm">
+          <div className="mb-6 rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300 backdrop-blur-sm">
             {error}
           </div>
         ) : null}
 
         {/* Portfolio widgets */}
         <div className="mb-3 flex items-center justify-between gap-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 sm:text-xs">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 sm:text-xs">
             {t("portfolioLabel")}
           </p>
         </div>
@@ -218,7 +218,7 @@ export default function DashboardPage() {
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className="h-44 animate-pulse rounded-[1.5rem] border border-slate-200/80 bg-white/70 backdrop-blur-sm"
+                className="h-44 animate-pulse rounded-[1.5rem] border border-white/10 bg-white/5 backdrop-blur-sm"
               />
             ))}
           </div>
@@ -239,12 +239,12 @@ export default function DashboardPage() {
                 />
 
                 <div className="relative flex items-center justify-between gap-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 sm:text-xs">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400 sm:text-xs">
                     {card.label}
                   </p>
                   <span
                     dir="ltr"
-                    className="rounded-md border border-white/80 bg-white/70 px-2 py-0.5 font-mono text-[10px] font-semibold tracking-wider text-slate-500 shadow-sm"
+                    className="rounded-md border border-white/80 bg-white/5 px-2 py-0.5 font-mono text-[10px] font-semibold tracking-wider text-slate-400 shadow-sm"
                   >
                     {card.badge}
                   </span>
@@ -252,16 +252,16 @@ export default function DashboardPage() {
 
                 <p className={`relative mt-4 text-3xl font-bold tracking-tight sm:text-[2rem] ${card.valueClass}`}>
                   {formatUsdt(card.value)}
-                  <span className="ms-1.5 text-sm font-medium text-slate-500">USDT</span>
+                  <span className="ms-1.5 text-sm font-medium text-slate-400">USDT</span>
                 </p>
-                <p className="relative mt-3 text-[13px] leading-relaxed text-slate-500">{card.hint}</p>
+                <p className="relative mt-3 text-[13px] leading-relaxed text-slate-400">{card.hint}</p>
               </article>
             ))}
           </div>
         )}
 
         {wallet && Number(wallet.pendingWithdrawalBalance) > 0 ? (
-          <div className="mt-4 rounded-2xl border border-amber-200/80 bg-amber-50/80 px-4 py-3 text-[14px] text-amber-800 backdrop-blur-sm">
+          <div className="mt-4 rounded-2xl border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-[14px] text-amber-200 backdrop-blur-sm">
             {t("pendingWithdrawal", { amount: formatUsdt(wallet.pendingWithdrawalBalance) })}
           </div>
         ) : null}
@@ -270,7 +270,7 @@ export default function DashboardPage() {
 
         {/* Quick actions */}
         <div className="mt-10 mb-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 sm:text-xs">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 sm:text-xs">
             {t("actionsLabel")}
           </p>
         </div>
@@ -282,8 +282,8 @@ export default function DashboardPage() {
               href={action.href}
               className={
                 action.primary
-                  ? "group relative inline-flex items-center justify-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 px-5 py-4 text-sm font-semibold text-white shadow-[0_10px_28px_rgba(239,68,68,0.28)] transition duration-200 hover:-translate-y-0.5 hover:brightness-110"
-                  : `inline-flex items-center justify-center gap-2.5 rounded-2xl border bg-white/75 px-5 py-4 text-sm font-semibold shadow-[0_4px_18px_rgba(15,23,42,0.04)] backdrop-blur-md transition duration-200 hover:-translate-y-0.5 ${action.tone}`
+                  ? "group relative inline-flex items-center justify-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-400 to-cyan-300 px-5 py-4 text-sm font-bold text-[#041016] shadow-[0_12px_40px_rgba(34,211,238,0.28)] transition duration-200 hover:-translate-y-0.5 hover:brightness-110"
+                  : `inline-flex items-center justify-center gap-2.5 rounded-2xl border bg-white/5 px-5 py-4 text-sm font-semibold shadow-[0_4px_18px_rgba(15,23,42,0.04)] backdrop-blur-md transition duration-200 hover:-translate-y-0.5 ${action.tone}`
               }
             >
               {action.primary ? (

@@ -80,42 +80,42 @@ export function InvestModal({ pkg, availableBalance, onClose, onSuccess }: Inves
         className="card-surface relative z-10 w-full max-w-md rounded-3xl p-5 sm:p-6"
       >
         <div className="mb-5">
-          <p className="text-xs font-semibold uppercase tracking-widest text-brand-500">{t("modal.eyebrow")}</p>
-          <h2 id="invest-modal-title" className="mt-1 text-xl font-bold text-slate-900">
+          <p className="text-xs font-semibold uppercase tracking-widest text-cyan-300">{t("modal.eyebrow")}</p>
+          <h2 id="invest-modal-title" className="mt-1 text-xl font-bold text-white">
             {pkg.name}
           </h2>
-          <p className="mt-1 text-sm text-slate-600">{t(`modal.${durationKey(pkg.duration_days)}`)}</p>
+          <p className="mt-1 text-sm text-slate-400">{t(`modal.${durationKey(pkg.duration_days)}`)}</p>
         </div>
 
-        <dl className="mb-5 grid grid-cols-2 gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm">
+        <dl className="mb-5 grid grid-cols-2 gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-sm">
           <div>
-            <dt className="text-xs text-slate-500">{t(`periodReturn.${durationKey(pkg.duration_days)}`)}</dt>
-            <dd className="mt-0.5 font-semibold text-blue-600">{periodReturn}%</dd>
+            <dt className="text-xs text-slate-400">{t(`periodReturn.${durationKey(pkg.duration_days)}`)}</dt>
+            <dd className="mt-0.5 font-semibold text-cyan-300">{periodReturn}%</dd>
           </div>
           <div>
-            <dt className="text-xs text-slate-500">{t("modal.duration")}</dt>
-            <dd className="mt-0.5 font-semibold text-slate-900">
+            <dt className="text-xs text-slate-400">{t("modal.duration")}</dt>
+            <dd className="mt-0.5 font-semibold text-white">
               {pkg.duration_days} {t("modal.days")}
             </dd>
           </div>
           <div>
-            <dt className="text-xs text-slate-500">{t("modal.fixedAmount")}</dt>
-            <dd className="mt-0.5 font-semibold text-slate-900">{formatUsdt(pkg.amount)} USDT</dd>
+            <dt className="text-xs text-slate-400">{t("modal.fixedAmount")}</dt>
+            <dd className="mt-0.5 font-semibold text-white">{formatUsdt(pkg.amount)} USDT</dd>
           </div>
           <div>
-            <dt className="text-xs text-slate-500">{t("modal.available")}</dt>
-            <dd className="mt-0.5 font-semibold text-green-600">{formatUsdt(availableBalance)} USDT</dd>
+            <dt className="text-xs text-slate-400">{t("modal.available")}</dt>
+            <dd className="mt-0.5 font-semibold text-emerald-400">{formatUsdt(availableBalance)} USDT</dd>
           </div>
         </dl>
 
         {errorMessage ? (
-          <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <div className="mb-4 rounded-xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
             {errorMessage}
           </div>
         ) : null}
 
         <form onSubmit={handleSubmit}>
-          <p className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
+          <p className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
             {t("modal.fixedAmountHint", { amount: formatUsdt(pkg.amount) })}
           </p>
 
@@ -123,14 +123,14 @@ export function InvestModal({ pkg, availableBalance, onClose, onSuccess }: Inves
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-xl border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="flex-1 rounded-xl border border-white/10 bg-white/5 py-3 text-sm font-semibold text-slate-300 transition hover:bg-white/5"
             >
               {t("modal.cancel")}
             </button>
             <button
               type="submit"
               disabled={isSubmitting || availableNum < packageAmount}
-              className="flex-1 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex-1 rounded-xl bg-gradient-to-r from-cyan-400 to-cyan-300 py-3 text-sm font-bold text-[#041016] shadow-[0_12px_40px_rgba(34,211,238,0.22)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting ? t("modal.submitting") : t("modal.submit")}
             </button>

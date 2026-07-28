@@ -110,18 +110,18 @@ export default function AdminWithdrawalsPage() {
 
       <main className="relative z-10 mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <div className="mb-8">
-          <p className="text-xs font-semibold uppercase tracking-widest text-gold-500">{t("eyebrow")}</p>
-          <h1 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">{t("title")}</h1>
-          <p className="mt-2 text-sm text-slate-600">{t("subtitle")}</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-cyan-300">{t("eyebrow")}</p>
+          <h1 className="mt-2 text-2xl font-bold text-white sm:text-3xl">{t("title")}</h1>
+          <p className="mt-2 text-sm text-slate-400">{t("subtitle")}</p>
         </div>
 
         {errorMessage ? (
-          <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <div className="mb-4 rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
             {errorMessage}
           </div>
         ) : null}
         {successMessage ? (
-          <div className="mb-4 rounded-2xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-700">
+          <div className="mb-4 rounded-2xl border border-cyan-400/25 bg-cyan-400/10 px-4 py-3 text-sm text-cyan-200">
             {successMessage}
           </div>
         ) : null}
@@ -129,20 +129,20 @@ export default function AdminWithdrawalsPage() {
         {copiedId ? (
           <div
             role="status"
-            className="fixed bottom-6 start-1/2 z-50 -translate-x-1/2 rounded-xl border border-green-200 bg-white px-4 py-2.5 text-sm font-semibold text-green-700 shadow-lg shadow-slate-900/10"
+            className="fixed bottom-6 start-1/2 z-50 -translate-x-1/2 rounded-xl border border-emerald-400/30 bg-white/5 px-4 py-2.5 text-sm font-semibold text-emerald-300 shadow-lg shadow-slate-900/10"
           >
             {t("copied")}
           </div>
         ) : null}
 
         {isLoading ? (
-          <div className="h-40 animate-pulse rounded-2xl border border-slate-200 bg-white" />
+          <div className="h-40 animate-pulse rounded-2xl border border-white/10 bg-white/5" />
         ) : rows.length === 0 ? (
-          <p className="text-sm text-slate-500">{t("empty")}</p>
+          <p className="text-sm text-slate-400">{t("empty")}</p>
         ) : (
           <div className="table-surface">
             <table className="w-full min-w-[860px] text-left text-sm">
-              <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+              <thead className="border-b border-white/10 bg-white/[0.03] text-xs uppercase tracking-wider text-slate-400">
                 <tr>
                   <th className="px-4 py-3 font-medium">{t("table.user")}</th>
                   <th className="px-4 py-3 font-medium">{t("table.amount")}</th>
@@ -157,14 +157,14 @@ export default function AdminWithdrawalsPage() {
                   const justCopied = copiedId === row.id;
 
                   return (
-                    <tr key={row.id} className="text-slate-700 hover:bg-slate-50/80">
+                    <tr key={row.id} className="text-slate-300 hover:bg-white/5/80">
                       <td className="px-4 py-3 align-top">
-                        <p className="font-medium text-slate-900">{row.user.email}</p>
-                        <p className="text-xs text-slate-500">
+                        <p className="font-medium text-white">{row.user.email}</p>
+                        <p className="text-xs text-slate-400">
                           {t("availableNow", { amount: formatUsdt(row.user.balance) })}
                         </p>
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3 align-top font-semibold text-blue-600">
+                      <td className="whitespace-nowrap px-4 py-3 align-top font-semibold text-cyan-300">
                         {formatUsdt(row.amount)} USDT
                       </td>
                       <td className="px-4 py-3 align-top">
@@ -172,7 +172,7 @@ export default function AdminWithdrawalsPage() {
                           <div className="flex items-start gap-2">
                             <code
                               dir="ltr"
-                              className="block min-w-0 flex-1 break-all rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 font-mono text-[12px] leading-relaxed text-slate-800"
+                              className="block min-w-0 flex-1 break-all rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-2 font-mono text-[12px] leading-relaxed text-slate-100"
                             >
                               {address}
                             </code>
@@ -183,8 +183,8 @@ export default function AdminWithdrawalsPage() {
                               title={justCopied ? t("copied") : t("copyAddress")}
                               className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition ${
                                 justCopied
-                                  ? "border-green-200 bg-green-50 text-green-700"
-                                  : "border-slate-200 bg-white text-slate-600 hover:border-brand-200 hover:bg-brand-50 hover:text-brand-600"
+                                  ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300"
+                                  : "border-white/10 bg-white/5 text-slate-400 hover:border-cyan-400/25 hover:bg-cyan-400/10 hover:text-cyan-300"
                               }`}
                             >
                               {justCopied ? <CheckIcon /> : <CopyIcon />}
@@ -194,7 +194,7 @@ export default function AdminWithdrawalsPage() {
                           <span className="text-slate-400">—</span>
                         )}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3 align-top text-xs text-slate-500">
+                      <td className="whitespace-nowrap px-4 py-3 align-top text-xs text-slate-400">
                         {formatDateTime(row.created_at)}
                       </td>
                       <td className="px-4 py-3 align-top">
@@ -203,7 +203,7 @@ export default function AdminWithdrawalsPage() {
                             type="button"
                             disabled={busyId === row.id}
                             onClick={() => void handleApprove(row.id)}
-                            className="rounded-lg border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-700 transition hover:bg-green-100 disabled:opacity-50"
+                            className="rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300 transition hover:bg-green-100 disabled:opacity-50"
                           >
                             {busyId === row.id ? "…" : t("approve")}
                           </button>
@@ -211,7 +211,7 @@ export default function AdminWithdrawalsPage() {
                             type="button"
                             disabled={busyId === row.id}
                             onClick={() => void handleReject(row.id)}
-                            className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
+                            className="rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-300 transition hover:bg-rose-500/20 disabled:opacity-50"
                           >
                             {busyId === row.id ? "…" : t("reject")}
                           </button>

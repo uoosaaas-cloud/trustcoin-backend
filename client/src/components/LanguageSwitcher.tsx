@@ -27,7 +27,7 @@ export function LanguageSwitcher() {
     <div
       role="group"
       aria-label={t("label")}
-      className="inline-flex items-center gap-0.5 rounded-xl border border-slate-200 bg-white p-0.5 shadow-sm"
+      className="inline-flex items-center gap-0.5 rounded-xl border border-white/15 bg-white/5 p-0.5"
     >
       <button
         type="button"
@@ -36,8 +36,8 @@ export function LanguageSwitcher() {
         aria-pressed={locale === "en"}
         className={`${btnBase} ${
           locale === "en"
-            ? "bg-slate-900 text-white shadow-sm"
-            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+            ? "bg-cyan-400 text-[#041016] shadow-[0_0_16px_rgba(34,211,238,0.25)]"
+            : "text-slate-400 hover:bg-white/5 hover:text-white"
         }`}
       >
         EN
@@ -49,8 +49,8 @@ export function LanguageSwitcher() {
         aria-pressed={locale === "ar"}
         className={`${btnBase} ${
           locale === "ar"
-            ? "bg-slate-900 text-white shadow-sm"
-            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+            ? "bg-cyan-400 text-[#041016] shadow-[0_0_16px_rgba(34,211,238,0.25)]"
+            : "text-slate-400 hover:bg-white/5 hover:text-white"
         }`}
       >
         ع

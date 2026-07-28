@@ -19,16 +19,16 @@ export function AuthChromeHeader({ brandHref = "/" }: AuthChromeHeaderProps) {
     <>
       <header className="relative z-10 flex items-center justify-between px-6 py-6 sm:px-10">
         <Link href={brandHref} className="flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-gold-500 text-lg font-bold text-white shadow-lg shadow-brand-500/25">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-brand-500 text-lg font-bold text-[#041016] shadow-[0_0_28px_rgba(34,211,238,0.35)]">
             T
           </span>
-          <span className="text-lg font-semibold tracking-tight text-slate-900">TrustCoin</span>
+          <span className="text-lg font-semibold tracking-tight text-white">TrustCoin</span>
         </Link>
         <div className="flex items-center gap-2 sm:gap-3">
           <button
             type="button"
             onClick={() => setAboutOpen(true)}
-            className="rounded-xl border border-blue-200/70 bg-gradient-to-r from-slate-900 to-slate-800 px-3 py-1.5 text-xs font-semibold text-blue-100 shadow-[0_0_18px_rgba(59,130,246,0.18)] transition hover:border-blue-300 sm:text-sm"
+            className="rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-cyan-100 transition hover:border-cyan-300/40 hover:bg-white/10 sm:text-sm"
           >
             {t("about")}
           </button>

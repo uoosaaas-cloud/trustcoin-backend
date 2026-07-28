@@ -109,39 +109,39 @@ export default function InvestPage() {
 
       <main className="relative z-10 mx-auto w-full max-w-5xl flex-1 px-4 pb-16 pt-7 sm:px-6">
         <div className="mb-7">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-500 sm:text-xs">{t("eyebrow")}</p>
-          <h1 className="mt-2.5 text-2xl font-bold tracking-tight text-slate-900 sm:text-[2rem] sm:leading-tight">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300 sm:text-xs">{t("eyebrow")}</p>
+          <h1 className="mt-2.5 text-2xl font-bold tracking-tight text-white sm:text-[2rem] sm:leading-tight">
             {t("title")}
           </h1>
-          <p className="mt-2.5 max-w-2xl text-[15px] leading-relaxed text-slate-600">{t("subtitle")}</p>
+          <p className="mt-2.5 max-w-2xl text-[15px] leading-relaxed text-slate-400">{t("subtitle")}</p>
         </div>
 
         <div className="mb-7">
           <TrustComplianceBlock />
         </div>
 
-        <div className="mb-7 rounded-[1.5rem] border border-green-200/80 bg-gradient-to-br from-green-50 via-white to-white p-5 shadow-[0_4px_24px_rgba(34,197,94,0.08)] sm:p-6">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-green-700 sm:text-xs">
+        <div className="mb-7 rounded-[1.5rem] border border-emerald-400/30 bg-gradient-to-br from-emerald-400/10 via-white/[0.04] to-[#0a1220] p-5 shadow-[0_8px_28px_rgba(0,0,0,0.25)] sm:p-6">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-300 sm:text-xs">
             {t("availableLabel")}
           </p>
           {isWalletLoading ? (
-            <div className="mt-2 h-9 w-36 animate-pulse rounded-lg bg-slate-100" />
+            <div className="mt-2 h-9 w-36 animate-pulse rounded-lg bg-white/10" />
           ) : (
-            <p className="mt-1.5 text-3xl font-bold tracking-tight text-green-600">
+            <p className="mt-1.5 text-3xl font-bold tracking-tight text-emerald-400">
               {formatUsdt(availableBalance)}
-              <span className="ms-1.5 text-sm font-medium text-slate-500">USDT</span>
+              <span className="ms-1.5 text-sm font-medium text-slate-400">USDT</span>
             </p>
           )}
-          <p className="mt-1.5 text-[13px] text-slate-500">{t("availableHint")}</p>
+          <p className="mt-1.5 text-[13px] text-slate-400">{t("availableHint")}</p>
         </div>
 
         {errorMessage ? (
-          <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <div className="mb-4 rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
             {errorMessage}
           </div>
         ) : null}
         {successMessage ? (
-          <div className="mb-4 rounded-2xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-700">
+          <div className="mb-4 rounded-2xl border border-cyan-400/25 bg-cyan-400/10 px-4 py-3 text-sm text-cyan-200">
             {successMessage}
           </div>
         ) : null}
@@ -149,7 +149,7 @@ export default function InvestPage() {
         {isLoadingPackages ? (
           <div className="space-y-4">
             {[0, 1, 2].map((i) => (
-              <div key={i} className="h-48 animate-pulse rounded-3xl border border-slate-200 bg-white" />
+              <div key={i} className="h-48 animate-pulse rounded-3xl border border-white/10 bg-white/5" />
             ))}
           </div>
         ) : (
@@ -157,10 +157,10 @@ export default function InvestPage() {
             {tiers.map((tier) => (
               <section key={tier.amount} className="card-surface rounded-[1.5rem] p-5 sm:p-6">
                 <div className="mb-5">
-                  <h2 className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
+                  <h2 className="text-lg font-semibold tracking-tight text-white sm:text-xl">
                     {t("tierTitle", { amount: formatUsdt(tier.amount) })}
                   </h2>
-                  <p className="mt-1.5 text-[13px] text-slate-500">
+                  <p className="mt-1.5 text-[13px] text-slate-400">
                     {t("tierFixedAmount", { amount: formatUsdt(tier.amount) })}
                   </p>
                 </div>
@@ -171,24 +171,24 @@ export default function InvestPage() {
                     return (
                       <div
                         key={pkg.id}
-                        className="flex flex-col rounded-2xl border border-slate-200/90 bg-gradient-to-b from-white to-slate-50/80 p-5 shadow-[0_2px_12px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-[0_10px_28px_rgba(15,23,42,0.08)]"
+                        className="flex flex-col rounded-2xl border border-white/10 bg-gradient-to-b from-white to-slate-50/80 p-5 shadow-[0_2px_12px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-0.5 hover:border-cyan-400/25 hover:shadow-[0_10px_28px_rgba(15,23,42,0.08)]"
                       >
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-500">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-cyan-300">
                           {t(`duration.${durationKey(pkg.duration_days)}`)}
                         </p>
-                        <p className="mt-2.5 text-3xl font-bold tracking-tight text-blue-600">{periodReturn}%</p>
-                        <p className="mt-1 text-[13px] text-slate-500">
+                        <p className="mt-2.5 text-3xl font-bold tracking-tight text-cyan-300">{periodReturn}%</p>
+                        <p className="mt-1 text-[13px] text-slate-400">
                           {t(`periodReturn.${durationKey(pkg.duration_days)}`)}
                         </p>
 
                         <dl className="mt-5 space-y-2.5 text-[13px]">
                           <div className="flex justify-between gap-2">
-                            <dt className="text-slate-500">{t("fixedAmountLabel")}</dt>
-                            <dd className="font-semibold text-slate-800">{formatUsdt(pkg.amount)} USDT</dd>
+                            <dt className="text-slate-400">{t("fixedAmountLabel")}</dt>
+                            <dd className="font-semibold text-slate-100">{formatUsdt(pkg.amount)} USDT</dd>
                           </div>
                           <div className="flex justify-between gap-2">
-                            <dt className="text-slate-500">{t("durationLabel")}</dt>
-                            <dd className="font-semibold text-slate-800">
+                            <dt className="text-slate-400">{t("durationLabel")}</dt>
+                            <dd className="font-semibold text-slate-100">
                               {pkg.duration_days} {t("days")}
                             </dd>
                           </div>
@@ -198,7 +198,7 @@ export default function InvestPage() {
                           type="button"
                           disabled={Number(availableBalance) < Number(pkg.amount)}
                           onClick={() => openInvestModal(pkg)}
-                          className="mt-5 w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/20 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+                          className="mt-5 w-full rounded-xl bg-gradient-to-r from-cyan-400 to-cyan-300 py-3 text-sm font-bold text-[#041016] shadow-lg shadow-brand-500/20 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           {t("investNow")}
                         </button>

@@ -29,16 +29,16 @@ export function AdminNav() {
   }
 
   return (
-    <header className="relative z-10 border-b border-slate-200/80 bg-white/85 backdrop-blur-md shadow-sm">
+    <header className="relative z-10 border-b border-white/10 bg-[#071018]/80 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6">
         <div className="flex items-center gap-6">
           <Link href={ADMIN_ROUTES.home} className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-gold-500 text-lg font-bold text-white shadow-md shadow-brand-500/20">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-brand-500 text-lg font-bold text-[#041016] shadow-[0_0_28px_rgba(34,211,238,0.3)]">
               A
             </span>
             <div>
-              <p className="text-sm font-semibold text-slate-900">{t("brand")}</p>
-              <p className="text-[11px] text-slate-500">{t("subtitle")}</p>
+              <p className="text-sm font-semibold text-white">{t("brand")}</p>
+              <p className="text-[11px] text-slate-400">{t("subtitle")}</p>
             </div>
           </Link>
 
@@ -51,8 +51,8 @@ export function AdminNav() {
                   href={item.href}
                   className={`rounded-xl px-3 py-1.5 text-sm font-medium transition ${
                     active
-                      ? "bg-brand-50 text-brand-600"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                      ? "bg-cyan-400/15 text-cyan-300"
+                      : "text-slate-400 hover:bg-white/5 hover:text-white"
                   }`}
                 >
                   {t(item.key)}
@@ -71,7 +71,7 @@ export function AdminNav() {
                   key={item.href}
                   href={item.href}
                   className={`rounded-lg px-2.5 py-1 text-xs font-medium transition ${
-                    active ? "bg-brand-50 text-brand-600" : "text-slate-600 hover:text-slate-900"
+                    active ? "bg-cyan-400/15 text-cyan-300" : "text-slate-400 hover:text-white"
                   }`}
                 >
                   {t(item.key)}
@@ -80,13 +80,13 @@ export function AdminNav() {
             })}
           </nav>
           {user?.email ? (
-            <span className="hidden text-xs text-slate-500 md:inline">{user.email}</span>
+            <span className="hidden text-xs text-slate-400 md:inline">{user.email}</span>
           ) : null}
           <LanguageSwitcher />
           <button
             type="button"
             onClick={handleLogout}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-brand-200 hover:text-brand-600"
+            className="rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-cyan-300/40 hover:text-cyan-200"
           >
             {t("logout")}
           </button>

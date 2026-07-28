@@ -1,11 +1,11 @@
 type BadgeStatus = "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED" | "FAILED";
 
 const STATUS_STYLES: Record<BadgeStatus, string> = {
-  PENDING: "bg-blue-100 text-blue-700 border-blue-200",
-  APPROVED: "bg-red-100 text-red-700 border-red-200",
-  COMPLETED: "bg-green-100 text-green-700 border-green-200",
-  REJECTED: "bg-rose-100 text-rose-700 border-rose-200",
-  FAILED: "bg-rose-100 text-rose-700 border-rose-200",
+  PENDING: "bg-cyan-400/15 text-cyan-300 border-cyan-400/30",
+  APPROVED: "bg-emerald-400/15 text-emerald-300 border-emerald-400/30",
+  COMPLETED: "bg-emerald-400/15 text-emerald-300 border-emerald-400/30",
+  REJECTED: "bg-rose-400/15 text-rose-300 border-rose-400/30",
+  FAILED: "bg-rose-400/15 text-rose-300 border-rose-400/30",
 };
 
 export function StatusBadge({ status, label }: { status: BadgeStatus; label: string }) {

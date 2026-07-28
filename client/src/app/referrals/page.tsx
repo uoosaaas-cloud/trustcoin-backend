@@ -17,11 +17,11 @@ import {
 
 function BonusStatusPill({ status, label }: { status: ReferralBonusState; label: string }) {
   const styles: Record<ReferralBonusState, string> = {
-    NONE: "border-slate-200 bg-slate-50 text-slate-600",
-    PENDING_PACKAGE_ACTIVE: "border-amber-200 bg-amber-50 text-amber-800",
-    PACKAGE_COMPLETED_AWAITING_ADMIN: "border-blue-200 bg-blue-50 text-blue-800",
-    APPROVED_RELEASED: "border-green-200 bg-green-50 text-green-800",
-    REJECTED: "border-rose-200 bg-rose-50 text-rose-700",
+    NONE: "border-white/10 bg-white/[0.03] text-slate-400",
+    PENDING_PACKAGE_ACTIVE: "border-amber-200 bg-amber-50 text-amber-200",
+    PACKAGE_COMPLETED_AWAITING_ADMIN: "border-cyan-400/30 bg-cyan-400/10 text-cyan-200",
+    APPROVED_RELEASED: "border-emerald-400/30 bg-emerald-500/10 text-emerald-200",
+    REJECTED: "border-rose-400/30 bg-rose-500/10 text-rose-300",
   };
 
   return (
@@ -106,24 +106,24 @@ export default function ReferralsPage() {
           label: t("totalReferrals"),
           value: String(stats.total_referrals),
           hint: t("totalReferralsHint"),
-          accent: "from-brand-50 to-white border-brand-200",
-          valueClass: "text-slate-900",
+          accent: "from-cyan-400/10 to-[#0a1220] border-cyan-400/25",
+          valueClass: "text-white",
         },
         {
           key: "pending",
           label: t("pendingEarnings"),
           value: `${formatUsdt(stats.pending_referral_earnings)} USDT`,
           hint: t("pendingEarningsHint"),
-          accent: "from-amber-50 to-white border-amber-200",
-          valueClass: "text-amber-700",
+          accent: "from-amber-400/10 to-[#0a1220] border-amber-400/30",
+          valueClass: "text-amber-300",
         },
         {
           key: "released",
           label: t("releasedEarnings"),
           value: `${formatUsdt(stats.total_commission_earned)} USDT`,
           hint: t("releasedEarningsHint"),
-          accent: "from-green-50 to-white border-green-200",
-          valueClass: "text-green-600",
+          accent: "from-emerald-400/10 to-[#0a1220] border-emerald-400/30",
+          valueClass: "text-emerald-400",
         },
       ]
     : [];
@@ -134,25 +134,25 @@ export default function ReferralsPage() {
 
       <main className="relative z-10 mx-auto w-full max-w-5xl flex-1 px-4 pb-16 pt-6 sm:px-6">
         <div className="mb-8">
-          <p className="text-xs font-semibold uppercase tracking-widest text-brand-500">{t("eyebrow")}</p>
-          <h1 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">{t("title")}</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">{t("subtitle")}</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-cyan-300">{t("eyebrow")}</p>
+          <h1 className="mt-2 text-2xl font-bold text-white sm:text-3xl">{t("title")}</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">{t("subtitle")}</p>
         </div>
 
         {errorMessage ? (
-          <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <div className="mb-6 rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
             {errorMessage}
           </div>
         ) : null}
 
         <section className="card-surface mb-6 rounded-3xl p-5">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{t("linkLabel")}</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{t("linkLabel")}</p>
           {isLoading || !stats ? (
-            <div className="mt-3 h-12 animate-pulse rounded-xl bg-slate-100" />
+            <div className="mt-3 h-12 animate-pulse rounded-xl bg-white/10" />
           ) : (
             <>
               <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <code className="flex-1 truncate rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-sm text-brand-600">
+                <code className="flex-1 truncate rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 font-mono text-sm text-cyan-300">
                   {stats.referral_link}
                 </code>
                 <CopyButton
@@ -162,9 +162,9 @@ export default function ReferralsPage() {
                   className="shrink-0 justify-center py-3 sm:px-4"
                 />
               </div>
-              <p className="mt-3 text-xs text-slate-500">
+              <p className="mt-3 text-xs text-slate-400">
                 {t("codeLabel")}:{" "}
-                <span className="font-mono font-semibold text-slate-700">{stats.referral_code}</span>
+                <span className="font-mono font-semibold text-slate-300">{stats.referral_code}</span>
               </p>
             </>
           )}
@@ -173,7 +173,7 @@ export default function ReferralsPage() {
         {isLoading ? (
           <div className="mb-8 grid gap-4 sm:grid-cols-3">
             {[0, 1, 2].map((i) => (
-              <div key={i} className="h-32 animate-pulse rounded-3xl border border-slate-200 bg-white" />
+              <div key={i} className="h-32 animate-pulse rounded-3xl border border-white/10 bg-white/5" />
             ))}
           </div>
         ) : (
@@ -183,26 +183,26 @@ export default function ReferralsPage() {
                 key={card.key}
                 className={`rounded-3xl border bg-gradient-to-br p-5 shadow-sm ${card.accent}`}
               >
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{card.label}</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{card.label}</p>
                 <p className={`mt-3 text-2xl font-bold tracking-tight sm:text-3xl ${card.valueClass}`}>
                   {card.value}
                 </p>
-                <p className="mt-3 text-xs leading-relaxed text-slate-500">{card.hint}</p>
+                <p className="mt-3 text-xs leading-relaxed text-slate-400">{card.hint}</p>
               </div>
             ))}
           </div>
         )}
 
         <section>
-          <h2 className="text-lg font-semibold text-slate-900">{t("tableTitle")}</h2>
+          <h2 className="text-lg font-semibold text-white">{t("tableTitle")}</h2>
           {isLoading ? (
-            <div className="mt-4 h-28 animate-pulse rounded-2xl border border-slate-200 bg-white" />
+            <div className="mt-4 h-28 animate-pulse rounded-2xl border border-white/10 bg-white/5" />
           ) : !stats || stats.referrals.length === 0 ? (
-            <p className="mt-4 text-sm text-slate-500">{t("empty")}</p>
+            <p className="mt-4 text-sm text-slate-400">{t("empty")}</p>
           ) : (
             <div className="table-surface mt-4 overflow-x-auto">
               <table className="w-full min-w-[720px] text-left text-sm">
-                <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+                <thead className="border-b border-white/10 bg-white/[0.03] text-xs uppercase tracking-wider text-slate-400">
                   <tr>
                     <th className="px-4 py-3 font-medium">{t("table.user")}</th>
                     <th className="px-4 py-3 font-medium">{t("table.registered")}</th>
@@ -213,25 +213,25 @@ export default function ReferralsPage() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {stats.referrals.map((referral) => (
-                    <tr key={referral.id} className="text-slate-700 hover:bg-slate-50/80">
+                    <tr key={referral.id} className="text-slate-300 hover:bg-white/5/80">
                       <td className="px-4 py-3">
-                        <p className="font-medium text-slate-900">
+                        <p className="font-medium text-white">
                           {referral.masked_email ?? referral.email}
                         </p>
-                        <p className="text-[11px] text-slate-500">
+                        <p className="text-[11px] text-slate-400">
                           {referral.account_status === "ACTIVE"
                             ? t("accountActive")
                             : t("accountPending")}
                         </p>
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-xs text-slate-500">
+                      <td className="whitespace-nowrap px-4 py-3 text-xs text-slate-400">
                         {formatDate(referral.registered_at)}
                       </td>
                       <td className="px-4 py-3">
                         {referral.package_name ? (
                           <>
-                            <p className="font-medium text-slate-800">{referral.package_name}</p>
-                            <p className="text-xs text-slate-500">
+                            <p className="font-medium text-slate-100">{referral.package_name}</p>
+                            <p className="text-xs text-slate-400">
                               {formatUsdt(referral.package_amount ?? "0")} USDT
                               {referral.expected_profit ? (
                                 <>
@@ -245,7 +245,7 @@ export default function ReferralsPage() {
                           <span className="text-xs text-slate-400">{t("noPackage")}</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 font-semibold text-green-600">
+                      <td className="px-4 py-3 font-semibold text-emerald-400">
                         {referral.referral_bonus
                           ? `${formatUsdt(referral.referral_bonus)} USDT`
                           : "—"}

@@ -80,28 +80,28 @@ export default function AdminPackagesPage() {
       <AdminNav />
       <main className="relative z-10 mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <div className="mb-8">
-          <p className="text-xs font-semibold uppercase tracking-widest text-gold-500">{t("eyebrow")}</p>
-          <h1 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">{t("title")}</h1>
-          <p className="mt-2 max-w-3xl text-sm text-slate-600">{t("subtitle")}</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-cyan-300">{t("eyebrow")}</p>
+          <h1 className="mt-2 text-2xl font-bold text-white sm:text-3xl">{t("title")}</h1>
+          <p className="mt-2 max-w-3xl text-sm text-slate-400">{t("subtitle")}</p>
         </div>
 
         {errorMessage ? (
-          <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <div className="mb-4 rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
             {errorMessage}
           </div>
         ) : null}
         {successMessage ? (
-          <div className="mb-4 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+          <div className="mb-4 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
             {successMessage}
           </div>
         ) : null}
 
         {isLoading ? (
-          <div className="h-40 animate-pulse rounded-2xl border border-slate-200 bg-white" />
+          <div className="h-40 animate-pulse rounded-2xl border border-white/10 bg-white/5" />
         ) : (
           <div className="table-surface overflow-x-auto">
             <table className="w-full min-w-[880px] text-left text-sm">
-              <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+              <thead className="border-b border-white/10 bg-white/[0.03] text-xs uppercase tracking-wider text-slate-400">
                 <tr>
                   <th className="px-4 py-3 font-medium">{t("table.name")}</th>
                   <th className="px-4 py-3 font-medium">{t("table.amount")}</th>
@@ -113,10 +113,10 @@ export default function AdminPackagesPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {packages.map((pkg) => (
-                  <tr key={pkg.id} className="hover:bg-slate-50/80">
-                    <td className="px-4 py-3 font-medium text-slate-900">{pkg.name}</td>
-                    <td className="px-4 py-3 text-slate-700">{formatUsdt(pkg.amount)} USDT</td>
-                    <td className="px-4 py-3 text-slate-700">{pkg.duration_days}d</td>
+                  <tr key={pkg.id} className="hover:bg-white/5/80">
+                    <td className="px-4 py-3 font-medium text-white">{pkg.name}</td>
+                    <td className="px-4 py-3 text-slate-300">{formatUsdt(pkg.amount)} USDT</td>
+                    <td className="px-4 py-3 text-slate-300">{pkg.duration_days}d</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <input
@@ -130,10 +130,10 @@ export default function AdminPackagesPage() {
                           }
                           className="input-surface w-28 py-2 text-sm"
                         />
-                        <span className="text-xs text-slate-500">%/day</span>
+                        <span className="text-xs text-slate-400">%/day</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-slate-700">{pkg.activeInvestments}</td>
+                    <td className="px-4 py-3 text-slate-300">{pkg.activeInvestments}</td>
                     <td className="px-4 py-3">
                       <button
                         type="button"
@@ -148,7 +148,7 @@ export default function AdminPackagesPage() {
                 ))}
               </tbody>
             </table>
-            <p className="border-t border-slate-100 px-4 py-3 text-xs text-slate-500">{t("note")}</p>
+            <p className="border-t border-white/10 px-4 py-3 text-xs text-slate-400">{t("note")}</p>
           </div>
         )}
       </main>

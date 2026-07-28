@@ -108,22 +108,22 @@ export function WithdrawalOtpModal({
       <div
         role="dialog"
         aria-modal="true"
-        className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl"
+        className="w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl"
       >
-        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-500">{t("eyebrow")}</p>
-        <h2 className="mt-2 text-xl font-bold text-slate-900">{t("title")}</h2>
-        <p className="mt-2 text-sm leading-relaxed text-slate-600">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300">{t("eyebrow")}</p>
+        <h2 className="mt-2 text-xl font-bold text-white">{t("title")}</h2>
+        <p className="mt-2 text-sm leading-relaxed text-slate-400">
           {t("subtitle")}
           {emailHint ? (
             <>
               {" "}
-              <span className="font-semibold text-slate-800">{emailHint}</span>
+              <span className="font-semibold text-slate-100">{emailHint}</span>
             </>
           ) : null}
         </p>
 
         {errorMessage ? (
-          <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+          <div className="mt-4 rounded-2xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-300">
             {errorMessage}
           </div>
         ) : null}
@@ -134,7 +134,7 @@ export function WithdrawalOtpModal({
           <button
             type="submit"
             disabled={isSubmitting || isSending || otpCode.length !== 6}
-            className="w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 disabled:opacity-50"
+            className="w-full rounded-xl bg-gradient-to-r from-cyan-400 to-cyan-300 py-3 text-sm font-bold text-[#041016] shadow-[0_12px_40px_rgba(34,211,238,0.22)] disabled:opacity-50"
           >
             {isSubmitting ? t("submitting") : t("confirm")}
           </button>
@@ -145,7 +145,7 @@ export function WithdrawalOtpModal({
             type="button"
             onClick={() => void handleResend()}
             disabled={cooldownSeconds > 0 || isSending}
-            className="text-sm font-semibold text-brand-600 disabled:text-slate-400"
+            className="text-sm font-semibold text-cyan-300 disabled:text-slate-400"
           >
             {isSending
               ? tOtp("resending")
@@ -157,7 +157,7 @@ export function WithdrawalOtpModal({
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="text-sm font-medium text-slate-500 hover:text-slate-700"
+            className="text-sm font-medium text-slate-400 hover:text-slate-300"
           >
             {t("cancel")}
           </button>

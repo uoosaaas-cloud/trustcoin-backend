@@ -40,19 +40,16 @@ export function AppNav() {
 
   const showWallet = getStoredAuthToken() && wallet;
 
-  const aboutButtonClass =
-    "rounded-xl border border-blue-200/70 bg-gradient-to-r from-slate-900 to-slate-800 px-3 py-1.5 text-sm font-semibold text-blue-100 shadow-[0_0_18px_rgba(59,130,246,0.18)] transition hover:border-blue-300 hover:shadow-[0_0_24px_rgba(59,130,246,0.28)]";
-
   return (
     <>
-      <header className="relative z-10 border-b border-slate-200/80 bg-white/85 px-6 py-5 shadow-sm backdrop-blur-md sm:px-10">
+      <header className="relative z-10 border-b border-white/10 bg-[#071018]/80 px-6 py-5 backdrop-blur-md sm:px-10">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-6">
             <Link href="/dashboard" className="flex items-center gap-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-gold-500 text-lg font-bold text-white shadow-lg shadow-brand-500/25">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-brand-500 text-lg font-bold text-[#041016] shadow-[0_0_28px_rgba(34,211,238,0.3)]">
                 T
               </span>
-              <span className="text-lg font-semibold tracking-tight text-slate-900">TrustCoin</span>
+              <span className="text-lg font-semibold tracking-tight text-white">TrustCoin</span>
             </Link>
 
             <nav className="hidden items-center gap-1 lg:flex">
@@ -64,15 +61,19 @@ export function AppNav() {
                     href={item.href}
                     className={`rounded-xl px-3 py-1.5 text-sm font-medium transition ${
                       active
-                        ? "bg-brand-50 text-brand-600"
-                        : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                        ? "bg-cyan-400/15 text-cyan-300"
+                        : "text-slate-400 hover:bg-white/5 hover:text-white"
                     }`}
                   >
                     {t(item.key)}
                   </Link>
                 );
               })}
-              <button type="button" onClick={() => setAboutOpen(true)} className={aboutButtonClass}>
+              <button
+                type="button"
+                onClick={() => setAboutOpen(true)}
+                className="rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-sm font-semibold text-cyan-100 transition hover:border-cyan-300/40 hover:bg-white/10"
+              >
                 {t("about")}
               </button>
             </nav>
@@ -80,14 +81,14 @@ export function AppNav() {
 
           <div className="flex flex-wrap items-center gap-3">
             {showWallet ? (
-              <div className="hidden items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-1.5 text-xs shadow-sm sm:flex">
-                <span className="text-slate-500">{t("available")}</span>
-                <span className="font-semibold text-green-600">
+              <div className="hidden items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs sm:flex">
+                <span className="text-slate-400">{t("available")}</span>
+                <span className="font-semibold text-emerald-400">
                   {isLoading ? "…" : formatUsdt(wallet.availableBalance)} USDT
                 </span>
-                <span className="text-slate-300">|</span>
-                <span className="text-slate-500">{t("locked")}</span>
-                <span className="font-semibold text-blue-600">
+                <span className="text-white/20">|</span>
+                <span className="text-slate-400">{t("locked")}</span>
+                <span className="font-semibold text-cyan-300">
                   {isLoading ? "…" : formatUsdt(wallet.lockedBalance)} USDT
                 </span>
               </div>
@@ -101,7 +102,7 @@ export function AppNav() {
                     key={item.href}
                     href={item.href}
                     className={`rounded-lg px-2.5 py-1 text-xs font-medium transition ${
-                      active ? "bg-brand-50 text-brand-600" : "text-slate-600 hover:text-slate-900"
+                      active ? "bg-cyan-400/15 text-cyan-300" : "text-slate-400 hover:text-white"
                     }`}
                   >
                     {t(item.key)}
@@ -111,7 +112,7 @@ export function AppNav() {
               <button
                 type="button"
                 onClick={() => setAboutOpen(true)}
-                className="rounded-lg border border-blue-200/80 bg-slate-900 px-2.5 py-1 text-xs font-semibold text-blue-100"
+                className="rounded-lg border border-white/15 bg-white/5 px-2.5 py-1 text-xs font-semibold text-cyan-100"
               >
                 {t("about")}
               </button>
@@ -120,7 +121,7 @@ export function AppNav() {
             <button
               type="button"
               onClick={handleLogout}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-brand-200 hover:text-brand-600"
+              className="rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-cyan-300/40 hover:text-cyan-200"
             >
               {t("logout")}
             </button>

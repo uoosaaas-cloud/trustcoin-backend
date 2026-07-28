@@ -69,16 +69,16 @@ export default function AdminDepositsPage() {
       <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-gold-500">{t("eyebrow")}</p>
-            <h1 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">{t("title")}</h1>
-            <p className="mt-2 max-w-3xl text-sm text-slate-600">{t("subtitle")}</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-cyan-300">{t("eyebrow")}</p>
+            <h1 className="mt-2 text-2xl font-bold text-white sm:text-3xl">{t("title")}</h1>
+            <p className="mt-2 max-w-3xl text-sm text-slate-400">{t("subtitle")}</p>
           </div>
           <div className="flex gap-2">
             <button
               type="button"
               disabled={isSweeping}
               onClick={() => void handleSweep(true)}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 disabled:opacity-50"
+              className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-slate-300 disabled:opacity-50"
             >
               {t("drySweep")}
             </button>
@@ -94,18 +94,18 @@ export default function AdminDepositsPage() {
         </div>
 
         {errorMessage ? (
-          <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <div className="mb-4 rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
             {errorMessage}
           </div>
         ) : null}
         {successMessage ? (
-          <div className="mb-4 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+          <div className="mb-4 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
             {successMessage}
           </div>
         ) : null}
 
         {isLoading || !data ? (
-          <div className="h-40 animate-pulse rounded-2xl border border-slate-200 bg-white" />
+          <div className="h-40 animate-pulse rounded-2xl border border-white/10 bg-white/5" />
         ) : (
           <div className="space-y-6">
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -117,13 +117,13 @@ export default function AdminDepositsPage() {
             </div>
 
             <section className="card-surface rounded-3xl p-4 sm:p-5">
-              <h2 className="text-lg font-semibold text-slate-900">{t("systemTitle")}</h2>
-              <p className="mt-1 text-sm text-slate-500">{t("systemSubtitle")}</p>
+              <h2 className="text-lg font-semibold text-white">{t("systemTitle")}</h2>
+              <p className="mt-1 text-sm text-slate-400">{t("systemSubtitle")}</p>
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
                 {(["TRC20", "BEP20", "ERC20"] as const).map((network) => (
-                  <div key={network} className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{network}</p>
-                    <p className="mt-2 break-all font-mono text-xs text-slate-800" dir="ltr">
+                  <div key={network} className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{network}</p>
+                    <p className="mt-2 break-all font-mono text-xs text-slate-100" dir="ltr">
                       {data.systemWallets[network]}
                     </p>
                   </div>
@@ -138,13 +138,13 @@ export default function AdminDepositsPage() {
               headers={[t("table.user"), t("table.amount"), t("table.network"), t("table.address"), t("table.date")]}
               render={(row) => (
                 <>
-                  <td className="px-3 py-2 text-slate-800">{row.user.email}</td>
+                  <td className="px-3 py-2 text-slate-100">{row.user.email}</td>
                   <td className="px-3 py-2 font-semibold">{formatUsdt(row.amount)} USDT</td>
                   <td className="px-3 py-2">{row.network}</td>
                   <td className="max-w-[180px] truncate px-3 py-2 font-mono text-xs" dir="ltr">
                     {row.depositAddress ?? "—"}
                   </td>
-                  <td className="px-3 py-2 text-xs text-slate-500">{formatDate(row.created_at)}</td>
+                  <td className="px-3 py-2 text-xs text-slate-400">{formatDate(row.created_at)}</td>
                 </>
               )}
             />
@@ -156,13 +156,13 @@ export default function AdminDepositsPage() {
               headers={[t("table.user"), t("table.network"), t("table.address"), t("table.status"), t("table.swept")]}
               render={(row) => (
                 <>
-                  <td className="px-3 py-2 text-slate-800">{row.user.email}</td>
+                  <td className="px-3 py-2 text-slate-100">{row.user.email}</td>
                   <td className="px-3 py-2">{row.network}</td>
                   <td className="max-w-[200px] truncate px-3 py-2 font-mono text-xs" dir="ltr">
                     {row.address}
                   </td>
                   <td className="px-3 py-2 text-xs">{row.last_sweep_status ?? "—"}</td>
-                  <td className="px-3 py-2 text-xs text-slate-500">
+                  <td className="px-3 py-2 text-xs text-slate-400">
                     {row.last_swept_at ? formatDate(row.last_swept_at) : "—"}
                   </td>
                 </>
@@ -182,7 +182,7 @@ export default function AdminDepositsPage() {
                     {row.from_address}
                   </td>
                   <td className="px-3 py-2 text-xs">{row.status}</td>
-                  <td className="px-3 py-2 text-xs text-slate-500">{formatDate(row.created_at)}</td>
+                  <td className="px-3 py-2 text-xs text-slate-400">{formatDate(row.created_at)}</td>
                 </>
               )}
             />
@@ -196,8 +196,8 @@ export default function AdminDepositsPage() {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="card-surface rounded-3xl p-4">
-      <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</p>
-      <p className="mt-2 text-2xl font-bold text-slate-900">{value}</p>
+      <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{label}</p>
+      <p className="mt-2 text-2xl font-bold text-white">{value}</p>
     </div>
   );
 }
@@ -217,13 +217,13 @@ function SectionTable<T extends { id: string }>({
 }) {
   return (
     <section className="card-surface rounded-3xl p-4 sm:p-5">
-      <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+      <h2 className="text-lg font-semibold text-white">{title}</h2>
       {rows.length === 0 ? (
-        <p className="mt-3 text-sm text-slate-500">{empty}</p>
+        <p className="mt-3 text-sm text-slate-400">{empty}</p>
       ) : (
         <div className="table-surface mt-4 overflow-x-auto border-0 shadow-none">
           <table className="w-full min-w-[720px] text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+            <thead className="border-b border-white/10 bg-white/[0.03] text-xs uppercase tracking-wider text-slate-400">
               <tr>
                 {headers.map((h) => (
                   <th key={h} className="px-3 py-2 font-medium">
@@ -234,7 +234,7 @@ function SectionTable<T extends { id: string }>({
             </thead>
             <tbody className="divide-y divide-slate-100">
               {rows.map((row) => (
-                <tr key={row.id} className="hover:bg-slate-50/80">
+                <tr key={row.id} className="hover:bg-white/5/80">
                   {render(row)}
                 </tr>
               ))}

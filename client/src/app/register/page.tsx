@@ -204,13 +204,13 @@ function RegisterForm() {
           <div className="card-surface animate-fade-in-up rounded-[1.5rem] p-7 sm:p-9">
             {step === "register" && (
               <>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-500 sm:text-xs">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300 sm:text-xs">
                   {tRegister("eyebrow")}
                 </p>
-                <h1 className="mt-2.5 text-2xl font-bold tracking-tight text-slate-900 sm:text-[2rem] sm:leading-tight">
+                <h1 className="mt-2.5 text-2xl font-bold tracking-tight text-white sm:text-[2rem] sm:leading-tight">
                   {tRegister("title")}
                 </h1>
-                <p className="mt-2.5 text-[15px] leading-relaxed text-slate-600">{tRegister("subtitle")}</p>
+                <p className="mt-2.5 text-[15px] leading-relaxed text-slate-400">{tRegister("subtitle")}</p>
 
                 <form onSubmit={handleRegisterSubmit} className="mt-8 space-y-5">
                   <Field label={tRegister("emailLabel")}>
@@ -276,10 +276,10 @@ function RegisterForm() {
                       accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
                       required
                       onChange={(event) => setIdDocument(event.target.files?.[0] ?? null)}
-                      className="block w-full text-sm text-slate-600 file:me-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-brand-600 hover:file:bg-brand-100"
+                      className="block w-full text-sm text-slate-400 file:me-3 file:rounded-lg file:border-0 file:bg-cyan-400/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-cyan-300 hover:file:bg-brand-100"
                     />
                     {idDocument ? (
-                      <span className="mt-1.5 block text-xs text-slate-500" dir="ltr">
+                      <span className="mt-1.5 block text-xs text-slate-400" dir="ltr">
                         {idDocument.name}
                       </span>
                     ) : null}
@@ -289,7 +289,7 @@ function RegisterForm() {
                     label={
                       <span>
                         {tRegister("referralCodeLabel")}{" "}
-                        <span className="text-slate-500">({tRegister("referralCodeOptional")})</span>
+                        <span className="text-slate-400">({tRegister("referralCodeOptional")})</span>
                       </span>
                     }
                   >
@@ -319,9 +319,9 @@ function RegisterForm() {
                   </button>
                 </form>
 
-                <p className="mt-6 text-center text-sm text-slate-600">
+                <p className="mt-6 text-center text-sm text-slate-400">
                   {tRegister("haveAccount")}{" "}
-                  <Link href="/login" className="font-semibold text-brand-500 hover:text-brand-600">
+                  <Link href="/login" className="font-semibold text-cyan-300 hover:text-cyan-200">
                     {tRegister("login")}
                   </Link>
                 </p>
@@ -330,14 +330,14 @@ function RegisterForm() {
 
             {step === "otp" && (
               <>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-500 sm:text-xs">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300 sm:text-xs">
                   {tOtp("eyebrow")}
                 </p>
-                <h1 className="mt-2.5 text-2xl font-bold tracking-tight text-slate-900 sm:text-[2rem] sm:leading-tight">
+                <h1 className="mt-2.5 text-2xl font-bold tracking-tight text-white sm:text-[2rem] sm:leading-tight">
                   {tOtp("title")}
                 </h1>
-                <p className="mt-2.5 text-[15px] leading-relaxed text-slate-600">
-                  {tOtp("subtitle")} <span dir="ltr" className="font-medium text-slate-800">{email}</span>
+                <p className="mt-2.5 text-[15px] leading-relaxed text-slate-400">
+                  {tOtp("subtitle")} <span dir="ltr" className="font-medium text-slate-100">{email}</span>
                 </p>
 
                 <form onSubmit={handleOtpSubmit} className="mt-8 space-y-6">
@@ -362,7 +362,7 @@ function RegisterForm() {
                       setOtpCode("");
                       setErrorMessage(null);
                     }}
-                    className="text-slate-600 transition hover:text-slate-900"
+                    className="text-slate-400 transition hover:text-white"
                   >
                     {tOtp("changeEmail")}
                   </button>
@@ -371,7 +371,7 @@ function RegisterForm() {
                     type="button"
                     onClick={handleResendOtp}
                     disabled={cooldownSeconds > 0 || isResending}
-                    className="font-semibold text-brand-500 transition hover:text-brand-600 disabled:cursor-not-allowed disabled:text-slate-400"
+                    className="font-semibold text-cyan-300 transition hover:text-cyan-300 disabled:cursor-not-allowed disabled:text-slate-400"
                   >
                     {isResending
                       ? tOtp("resending")
@@ -385,13 +385,13 @@ function RegisterForm() {
 
             {step === "success" && (
               <div className="text-center">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-50 text-3xl text-brand-500">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-cyan-400/10 text-3xl text-cyan-300">
                   ✓
                 </div>
-                <h1 className="mt-5 text-2xl font-bold tracking-tight text-slate-900 sm:text-[1.75rem]">
+                <h1 className="mt-5 text-2xl font-bold tracking-tight text-white sm:text-[1.75rem]">
                   {pendingApproval ? tOtp("successPending") : tOtp("success")}
                 </h1>
-                <p className="mt-2.5 text-[15px] leading-relaxed text-slate-600">
+                <p className="mt-2.5 text-[15px] leading-relaxed text-slate-400">
                   {pendingApproval ? tOtp("successPendingHint") : null}
                 </p>
                 <Link
@@ -408,7 +408,7 @@ function RegisterForm() {
             <TrustComplianceBlock compact />
           </div>
 
-          <p className="mt-6 flex items-center justify-center gap-2 text-center text-xs text-slate-500">
+          <p className="mt-6 flex items-center justify-center gap-2 text-center text-xs text-slate-400">
             <span aria-hidden>🔒</span>
             {tCommon("securedBy")}
           </p>
@@ -423,10 +423,10 @@ function StepDot({ active, done, label }: { active: boolean; done: boolean; labe
     <span
       className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition ${
         active
-          ? "bg-brand-500 text-white shadow-lg shadow-brand-500/25"
+          ? "bg-cyan-400/100 text-white shadow-[0_12px_40px_rgba(34,211,238,0.22)]"
           : done
-            ? "bg-brand-100 text-brand-600"
-            : "bg-slate-100 text-slate-500"
+            ? "bg-brand-100 text-cyan-300"
+            : "bg-white/10 text-slate-400"
       }`}
     >
       {done ? "✓" : label}
@@ -445,16 +445,16 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-medium text-slate-700">{label}</span>
+      <span className="mb-1.5 block text-sm font-medium text-slate-300">{label}</span>
       {children}
-      {hint && <span className="mt-1.5 block text-xs text-slate-500">{hint}</span>}
+      {hint && <span className="mt-1.5 block text-xs text-slate-400">{hint}</span>}
     </label>
   );
 }
 
 function ErrorBanner({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-sm text-rose-700">
+    <div className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-3.5 py-2.5 text-sm text-rose-300">
       {message}
     </div>
   );
@@ -462,7 +462,7 @@ function ErrorBanner({ message }: { message: string }) {
 
 function FieldError({ message }: { message: string }) {
   return (
-    <span role="alert" className="mt-1.5 flex items-center gap-1 text-xs font-medium text-rose-600">
+    <span role="alert" className="mt-1.5 flex items-center gap-1 text-xs font-medium text-rose-300">
       <span aria-hidden>⚠</span>
       {message}
     </span>
@@ -470,4 +470,4 @@ function FieldError({ message }: { message: string }) {
 }
 
 const primaryButtonClassName =
-  "w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none";
+  "w-full rounded-xl bg-gradient-to-r from-cyan-400 to-cyan-300 px-4 py-3 text-sm font-bold text-[#041016] shadow-[0_12px_40px_rgba(34,211,238,0.22)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none";

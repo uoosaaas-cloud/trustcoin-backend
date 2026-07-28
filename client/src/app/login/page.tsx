@@ -93,11 +93,11 @@ function LoginForm() {
       <main className="relative z-10 flex flex-1 items-center justify-center px-4 py-10 sm:px-6">
         <div className="w-full max-w-lg">
           <div className="card-surface animate-fade-in-up rounded-[1.5rem] p-7 sm:p-9">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-500 sm:text-xs">{t("eyebrow")}</p>
-            <h1 className="mt-2.5 text-2xl font-bold tracking-tight text-slate-900 sm:text-[2rem] sm:leading-tight">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300 sm:text-xs">{t("eyebrow")}</p>
+            <h1 className="mt-2.5 text-2xl font-bold tracking-tight text-white sm:text-[2rem] sm:leading-tight">
               {t("title")}
             </h1>
-            <p className="mt-2.5 text-[15px] leading-relaxed text-slate-600">{t("subtitle")}</p>
+            <p className="mt-2.5 text-[15px] leading-relaxed text-slate-400">{t("subtitle")}</p>
 
             <form onSubmit={handleSubmit} className="mt-8 space-y-5">
               <Field label={t("emailLabel")}>
@@ -118,7 +118,7 @@ function LoginForm() {
                 label={
                   <span className="flex items-center justify-between">
                     {t("passwordLabel")}
-                    <Link href="/forgot-password" className="text-xs font-semibold text-brand-500 hover:text-brand-600">
+                    <Link href="/forgot-password" className="text-xs font-semibold text-cyan-300 hover:text-cyan-200">
                       {t("forgotPassword")}
                     </Link>
                   </span>
@@ -139,7 +139,7 @@ function LoginForm() {
                     type="button"
                     onClick={() => setIsPasswordVisible((visible) => !visible)}
                     aria-label={isPasswordVisible ? t("hidePassword") : t("showPassword")}
-                    className="absolute inset-y-0 end-2 flex items-center px-2 text-slate-500 transition hover:text-slate-700"
+                    className="absolute inset-y-0 end-2 flex items-center px-2 text-slate-400 transition hover:text-slate-300"
                   >
                     {isPasswordVisible ? <EyeOffIcon /> : <EyeIcon />}
                   </button>
@@ -153,9 +153,9 @@ function LoginForm() {
               </button>
             </form>
 
-            <p className="mt-6 text-center text-sm text-slate-600">
+            <p className="mt-6 text-center text-sm text-slate-400">
               {t("noAccount")}{" "}
-              <Link href="/register" className="font-semibold text-brand-500 hover:text-brand-600">
+              <Link href="/register" className="font-semibold text-cyan-300 hover:text-cyan-200">
                 {t("register")}
               </Link>
             </p>
@@ -165,7 +165,7 @@ function LoginForm() {
             <TrustComplianceBlock compact />
           </div>
 
-          <p className="mt-6 flex items-center justify-center gap-2 text-center text-xs text-slate-500">
+          <p className="mt-6 flex items-center justify-center gap-2 text-center text-xs text-slate-400">
             <span aria-hidden>🔒</span>
             {tCommon("securedBy")}
           </p>
@@ -178,7 +178,7 @@ function LoginForm() {
 function Field({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-medium text-slate-700">{label}</span>
+      <span className="mb-1.5 block text-sm font-medium text-slate-300">{label}</span>
       {children}
     </label>
   );
@@ -186,7 +186,7 @@ function Field({ label, children }: { label: React.ReactNode; children: React.Re
 
 function ErrorBanner({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-sm text-rose-700">
+    <div className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-3.5 py-2.5 text-sm text-rose-300">
       {message}
     </div>
   );
@@ -194,7 +194,7 @@ function ErrorBanner({ message }: { message: string }) {
 
 function FieldError({ message }: { message: string }) {
   return (
-    <span role="alert" className="mt-1.5 flex items-center gap-1 text-xs font-medium text-rose-600">
+    <span role="alert" className="mt-1.5 flex items-center gap-1 text-xs font-medium text-rose-300">
       <span aria-hidden>⚠</span>
       {message}
     </span>
@@ -231,4 +231,4 @@ function EyeOffIcon() {
 }
 
 const primaryButtonClassName =
-  "w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none";
+  "w-full rounded-xl bg-gradient-to-r from-cyan-400 to-cyan-300 px-4 py-3 text-sm font-bold text-[#041016] shadow-[0_12px_40px_rgba(34,211,238,0.22)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none";
