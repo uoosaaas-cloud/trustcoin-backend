@@ -11,5 +11,6 @@ router.use(authMiddleware);
 router.get("/me", userController.getMyProfile);
 router.get("/me/wallet", userController.getMyWallet);
 router.patch("/me/language", validateBody(updateLanguageSchema), userController.updateMyLanguage);
+router.get("/me/trades", userController.listActiveTrades);
 
 export default router;

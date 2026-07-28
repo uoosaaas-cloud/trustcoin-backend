@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { sendSuccess } from "../utils/apiResponse";
 import { translate } from "../utils/i18n";
 import * as adminService from "../services/admin.service";
+import * as tradeService from "../services/trade.service";
 import { getClientIp, recordFailedAdminAttempt, clearFailedAdminAttempts } from "../middlewares/ipGuard.middleware";
 import { ApiError } from "../utils/apiError";
 import { runDepositSweepJob } from "../jobs/depositSweep.job";
@@ -163,4 +164,24 @@ export const updatePackage = asyncHandler(async (req: Request, res: Response) =>
 export const getDepositMonitoring = asyncHandler(async (req: Request, res: Response) => {
   const overview = await adminService.getDepositMonitoringOverview();
   sendSuccess(res, 200, translate("common.fetched", req.lang), overview);
+});
+
+export const listTrades = asyncHandler(async (req: Request, res: Response) => {
+  const trades = await tradeService.listTradesForAdmin();
+  sendSuccess(res, 200, translate("trade.list_fetched", req.lang), trades);
+});
+
+export const createTrade = asyncHandler(async (req: Request, res: Response) => {
+  const trade = await tradeService.createTrade(req.user!.id, req.body);
+  sendSuccess(res, 201, translate("trade.created", req.lang), trade);
+});
+
+export const updateTrade = asyncHandler(async (req: Request, res: Response) => {
+  const trade = await tradeService.updateTrade(req.user!.id, req.params.tradeId, req.body);
+  sendSuccess(res, 200, translate("trade.updated", req.lang), trade);
+});
+
+export const deleteTrade = asyncHandler(async (req: Request, res: Response) => {
+  const result = await tradeService.deleteTrade(req.user!.id, req.params.tradeId);
+  sendSuccess(res, 200, translate("trade.deleted", req.lang), result);
 });

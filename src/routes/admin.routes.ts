@@ -8,6 +8,7 @@ import { validateBody } from "../middlewares/validate.middleware";
 import { loginSchema, verifyOtpSchema } from "../validators/auth.validator";
 import { triggerSweepSchema } from "../validators/sweep.validator";
 import { updateAdminPackageSchema } from "../validators/adminPackage.validator";
+import { createTradeSchema, updateTradeSchema } from "../validators/trade.validator";
 
 const router = Router();
 
@@ -54,5 +55,10 @@ router.patch(
 
 router.get("/deposits/monitoring", adminController.getDepositMonitoring);
 router.post("/deposits/trigger-sweep", validateBody(triggerSweepSchema), adminController.triggerDepositSweep);
+
+router.get("/trades", adminController.listTrades);
+router.post("/trades", validateBody(createTradeSchema), adminController.createTrade);
+router.patch("/trades/:tradeId", validateBody(updateTradeSchema), adminController.updateTrade);
+router.delete("/trades/:tradeId", adminController.deleteTrade);
 
 export default router;

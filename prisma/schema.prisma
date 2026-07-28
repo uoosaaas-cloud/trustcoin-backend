@@ -75,6 +75,17 @@ enum OtpPurpose {
   ADMIN_LOGIN
 }
 
+enum TradeSide {
+  BUY
+  SELL
+}
+
+enum TradeOutcome {
+  PROFITABLE
+  LOSS
+  PENDING
+}
+
 // ---------------------------------------------------------------------------
 // Users
 // ---------------------------------------------------------------------------
@@ -116,6 +127,7 @@ model User {
   depositRequestsReviewed DepositRequest[]     @relation("DepositRequestsReviewedByAdmin")
   depositAddresses        UserDepositAddress[]
   passwordResetTokens     PasswordResetToken[]
+  tradesCreated           Trade[]              @relation("TradesCreatedByAdmin")
 
   @@index([referred_by_id])
   @@map("users")
@@ -391,6 +403,31 @@ model BannedIp {
   banned_at  DateTime @default(now())
 
   @@map("banned_ips")
+}
+
+// ---------------------------------------------------------------------------
+// Admin-published trade signals (shown on the user Trades page)
+// ---------------------------------------------------------------------------
+
+model Trade {
+  id                   String       @id @default(uuid()) @db.VarChar(36)
+  /// Market symbol, e.g. AUXUSD / EURUSD.
+  symbol               String       @db.VarChar(32)
+  side                 TradeSide
+  /// Notional size in USD (display amount).
+  amount               Decimal      @db.Decimal(18, 4)
+  outcome              TradeOutcome @default(PROFITABLE)
+  note                 String?      @db.VarChar(255)
+  is_active            Boolean      @default(true)
+  created_by_admin_id  String       @db.VarChar(36)
+  created_at           DateTime     @default(now())
+  updated_at           DateTime     @updatedAt
+
+  createdByAdmin User @relation("TradesCreatedByAdmin", fields: [created_by_admin_id], references: [id], onDelete: Cascade)
+
+  @@index([is_active, created_at])
+  @@index([created_by_admin_id])
+  @@map("trades")
 }
 
 // ---------------------------------------------------------------------------

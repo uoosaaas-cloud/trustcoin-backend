@@ -5,6 +5,7 @@ import { sendSuccess } from "../utils/apiResponse";
 import { translate } from "../utils/i18n";
 import { ApiError } from "../utils/apiError";
 import { getWalletBalanceSummary } from "../services/wallet.service";
+import * as tradeService from "../services/trade.service";
 
 export const getMyProfile = asyncHandler(async (req: Request, res: Response) => {
   const user = await prisma.user.findUnique({ where: { id: req.user!.id } });
@@ -49,4 +50,9 @@ export const updateMyLanguage = asyncHandler(async (req: Request, res: Response)
   });
 
   sendSuccess(res, 200, translate("user.language_updated", req.lang), { language: user.language });
+});
+
+export const listActiveTrades = asyncHandler(async (req: Request, res: Response) => {
+  const trades = await tradeService.listActiveTradesForUsers();
+  sendSuccess(res, 200, translate("trade.list_fetched", req.lang), trades);
 });

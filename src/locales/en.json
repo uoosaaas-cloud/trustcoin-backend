@@ -95,5 +95,12 @@
     "database_unavailable": "We couldn't reach the database. Please try again in a moment.",
     "invalid_file_type": "Unsupported file type. Please upload a JPG, PNG, or WEBP image.",
     "file_too_large": "The uploaded file is too large."
+  },
+  "trade": {
+    "not_found": "Trade not found.",
+    "list_fetched": "Trades fetched successfully.",
+    "created": "Trade published successfully.",
+    "updated": "Trade updated successfully.",
+    "deleted": "Trade deleted successfully."
   }
 }
