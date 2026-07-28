@@ -39,6 +39,10 @@ export default function AdminDepositsPage() {
   useEffect(() => {
     if (!ready) return;
     void load();
+    const id = window.setInterval(() => {
+      void load();
+    }, 10_000);
+    return () => window.clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
 

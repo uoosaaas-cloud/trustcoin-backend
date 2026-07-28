@@ -26,7 +26,6 @@ export default function AdminWithdrawalsPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   async function load() {
-    setIsLoading(true);
     setErrorMessage(null);
     try {
       const response = await getPendingWithdrawals();
@@ -41,6 +40,10 @@ export default function AdminWithdrawalsPage() {
   useEffect(() => {
     if (!ready) return;
     void load();
+    const id = window.setInterval(() => {
+      void load();
+    }, 10_000);
+    return () => window.clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
 

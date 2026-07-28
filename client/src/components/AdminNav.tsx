@@ -9,6 +9,7 @@ import { ADMIN_ROUTES } from "@/lib/adminPaths";
 
 const NAV_ITEMS = [
   { href: ADMIN_ROUTES.home, key: "overview" as const, exact: true },
+  { href: ADMIN_ROUTES.trades, key: "trades" as const, exact: false },
   { href: ADMIN_ROUTES.withdrawals, key: "withdrawals" as const, exact: false },
   { href: ADMIN_ROUTES.deposits, key: "deposits" as const, exact: false },
   { href: ADMIN_ROUTES.users, key: "users" as const, exact: false },

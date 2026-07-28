@@ -48,7 +48,8 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4
  */
 export const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 15000,
+  // Free-tier Render cold starts can exceed 15s; keep headroom for register/upload.
+  timeout: 60000,
   headers: {
     "Content-Type": "application/json",
   },

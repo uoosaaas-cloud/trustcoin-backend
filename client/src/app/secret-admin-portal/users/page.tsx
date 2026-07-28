@@ -50,8 +50,7 @@ export default function AdminUsersPage() {
     let mounted = true;
 
     async function load() {
-      setIsLoading(true);
-      setErrorMessage(null);
+      if (mounted) setErrorMessage(null);
       try {
         const response = await getAdminUsers(query || undefined, statusFilter || undefined);
         if (!mounted) return;
@@ -64,9 +63,13 @@ export default function AdminUsersPage() {
       }
     }
 
-    load();
+    void load();
+    const id = window.setInterval(() => {
+      void load();
+    }, 10_000);
     return () => {
       mounted = false;
+      window.clearInterval(id);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, query, statusFilter]);

@@ -60,6 +60,10 @@ export default function AdminReferralsPage() {
   useEffect(() => {
     if (!ready) return;
     void load();
+    const id = window.setInterval(() => {
+      void load();
+    }, 10_000);
+    return () => window.clearInterval(id);
   }, [ready, load]);
 
   async function handleApprove(row: AdminReferralAuditRow) {

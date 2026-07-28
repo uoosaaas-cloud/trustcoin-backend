@@ -13,6 +13,7 @@ import { getStoredAuthToken } from "@/lib/api";
 
 const NAV_ITEMS = [
   { href: "/dashboard", key: "dashboard" as const },
+  { href: "/trades", key: "trades" as const },
   { href: "/invest", key: "invest" as const },
   { href: "/deposit", key: "deposit" as const },
   { href: "/withdraw", key: "withdraw" as const },

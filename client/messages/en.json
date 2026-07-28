@@ -8,6 +8,69 @@
     "en": "English",
     "ar": "العربية"
   },
+  "landing": {
+    "heroTitle": "Secure crypto growth, built for serious investors.",
+    "heroSubtitle": "TrustCoin combines disciplined daily yields, verified accounts, and protected wallets — so your capital compounds with clarity.",
+    "login": "Sign in",
+    "register": "Create account",
+    "goDashboard": "Open dashboard",
+    "profitTitle": "Designed for measurable returns",
+    "profitBody": "Choose investment packages with transparent daily profit rates, track locked and available balances in real time, and grow through referrals when your network invests.",
+    "profitPoints": {
+      "daily": {
+        "label": "Daily yield distribution",
+        "body": "Profits are calculated and credited on a clear schedule so you always know what your packages are earning."
+      },
+      "packages": {
+        "label": "Structured packages",
+        "body": "Pick plans that match your capital size and time horizon — returns and duration are shown before you commit."
+      },
+      "referrals": {
+        "label": "Referral upside",
+        "body": "Invite trusted partners and earn bonuses when their investments succeed under platform rules."
+      }
+    },
+    "securityTitle": "Security at every gate",
+    "securityBody": "From registration to withdrawals, TrustCoin verifies identity, protects sessions with OTP, and isolates deposit addresses per user.",
+    "securityPoints": {
+      "otp": {
+        "label": "OTP verification",
+        "body": "Email codes protect account creation, admin access, and sensitive money movements."
+      },
+      "kyc": {
+        "label": "ID review",
+        "body": "New accounts submit identity documents and stay pending until an admin approves access."
+      },
+      "wallets": {
+        "label": "Dedicated deposit addresses",
+        "body": "Each user receives unique on-chain addresses — deposits are matched automatically after confirmation."
+      }
+    },
+    "detailsTitle": "How TrustCoin works",
+    "detailsBody": "Register, verify your email, wait for approval, deposit USDT, invest in a package, and follow live trade signals published by the team. Withdrawals are reviewed by admins before completion."
+  },
+  "trades": {
+    "eyebrow": "Live signals",
+    "title": "Trade board",
+    "subtitle": "Published market trades from the TrustCoin desk — symbol, side, size, and result.",
+    "empty": "No trades published yet. Check back soon.",
+    "columns": {
+      "symbol": "Symbol",
+      "side": "Side",
+      "amount": "Amount",
+      "outcome": "Result",
+      "time": "Published"
+    },
+    "side": {
+      "buy": "Buy",
+      "sell": "Sell"
+    },
+    "outcome": {
+      "profitable": "Profitable",
+      "loss": "Loss",
+      "pending": "Pending"
+    }
+  },
   "register": {
     "eyebrow": "Create your account",
     "title": "Start your investment journey",
@@ -155,6 +218,7 @@
   },
   "nav": {
     "dashboard": "Trading Room",
+    "trades": "Trades",
     "invest": "Invest",
     "deposit": "Deposit",
     "withdraw": "Withdraw",
@@ -383,6 +447,7 @@
       "brand": "TrustCoin Admin",
       "subtitle": "Management console",
       "overview": "Overview",
+      "trades": "Trades",
       "withdrawals": "Withdrawals",
       "deposits": "Deposits",
       "users": "Users",
@@ -432,6 +497,45 @@
       "reviewWithdrawals": "Review withdrawals",
       "goWithdrawals": "Pending withdrawals",
       "goUsers": "Manage users"
+    },
+    "trades": {
+      "eyebrow": "Desk signals",
+      "title": "Publish trades",
+      "subtitle": "Add market trades that appear instantly on every user’s Trades board.",
+      "autoRefresh": "This page refreshes every 10 seconds.",
+      "empty": "No trades yet — publish the first signal above.",
+      "created": "Trade published to the user board.",
+      "confirmDelete": "Delete this trade permanently?",
+      "form": {
+        "symbol": "Symbol",
+        "side": "Side",
+        "amount": "Amount ($)",
+        "outcome": "Result",
+        "note": "Note (optional)",
+        "notePlaceholder": "e.g. scalp on London open",
+        "submit": "Publish trade",
+        "submitting": "Publishing…"
+      },
+      "side": { "buy": "Buy", "sell": "Sell" },
+      "outcome": {
+        "profitable": "Profitable",
+        "loss": "Loss",
+        "pending": "Pending"
+      },
+      "columns": {
+        "symbol": "Symbol",
+        "side": "Side",
+        "amount": "Amount",
+        "outcome": "Result",
+        "status": "Visibility",
+        "actions": "Actions"
+      },
+      "status": { "active": "Visible", "hidden": "Hidden" },
+      "actions": { "hide": "Hide", "show": "Show", "delete": "Delete" },
+      "errors": {
+        "invalid": "Enter a valid symbol and amount.",
+        "generic": "Could not save the trade. Please try again."
+      }
     },
     "withdrawals": {
       "eyebrow": "Cash-out queue",

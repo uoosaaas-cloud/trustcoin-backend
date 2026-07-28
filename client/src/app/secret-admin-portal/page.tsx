@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { AdminNav } from "@/components/AdminNav";
 import { useRequireAdmin } from "@/hooks/useRequireAdmin";
+import { usePollingReload } from "@/hooks/usePollingReload";
 import { getAdminOverview, type AdminOverviewStats } from "@/lib/admin";
 import { ADMIN_ROUTES } from "@/lib/adminPaths";
 import { getApiErrorMessage } from "@/lib/api";
@@ -19,30 +20,19 @@ export default function AdminOverviewPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!ready) return;
-
-    let mounted = true;
-
-    async function load() {
-      try {
-        const response = await getAdminOverview();
-        if (!mounted) return;
-        setStats(response.data);
-      } catch (error) {
-        if (!mounted) return;
-        setErrorMessage(getApiErrorMessage(error, tCommon("unknownError")));
-      } finally {
-        if (mounted) setIsLoading(false);
-      }
+  const load = useCallback(async () => {
+    try {
+      const response = await getAdminOverview();
+      setStats(response.data);
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage(getApiErrorMessage(error, tCommon("unknownError")));
+    } finally {
+      setIsLoading(false);
     }
+  }, [tCommon]);
 
-    load();
-    return () => {
-      mounted = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready]);
+  usePollingReload(load, ready, 10_000);
 
   if (!ready) return null;
 
