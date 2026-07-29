@@ -9,6 +9,9 @@ import { getStoredAuthToken, getApiErrorMessage } from "@/lib/api";
 import { formatUsdt } from "@/lib/format";
 import { listUserTrades, type TradeItem } from "@/lib/trades";
 
+const headCellClass = "px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide";
+const bodyCellClass = "px-4 py-3 text-center align-middle";
+
 export default function UserTradesPage() {
   const t = useTranslations("trades");
   const tCommon = useTranslations("common");
@@ -55,26 +58,33 @@ export default function UserTradesPage() {
   return (
     <div className="page-shell">
       <AppNav />
-      <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">{t("eyebrow")}</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-white">{t("title")}</h1>
-        <p className="mt-2 max-w-2xl text-sm text-slate-400">{t("subtitle")}</p>
+      <main className="relative z-10 mx-auto max-w-5xl flex-1 px-4 pb-16 pt-7 sm:px-6">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-200/90 sm:text-xs">{t("eyebrow")}</p>
+        <h1 className="mt-2.5 text-2xl font-bold tracking-tight text-white sm:text-[2rem] sm:leading-tight">{t("title")}</h1>
+        <p className="mt-2.5 max-w-2xl text-[15px] leading-relaxed text-slate-300">{t("subtitle")}</p>
 
         {errorMessage ? (
-          <p className="mt-6 rounded-xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
+          <p className="mt-6 rounded-xl border border-rose-400/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
             {errorMessage}
           </p>
         ) : null}
 
-        <div className="table-surface mt-8">
-          <table className="min-w-full text-sm">
+        <div className="table-surface mt-8 overflow-x-auto">
+          <table className="w-full min-w-[720px] table-fixed text-sm">
+            <colgroup>
+              <col className="w-[14%]" />
+              <col className="w-[14%]" />
+              <col className="w-[18%]" />
+              <col className="w-[16%]" />
+              <col className="w-[38%]" />
+            </colgroup>
             <thead>
-              <tr className="border-b border-white/10 text-start text-xs uppercase tracking-wide text-slate-400">
-                <th className="px-4 py-3 font-semibold">{t("columns.symbol")}</th>
-                <th className="px-4 py-3 font-semibold">{t("columns.side")}</th>
-                <th className="px-4 py-3 font-semibold">{t("columns.amount")}</th>
-                <th className="px-4 py-3 font-semibold">{t("columns.outcome")}</th>
-                <th className="px-4 py-3 font-semibold">{t("columns.time")}</th>
+              <tr className="border-b border-white/10 bg-white/[0.06] text-slate-400">
+                <th className={headCellClass}>{t("columns.symbol")}</th>
+                <th className={headCellClass}>{t("columns.side")}</th>
+                <th className={headCellClass}>{t("columns.amount")}</th>
+                <th className={headCellClass}>{t("columns.outcome")}</th>
+                <th className={headCellClass}>{t("columns.time")}</th>
               </tr>
             </thead>
             <tbody>
@@ -92,32 +102,36 @@ export default function UserTradesPage() {
                 </tr>
               ) : (
                 trades.map((trade) => (
-                  <tr key={trade.id} className="border-b border-white/5 last:border-0">
-                    <td className="px-4 py-3.5 font-mono text-sm font-semibold tracking-wide text-white">
-                      {trade.symbol}
+                  <tr key={trade.id} className="border-b border-white/10 last:border-0 hover:bg-white/[0.06]">
+                    <td className={bodyCellClass}>
+                      <span dir="ltr" className="inline-block font-mono text-sm font-semibold tracking-wide text-white">
+                        {trade.symbol}
+                      </span>
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td className={bodyCellClass}>
                       <span
-                        className={`rounded-lg px-2 py-0.5 text-xs font-bold uppercase ${
+                        className={`inline-flex items-center justify-center rounded-lg px-2.5 py-1 text-xs font-bold ${
                           trade.side === "SELL"
-                            ? "bg-red-50 text-red-600"
-                            : "bg-emerald-50 text-emerald-300"
+                            ? "border border-rose-400/30 bg-rose-500/10 text-rose-300"
+                            : "border border-cyan-300/30 bg-cyan-400/10 text-cyan-200"
                         }`}
                       >
                         {sideLabel(trade.side)}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5 font-semibold text-slate-100" dir="ltr">
-                      {formatUsdt(trade.amount)}$
+                    <td className={`${bodyCellClass} font-semibold text-slate-100`}>
+                      <span dir="ltr" className="inline-block tabular-nums">
+                        {formatUsdt(trade.amount)}$
+                      </span>
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td className={bodyCellClass}>
                       <span
                         className={`text-sm font-semibold ${
                           trade.outcome === "PROFITABLE"
-                            ? "text-emerald-600"
+                            ? "text-cyan-200"
                             : trade.outcome === "LOSS"
-                              ? "text-red-600"
-                              : "text-amber-600"
+                              ? "text-rose-300"
+                              : "text-amber-200"
                         }`}
                       >
                         {outcomeLabel(trade.outcome)}
@@ -126,8 +140,10 @@ export default function UserTradesPage() {
                         <p className="mt-0.5 text-xs text-slate-400">{trade.note}</p>
                       ) : null}
                     </td>
-                    <td className="px-4 py-3.5 text-xs text-slate-400" dir="ltr">
-                      {new Date(trade.createdAt).toLocaleString()}
+                    <td className={`${bodyCellClass} text-xs text-slate-400`}>
+                      <span dir="ltr" className="inline-block whitespace-nowrap tabular-nums">
+                        {new Date(trade.createdAt).toLocaleString()}
+                      </span>
                     </td>
                   </tr>
                 ))

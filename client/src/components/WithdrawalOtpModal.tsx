@@ -108,11 +108,11 @@ export function WithdrawalOtpModal({
       <div
         role="dialog"
         aria-modal="true"
-        className="w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl"
+        className="w-full max-w-md rounded-2xl border border-white/14 bg-white/[0.08] p-6 shadow-2xl backdrop-blur-sm"
       >
-        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300">{t("eyebrow")}</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-200/90">{t("eyebrow")}</p>
         <h2 className="mt-2 text-xl font-bold text-white">{t("title")}</h2>
-        <p className="mt-2 text-sm leading-relaxed text-slate-400">
+        <p className="mt-2 text-sm leading-relaxed text-slate-300">
           {t("subtitle")}
           {emailHint ? (
             <>
@@ -123,7 +123,7 @@ export function WithdrawalOtpModal({
         </p>
 
         {errorMessage ? (
-          <div className="mt-4 rounded-2xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-300">
+          <div className="mt-4 rounded-xl border border-rose-400/25 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">
             {errorMessage}
           </div>
         ) : null}
@@ -134,7 +134,7 @@ export function WithdrawalOtpModal({
           <button
             type="submit"
             disabled={isSubmitting || isSending || otpCode.length !== 6}
-            className="w-full rounded-xl bg-gradient-to-r from-cyan-400 to-cyan-300 py-3 text-sm font-bold text-[#041016] shadow-[0_12px_40px_rgba(34,211,238,0.22)] disabled:opacity-50"
+            className="w-full rounded-xl bg-gradient-to-r from-cyan-300 to-cyan-200 py-3 text-sm font-bold text-[#041016] shadow-[0_8px_24px_rgba(34,211,238,0.2)] disabled:opacity-50"
           >
             {isSubmitting ? t("submitting") : t("confirm")}
           </button>

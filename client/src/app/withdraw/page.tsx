@@ -161,22 +161,22 @@ export default function WithdrawPage() {
 
       <main className="relative z-10 mx-auto w-full max-w-3xl flex-1 px-4 pb-16 pt-6 sm:px-6">
         <div className="mb-6">
-          <p className="text-xs font-semibold uppercase tracking-widest text-cyan-300">{t("eyebrow")}</p>
-          <h1 className="mt-2 text-2xl font-bold text-white sm:text-3xl">{t("title")}</h1>
-          <p className="mt-2 text-sm leading-relaxed text-slate-400">{t("subtitle")}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-200/90 sm:text-xs">{t("eyebrow")}</p>
+          <h1 className="mt-2.5 text-2xl font-bold tracking-tight text-white sm:text-[2rem] sm:leading-tight">{t("title")}</h1>
+          <p className="mt-2.5 text-[15px] leading-relaxed text-slate-300">{t("subtitle")}</p>
         </div>
 
-        <div className="mb-6 rounded-3xl border border-emerald-400/30 bg-gradient-to-br from-emerald-400/10 to-[#0a1220] p-5">
-          <p className="text-xs font-semibold uppercase tracking-wider text-emerald-300">{t("availableLabel")}</p>
+        <div className="mb-6 rounded-2xl border border-white/14 bg-white/[0.08] p-5 backdrop-blur-sm sm:p-6">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-300 sm:text-xs">{t("availableLabel")}</p>
           {isLoadingWallet ? (
-            <div className="mt-3 h-9 w-40 animate-pulse rounded-lg bg-white/10" />
+            <div className="mt-2 h-9 w-40 animate-pulse rounded-lg bg-white/10" />
           ) : (
-            <p className="mt-2 text-3xl font-bold tracking-tight text-emerald-400">
+            <p className="mt-1.5 text-3xl font-bold tracking-tight text-white">
               {formatUsdt(availableBalance)}
-              <span className="ms-1.5 text-sm font-medium text-slate-400">USDT</span>
+              <span className="ms-1.5 text-sm font-medium text-cyan-200/80">USDT</span>
             </p>
           )}
-          <p className="mt-2 text-xs text-slate-400">{t("availableHint")}</p>
+          <p className="mt-1.5 text-[13px] text-slate-400">{t("availableHint")}</p>
           {wallet && Number(wallet.lockedBalance) > 0 ? (
             <p className="mt-1 text-xs text-slate-400">
               {t("lockedNote", { amount: formatUsdt(wallet.lockedBalance) })}
@@ -185,17 +185,17 @@ export default function WithdrawPage() {
         </div>
 
         {errorMessage ? (
-          <div className="mb-4 rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
+          <div className="mb-4 rounded-xl border border-rose-400/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
             {errorMessage}
           </div>
         ) : null}
         {successMessage ? (
-          <div className="mb-4 rounded-2xl border border-cyan-400/25 bg-cyan-400/10 px-4 py-3 text-sm text-cyan-200">
+          <div className="mb-4 rounded-xl border border-cyan-300/25 bg-cyan-400/10 px-4 py-3 text-sm text-cyan-100">
             {successMessage}
           </div>
         ) : null}
 
-        <form onSubmit={handleSubmit} className="card-surface rounded-3xl p-5 sm:p-6">
+        <form onSubmit={handleSubmit} className="card-surface p-5 sm:p-6">
           <div className="space-y-5">
             <div>
               <label htmlFor="withdraw-amount" className="block text-sm font-medium text-slate-300">
@@ -218,7 +218,7 @@ export default function WithdrawPage() {
                   type="button"
                   onClick={() => setAmount(availableBalance)}
                   disabled={availableNum <= 0}
-                  className="absolute end-2 top-1/2 -translate-y-1/2 rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1 text-xs font-semibold text-slate-300 transition hover:bg-white/5 disabled:opacity-40"
+                  className="absolute end-2 top-1/2 -translate-y-1/2 rounded-lg border border-white/14 bg-white/[0.06] px-2.5 py-1 text-xs font-semibold text-slate-300 transition hover:bg-white/[0.1] disabled:opacity-40"
                 >
                   {t("maxButton")}
                 </button>
@@ -261,7 +261,7 @@ export default function WithdrawPage() {
           <button
             type="submit"
             disabled={availableNum <= 0}
-            className="mt-6 w-full rounded-xl bg-gradient-to-r from-cyan-400 to-cyan-300 py-3 text-sm font-bold text-[#041016] shadow-[0_12px_40px_rgba(34,211,238,0.22)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-6 w-full rounded-xl bg-gradient-to-r from-cyan-300 to-cyan-200 py-3 text-sm font-bold text-[#041016] shadow-[0_8px_24px_rgba(34,211,238,0.2)] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {t("submit")}
           </button>
@@ -270,13 +270,13 @@ export default function WithdrawPage() {
         <section className="mt-10">
           <h2 className="text-lg font-semibold text-white">{t("historyTitle")}</h2>
           {isLoadingHistory ? (
-            <div className="mt-4 h-24 animate-pulse rounded-2xl border border-white/10 bg-white/5" />
+            <div className="mt-4 h-24 animate-pulse rounded-2xl border border-white/10 bg-white/[0.06]" />
           ) : history.length === 0 ? (
             <p className="mt-4 text-sm text-slate-400">{t("historyEmpty")}</p>
           ) : (
             <div className="table-surface mt-4">
               <table className="w-full min-w-[480px] text-left text-sm">
-                <thead className="border-b border-white/10 bg-white/[0.03] text-xs uppercase tracking-wider text-slate-400">
+                <thead className="border-b border-white/10 bg-white/[0.06] text-xs uppercase tracking-wider text-slate-400">
                   <tr>
                     <th className="px-4 py-3 font-medium">{t("table.amount")}</th>
                     <th className="px-4 py-3 font-medium">{t("table.status")}</th>
@@ -284,9 +284,9 @@ export default function WithdrawPage() {
                     <th className="px-4 py-3 font-medium">{t("table.date")}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-white/10">
                   {history.map((tx) => (
-                    <tr key={tx.id} className="text-slate-300 hover:bg-white/5/80">
+                    <tr key={tx.id} className="text-slate-300 hover:bg-white/[0.06]">
                       <td className="px-4 py-3 font-medium text-white">{formatUsdt(tx.amount)} USDT</td>
                       <td className="px-4 py-3">
                         <StatusBadge

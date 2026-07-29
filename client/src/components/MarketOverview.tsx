@@ -168,16 +168,14 @@ function MarketCard({ asset }: { asset: MarketAssetPayload }) {
   return (
     <article
       dir="ltr"
-      className={`group relative overflow-hidden rounded-2xl border bg-slate-950/90 p-4 shadow-[0_12px_40px_rgba(2,6,23,0.35)] backdrop-blur-md transition duration-300 hover:-translate-y-1 sm:p-5 ${
-        positive
-          ? "border-emerald-400/20 hover:border-emerald-400/55 hover:shadow-[0_0_0_1px_rgba(52,211,153,0.25),0_16px_48px_rgba(16,185,129,0.18)]"
-          : "border-rose-400/20 hover:border-rose-400/55 hover:shadow-[0_0_0_1px_rgba(251,113,133,0.25),0_16px_48px_rgba(244,63,94,0.16)]"
+      className={`group relative overflow-hidden rounded-2xl border border-white/14 bg-white/[0.08] p-4 backdrop-blur-sm transition duration-200 hover:border-cyan-300/35 hover:bg-white/[0.11] sm:p-5 ${
+        positive ? "" : ""
       }`}
     >
       <div
         aria-hidden
-        className={`pointer-events-none absolute -end-10 -top-12 h-32 w-32 rounded-full blur-3xl transition duration-300 group-hover:opacity-100 ${
-          positive ? "bg-emerald-400/20 opacity-70" : "bg-rose-400/20 opacity-70"
+        className={`pointer-events-none absolute -end-10 -top-12 h-32 w-32 rounded-full blur-3xl transition duration-300 ${
+          positive ? "bg-cyan-400/10 opacity-70" : "bg-rose-400/10 opacity-70"
         }`}
       />
       <div
@@ -186,7 +184,7 @@ function MarketCard({ asset }: { asset: MarketAssetPayload }) {
       />
 
       <div className="relative flex items-center gap-3">
-        <div className="shrink-0 rounded-xl border border-white/10 bg-white/5 p-1.5 shadow-inner">
+        <div className="shrink-0 rounded-xl border border-white/14 bg-white/[0.06] p-1.5">
           <AssetIcon id={asset.id} />
         </div>
         <div className="min-w-0">
@@ -216,7 +214,7 @@ function MarketCard({ asset }: { asset: MarketAssetPayload }) {
         </p>
       </div>
 
-      <div className="relative mt-3 overflow-hidden rounded-xl border border-white/5 bg-black/25 px-1 pt-1">
+      <div className="relative mt-3 overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] px-1 pt-1">
         <MiniSparkline points={asset.sparkline} positive={positive} />
       </div>
     </article>
@@ -225,7 +223,7 @@ function MarketCard({ asset }: { asset: MarketAssetPayload }) {
 
 function MarketCardSkeleton() {
   return (
-    <div className="h-[220px] animate-pulse rounded-2xl border border-slate-800 bg-slate-950/80 p-5 backdrop-blur-md">
+    <div className="h-[220px] animate-pulse rounded-2xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur-sm">
       <div className="flex items-center gap-3">
         <div className="h-9 w-9 rounded-xl bg-white/10" />
         <div className="space-y-2">
@@ -275,7 +273,7 @@ export function MarketOverview() {
     <section className="mt-10" aria-label={t("title")}>
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300/90 sm:text-xs">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-200/90 sm:text-xs">
             {t("eyebrow")}
           </p>
           <h2 className="mt-1.5 text-xl font-bold tracking-tight text-white sm:text-2xl">
@@ -284,10 +282,10 @@ export function MarketOverview() {
           <p className="mt-1 text-[13px] text-slate-400 sm:text-sm">{t("subtitle")}</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-[11px] font-semibold text-emerald-300">
+          <span className="inline-flex items-center gap-2 rounded-full border border-cyan-300/30 bg-cyan-400/10 px-3 py-1 text-[11px] font-semibold text-cyan-200">
             <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
             </span>
             {t("live")}
           </span>
@@ -304,7 +302,7 @@ export function MarketOverview() {
       </div>
 
       {error ? (
-        <div className="mb-4 rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
+        <div className="mb-4 rounded-xl border border-rose-400/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
           {error}
         </div>
       ) : null}

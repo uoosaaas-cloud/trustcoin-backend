@@ -92,7 +92,7 @@ export function AiTradingBadge({ compact = false }: { compact?: boolean }) {
 export function TrustRegulators({ compact = false }: { compact?: boolean }) {
   return (
     <section
-      className={`relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] shadow-[0_8px_28px_rgba(0,0,0,0.28)] backdrop-blur-sm ${
+      className={`relative overflow-hidden rounded-2xl border border-white/14 bg-white/[0.08] shadow-[0_8px_28px_rgba(0,0,0,0.22)] backdrop-blur-sm ${
         compact ? "p-4 sm:p-5" : "p-5 sm:p-6"
       }`}
       dir="ltr"

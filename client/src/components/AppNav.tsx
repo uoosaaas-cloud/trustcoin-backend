@@ -42,7 +42,7 @@ export function AppNav() {
 
   return (
     <>
-      <header className="relative z-10 border-b border-white/10 bg-[#071018]/80 px-6 py-5 backdrop-blur-md sm:px-10">
+      <header className="relative z-10 border-b border-white/14 bg-[#071018]/85 px-6 py-5 backdrop-blur-md sm:px-10">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-6">
             <Link href="/dashboard" className="flex items-center gap-2">
@@ -61,8 +61,8 @@ export function AppNav() {
                     href={item.href}
                     className={`rounded-xl px-3 py-1.5 text-sm font-medium transition ${
                       active
-                        ? "bg-cyan-400/15 text-cyan-300"
-                        : "text-slate-400 hover:bg-white/5 hover:text-white"
+                        ? "bg-cyan-400/12 text-cyan-200"
+                        : "text-slate-400 hover:bg-white/[0.08] hover:text-white"
                     }`}
                   >
                     {t(item.key)}
@@ -72,7 +72,7 @@ export function AppNav() {
               <button
                 type="button"
                 onClick={() => setAboutOpen(true)}
-                className="rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-sm font-semibold text-cyan-100 transition hover:border-cyan-300/40 hover:bg-white/10"
+                className="rounded-xl border border-white/14 bg-white/[0.06] px-3 py-1.5 text-sm font-semibold text-cyan-100 transition hover:border-cyan-300/35 hover:bg-white/[0.1]"
               >
                 {t("about")}
               </button>
@@ -81,14 +81,14 @@ export function AppNav() {
 
           <div className="flex flex-wrap items-center gap-3">
             {showWallet ? (
-              <div className="hidden items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs sm:flex">
+              <div className="hidden items-center gap-2 rounded-2xl border border-white/14 bg-white/[0.08] px-3 py-1.5 text-xs sm:flex">
                 <span className="text-slate-400">{t("available")}</span>
-                <span className="font-semibold text-emerald-400">
+                <span className="font-semibold text-cyan-200">
                   {isLoading ? "…" : formatUsdt(wallet.availableBalance)} USDT
                 </span>
                 <span className="text-white/20">|</span>
                 <span className="text-slate-400">{t("locked")}</span>
-                <span className="font-semibold text-cyan-300">
+                <span className="font-semibold text-slate-200">
                   {isLoading ? "…" : formatUsdt(wallet.lockedBalance)} USDT
                 </span>
               </div>
@@ -102,7 +102,7 @@ export function AppNav() {
                     key={item.href}
                     href={item.href}
                     className={`rounded-lg px-2.5 py-1 text-xs font-medium transition ${
-                      active ? "bg-cyan-400/15 text-cyan-300" : "text-slate-400 hover:text-white"
+                      active ? "bg-cyan-400/12 text-cyan-200" : "text-slate-400 hover:text-white"
                     }`}
                   >
                     {t(item.key)}
@@ -112,7 +112,7 @@ export function AppNav() {
               <button
                 type="button"
                 onClick={() => setAboutOpen(true)}
-                className="rounded-lg border border-white/15 bg-white/5 px-2.5 py-1 text-xs font-semibold text-cyan-100"
+                className="rounded-lg border border-white/14 bg-white/[0.06] px-2.5 py-1 text-xs font-semibold text-cyan-100"
               >
                 {t("about")}
               </button>
@@ -121,7 +121,7 @@ export function AppNav() {
             <button
               type="button"
               onClick={handleLogout}
-              className="rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-cyan-300/40 hover:text-cyan-200"
+              className="rounded-xl border border-white/14 bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-cyan-300/35 hover:text-cyan-200"
             >
               {t("logout")}
             </button>
