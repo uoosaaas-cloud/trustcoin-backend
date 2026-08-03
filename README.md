@@ -74,6 +74,8 @@ src/
    npm run seed
    ```
 
+   Seeds **56 packages** (14 amount tiers × 4 durations: 7 days, 1 / 3 / 6 months)
+   and removes obsolete packages that are not referenced by investments.
    (This also runs automatically after `prisma migrate dev` since it's wired
    up via the `prisma.seed` field in `package.json`.)
 

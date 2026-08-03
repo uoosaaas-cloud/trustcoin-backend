@@ -3,81 +3,56 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 /**
- * All investment packages available on TrustCoin, grouped by minimum
- * deposit tier. Each tier offers 1 / 3 / 6 month durations with an
- * increasing daily profit percentage as the lock-in period grows.
+ * Period total-return % for each amount tier × duration.
+ * Stored as daily_profit_percent = periodReturn / durationDays (4 d.p.).
  */
-const packagesData = [
-  // Tier $50
-  { name: "Plan 50 - 1 Month", amount: 50, daily_profit_percent: 0.5, duration_days: 30 },
-  { name: "Plan 50 - 3 Months", amount: 50, daily_profit_percent: 0.5166, duration_days: 90 },
-  { name: "Plan 50 - 6 Months", amount: 50, daily_profit_percent: 0.5333, duration_days: 180 },
+const DURATION_LABELS: Record<number, string> = {
+  7: "7 Days",
+  30: "1 Month",
+  90: "3 Months",
+  180: "6 Months",
+};
 
-  // Tier $100
-  { name: "Plan 100 - 1 Month", amount: 100, daily_profit_percent: 0.5666, duration_days: 30 },
-  { name: "Plan 100 - 3 Months", amount: 100, daily_profit_percent: 0.5833, duration_days: 90 },
-  { name: "Plan 100 - 6 Months", amount: 100, daily_profit_percent: 0.6, duration_days: 180 },
+const DURATIONS = [7, 30, 90, 180] as const;
 
-  // Tier $150
-  { name: "Plan 150 - 1 Month", amount: 150, daily_profit_percent: 0.6, duration_days: 30 },
-  { name: "Plan 150 - 3 Months", amount: 150, daily_profit_percent: 0.6166, duration_days: 90 },
-  { name: "Plan 150 - 6 Months", amount: 150, daily_profit_percent: 0.6333, duration_days: 180 },
-
-  // Tier $200
-  { name: "Plan 200 - 1 Month", amount: 200, daily_profit_percent: 0.6333, duration_days: 30 },
-  { name: "Plan 200 - 3 Months", amount: 200, daily_profit_percent: 0.65, duration_days: 90 },
-  { name: "Plan 200 - 6 Months", amount: 200, daily_profit_percent: 0.6666, duration_days: 180 },
-
-  // Tier $400
-  { name: "Plan 400 - 1 Month", amount: 400, daily_profit_percent: 0.6666, duration_days: 30 },
-  { name: "Plan 400 - 3 Months", amount: 400, daily_profit_percent: 0.6833, duration_days: 90 },
-  { name: "Plan 400 - 6 Months", amount: 400, daily_profit_percent: 0.7, duration_days: 180 },
-
-  // Tier $700
-  { name: "Plan 700 - 1 Month", amount: 700, daily_profit_percent: 0.7, duration_days: 30 },
-  { name: "Plan 700 - 3 Months", amount: 700, daily_profit_percent: 0.7166, duration_days: 90 },
-  { name: "Plan 700 - 6 Months", amount: 700, daily_profit_percent: 0.7333, duration_days: 180 },
-
-  // Tier $1000
-  { name: "Plan 1000 - 1 Month", amount: 1000, daily_profit_percent: 0.7333, duration_days: 30 },
-  { name: "Plan 1000 - 3 Months", amount: 1000, daily_profit_percent: 0.75, duration_days: 90 },
-  { name: "Plan 1000 - 6 Months", amount: 1000, daily_profit_percent: 0.7666, duration_days: 180 },
-
-  // Tier $2000
-  { name: "Plan 2000 - 1 Month", amount: 2000, daily_profit_percent: 0.7666, duration_days: 30 },
-  { name: "Plan 2000 - 3 Months", amount: 2000, daily_profit_percent: 0.7833, duration_days: 90 },
-  { name: "Plan 2000 - 6 Months", amount: 2000, daily_profit_percent: 0.8, duration_days: 180 },
-
-  // Tier $5000
-  { name: "Plan 5000 - 1 Month", amount: 5000, daily_profit_percent: 0.8, duration_days: 30 },
-  { name: "Plan 5000 - 3 Months", amount: 5000, daily_profit_percent: 0.8166, duration_days: 90 },
-  { name: "Plan 5000 - 6 Months", amount: 5000, daily_profit_percent: 0.8333, duration_days: 180 },
-
-  // Tier $10000
-  { name: "Plan 10000 - 1 Month", amount: 10000, daily_profit_percent: 0.8333, duration_days: 30 },
-  { name: "Plan 10000 - 3 Months", amount: 10000, daily_profit_percent: 0.85, duration_days: 90 },
-  { name: "Plan 10000 - 6 Months", amount: 10000, daily_profit_percent: 0.8666, duration_days: 180 },
-
-  // Tier $30000
-  { name: "Plan 30000 - 1 Month", amount: 30000, daily_profit_percent: 0.8666, duration_days: 30 },
-  { name: "Plan 30000 - 3 Months", amount: 30000, daily_profit_percent: 0.8833, duration_days: 90 },
-  { name: "Plan 30000 - 6 Months", amount: 30000, daily_profit_percent: 0.9, duration_days: 180 },
-
-  // Tier $50000
-  { name: "Plan 50000 - 1 Month", amount: 50000, daily_profit_percent: 0.9, duration_days: 30 },
-  { name: "Plan 50000 - 3 Months", amount: 50000, daily_profit_percent: 0.9166, duration_days: 90 },
-  { name: "Plan 50000 - 6 Months", amount: 50000, daily_profit_percent: 0.9333, duration_days: 180 },
-
-  // Tier $100000
-  { name: "Plan 100000 - 1 Month", amount: 100000, daily_profit_percent: 0.9666, duration_days: 30 },
-  { name: "Plan 100000 - 3 Months", amount: 100000, daily_profit_percent: 0.9833, duration_days: 90 },
-  { name: "Plan 100000 - 6 Months", amount: 100000, daily_profit_percent: 1.0, duration_days: 180 },
-
-  // Tier $200000
-  { name: "Plan 200000 - 1 Month", amount: 200000, daily_profit_percent: 1.0833, duration_days: 30 },
-  { name: "Plan 200000 - 3 Months", amount: 200000, daily_profit_percent: 1.1, duration_days: 90 },
-  { name: "Plan 200000 - 6 Months", amount: 200000, daily_profit_percent: 1.1333, duration_days: 180 },
+/** [amount, 7d%, 1m%, 3m%, 6m%] — period return percentages from product plan. */
+const TIER_PERIOD_RETURNS: Array<[number, number, number, number, number]> = [
+  [100, 10, 42, 138, 270],
+  [200, 11, 43, 140, 272],
+  [300, 12, 44, 142, 274],
+  [400, 13, 45, 144, 276],
+  [500, 14, 46, 146, 278],
+  [1000, 15, 47, 148, 280],
+  [1500, 16, 48, 150, 282],
+  [2000, 17, 49, 152, 284],
+  [3000, 18, 50, 154, 286],
+  [5000, 19, 51, 156, 288],
+  [8000, 20, 52, 158, 290],
+  [10000, 21, 53, 160, 292],
+  [20000, 22, 54, 162, 294],
+  [50000, 23, 55, 165, 350],
 ];
+
+/** Convert period return % → daily % rounded to 4 d.p. (Decimal(5,4)). */
+function dailyFromPeriod(periodPercent: number, days: number): number {
+  return Math.round((periodPercent / days) * 10000) / 10000;
+}
+
+const packagesData = TIER_PERIOD_RETURNS.flatMap(([amount, r7, r30, r90, r180]) => {
+  const returns: Record<(typeof DURATIONS)[number], number> = {
+    7: r7,
+    30: r30,
+    90: r90,
+    180: r180,
+  };
+
+  return DURATIONS.map((days) => ({
+    name: `Plan ${amount} - ${DURATION_LABELS[days]}`,
+    amount,
+    daily_profit_percent: dailyFromPeriod(returns[days], days),
+    duration_days: days,
+  }));
+});
 
 /**
  * Legacy package columns kept for schema compatibility only.
@@ -103,7 +78,31 @@ async function main() {
     });
   }
 
-  console.log("Packages seeded successfully.");
+  const keepNames = packagesData.map((pkg) => pkg.name);
+  const obsolete = await prisma.package.findMany({
+    where: { name: { notIn: keepNames } },
+    include: { _count: { select: { investments: true } } },
+  });
+
+  let deleted = 0;
+  let keptWithInvestments = 0;
+
+  for (const pkg of obsolete) {
+    if (pkg._count.investments > 0) {
+      keptWithInvestments += 1;
+      console.warn(
+        `Keeping obsolete package "${pkg.name}" (${pkg.id}) — ${pkg._count.investments} investment(s) still reference it.`
+      );
+      continue;
+    }
+
+    await prisma.package.delete({ where: { id: pkg.id } });
+    deleted += 1;
+  }
+
+  console.log(
+    `Packages seeded successfully. Upserted ${packagesData.length}, deleted ${deleted} obsolete, kept ${keptWithInvestments} obsolete with investments.`
+  );
 }
 
 main()
