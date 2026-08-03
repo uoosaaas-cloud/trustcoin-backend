@@ -251,11 +251,17 @@ export function MarketOverview() {
       try {
         const data = await fetchMarketAssets();
         if (cancelled) return;
+        if (!data.assets.length) {
+          setError(t("error"));
+          return;
+        }
         setAssets(data.assets);
         setRefreshedAt(data.refreshedAt);
         setError(null);
       } catch {
-        if (!cancelled) setError(t("error"));
+        if (!cancelled) {
+          setError(t("error"));
+        }
       } finally {
         if (!cancelled) setIsLoading(false);
       }
