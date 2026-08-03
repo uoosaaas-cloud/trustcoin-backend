@@ -40,6 +40,19 @@ const BINANCE_SYMBOLS: Record<string, MarketAssetId> = {
   TRXUSDT: "trx",
 };
 
+/** Public market-data hosts (vision endpoint is more reliable from US cloud regions). */
+const BINANCE_API_BASES = [
+  "https://data-api.binance.vision",
+  "https://api.binance.com",
+] as const;
+
+const KRAKEN_SYMBOLS: Record<string, MarketAssetId> = {
+  XBTUSD: "btc",
+  ETHUSD: "eth",
+  BNBUSD: "bnb",
+  TRXUSD: "trx",
+};
+
 const DISPLAY_ORDER: MarketAssetId[] = ["btc", "eth", "bnb", "trx", "xau", "wti"];
 
 const CACHE_TTL_MS = 30_000;
@@ -91,20 +104,26 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 async function fetchBinanceSparkline(
+  apiBase: string,
   symbol: string,
   price: number,
   change24h: number
 ): Promise<number[]> {
-  try {
-    const url = `https://api.binance.com/api/v3/klines?symbol=${encodeURIComponent(
-      symbol
-    )}&interval=1h&limit=36`;
-    const klines = await fetchJson<Array<[unknown, string, string, string, string, ...unknown[]]>>(url);
-    const closes = klines.map((row) => Number(row[4])).filter((n) => Number.isFinite(n));
-    return closes.length > 4 ? closes : fallbackSparkline(price, change24h);
-  } catch {
-    return fallbackSparkline(price, change24h);
+  for (const base of [apiBase, ...BINANCE_API_BASES]) {
+    try {
+      const url = `${base}/api/v3/klines?symbol=${encodeURIComponent(
+        symbol
+      )}&interval=1h&limit=36`;
+      const klines = await fetchJson<Array<[unknown, string, string, string, string, ...unknown[]]>>(
+        url
+      );
+      const closes = klines.map((row) => Number(row[4])).filter((n) => Number.isFinite(n));
+      if (closes.length > 4) return closes;
+    } catch {
+      // try next host
+    }
   }
+  return fallbackSparkline(price, change24h);
 }
 
 async function fetchGoldAsset(): Promise<MarketAssetPayload | null> {
@@ -134,15 +153,27 @@ async function fetchGoldAsset(): Promise<MarketAssetPayload | null> {
   }
 }
 
-async function fetchCryptoAssets(): Promise<MarketAssetPayload[]> {
+async function fetchCryptoAssetsFromBinanceBase(
+  apiBase: string
+): Promise<MarketAssetPayload[]> {
   const symbols = Object.keys(BINANCE_SYMBOLS);
-  const url = `https://api.binance.com/api/v3/ticker/24hr?symbols=${encodeURIComponent(
+  const batchUrl = `${apiBase}/api/v3/ticker/24hr?symbols=${encodeURIComponent(
     JSON.stringify(symbols)
   )}`;
 
-  const rows = await fetchJson<
-    Array<{ symbol: string; lastPrice: string; priceChangePercent: string }>
-  >(url);
+  let rows: Array<{ symbol: string; lastPrice: string; priceChangePercent: string }>;
+
+  try {
+    rows = await fetchJson(batchUrl);
+  } catch {
+    rows = await Promise.all(
+      symbols.map(async (symbol) =>
+        fetchJson<{ symbol: string; lastPrice: string; priceChangePercent: string }>(
+          `${apiBase}/api/v3/ticker/24hr?symbol=${encodeURIComponent(symbol)}`
+        )
+      )
+    );
+  }
 
   const assets = await Promise.all(
     rows.map(async (row) => {
@@ -152,7 +183,7 @@ async function fetchCryptoAssets(): Promise<MarketAssetPayload[]> {
       const meta = ASSET_META[id];
       const price = Number(row.lastPrice);
       const change24h = Number(row.priceChangePercent);
-      const sparkline = await fetchBinanceSparkline(row.symbol, price, change24h);
+      const sparkline = await fetchBinanceSparkline(apiBase, row.symbol, price, change24h);
 
       return {
         id,
@@ -176,6 +207,75 @@ async function fetchCryptoAssets(): Promise<MarketAssetPayload[]> {
   }
 
   return resolved;
+}
+
+async function fetchCryptoAssetsFromBinance(): Promise<MarketAssetPayload[]> {
+  let lastError: unknown;
+  for (const apiBase of BINANCE_API_BASES) {
+    try {
+      return await fetchCryptoAssetsFromBinanceBase(apiBase);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error(String(lastError));
+}
+
+async function fetchCryptoAssetsFromKraken(): Promise<MarketAssetPayload[]> {
+  const url = `https://api.kraken.com/0/public/Ticker?pair=${encodeURIComponent(
+    Object.keys(KRAKEN_SYMBOLS).join(",")
+  )}`;
+
+  const json = await fetchJson<{
+    error?: string[];
+    result?: Record<
+      string,
+      {
+        c?: [string, string];
+        o?: string;
+      }
+    >;
+  }>(url);
+
+  if (json.error?.length) {
+    throw new Error(`Kraken ${json.error.join(", ")}`);
+  }
+
+  const assets = Object.entries(KRAKEN_SYMBOLS)
+    .map(([pair, id]) => {
+      const row = json.result?.[pair];
+      const price = Number(row?.c?.[0]);
+      const open = Number(row?.o);
+      if (!Number.isFinite(price) || price <= 0) return null;
+
+      const meta = ASSET_META[id];
+      const change24h = open > 0 ? ((price - open) / open) * 100 : 0;
+
+      return {
+        id,
+        symbol: meta.symbol,
+        name: meta.name,
+        pair: meta.pair,
+        price,
+        change24h,
+        sparkline: fallbackSparkline(price, change24h),
+        updatedAt: new Date().toISOString(),
+      } satisfies MarketAssetPayload;
+    })
+    .filter((item): item is MarketAssetPayload => item !== null);
+
+  const requiredCrypto: MarketAssetId[] = ["btc", "eth", "bnb", "trx"];
+  for (const id of requiredCrypto) {
+    if (!assets.some((item) => item.id === id)) {
+      throw new Error(`Missing crypto market asset: ${id}`);
+    }
+  }
+
+  return assets;
+}
+
+async function fetchCryptoAssets(): Promise<MarketAssetPayload[]> {
+  return fetchCryptoAssetsFromBinance();
 }
 
 /** Legacy CoinGecko batch kept as a fallback if Binance is unreachable. */
@@ -233,7 +333,11 @@ async function fetchCryptoAssetsWithFallback(): Promise<MarketAssetPayload[]> {
   try {
     return await fetchCryptoAssets();
   } catch {
-    return fetchCryptoAssetsFromCoinGecko();
+    try {
+      return await fetchCryptoAssetsFromKraken();
+    } catch {
+      return fetchCryptoAssetsFromCoinGecko();
+    }
   }
 }
 
@@ -257,14 +361,11 @@ async function fetchYahooAssetWithRetry(
 }
 
 async function fetchOilAsset(): Promise<MarketAssetPayload | null> {
-  await new Promise((resolve) => setTimeout(resolve, 1500));
-
   try {
-    return await fetchYahooAssetWithRetry("CL=F", "wti");
+    return await fetchYahooAssetWithRetry("CL=F", "wti", 2);
   } catch {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-      const uso = await fetchYahooAssetWithRetry("USO", "wti");
+      const uso = await fetchYahooAssetWithRetry("USO", "wti", 2);
       return { ...uso, name: "Crude Oil", pair: "WTI/USD" };
     } catch {
       return null;
@@ -338,15 +439,11 @@ export async function getMarketsOverview(): Promise<MarketsOverviewPayload> {
     return cache.payload;
   }
 
-  let cryptoResult: PromiseSettledResult<MarketAssetPayload[]>;
-
-  try {
-    cryptoResult = { status: "fulfilled", value: await fetchCryptoAssetsWithFallback() };
-  } catch (reason) {
-    cryptoResult = { status: "rejected", reason };
-  }
-
-  const [goldAsset, oilAsset] = await Promise.all([fetchGoldAsset(), fetchOilAsset()]);
+  const [cryptoResult, goldAsset, oilAsset] = await Promise.allSettled([
+    fetchCryptoAssetsWithFallback(),
+    fetchGoldAsset(),
+    fetchOilAsset(),
+  ]);
 
   const byId = new Map<MarketAssetId, MarketAssetPayload>();
 
@@ -358,8 +455,8 @@ export async function getMarketsOverview(): Promise<MarketsOverviewPayload> {
     }
   }
 
-  if (goldAsset) {
-    byId.set("xau", goldAsset);
+  if (goldAsset.status === "fulfilled" && goldAsset.value) {
+    byId.set("xau", goldAsset.value);
   } else if (cryptoResult.status === "fulfilled") {
     const goldFromCoinGecko = cryptoResult.value.find((item) => item.id === "xau");
     if (goldFromCoinGecko) {
@@ -367,8 +464,8 @@ export async function getMarketsOverview(): Promise<MarketsOverviewPayload> {
     }
   }
 
-  if (oilAsset) {
-    byId.set("wti", oilAsset);
+  if (oilAsset.status === "fulfilled" && oilAsset.value) {
+    byId.set("wti", oilAsset.value);
   }
 
   if (byId.size === 0) {
