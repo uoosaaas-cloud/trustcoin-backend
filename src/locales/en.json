@@ -58,6 +58,10 @@
     "packages_fetched": "Packages fetched successfully.",
     "list_fetched": "Investments fetched successfully."
   },
+  "markets": {
+    "overview_fetched": "Market overview fetched successfully.",
+    "feed_unavailable": "Live market prices are temporarily unavailable. Please try again shortly."
+  },
   "transactions": {
     "deposit_created": "Deposit request submitted successfully.",
     "withdrawal_created": "Withdrawal request submitted successfully. The amount is reserved from your available balance pending admin review.",

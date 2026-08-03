@@ -6,6 +6,7 @@ import transactionRoutes from "./transaction.routes";
 import adminRoutes from "./admin.routes";
 import referralRoutes from "./referral.routes";
 import depositRoutes from "./deposit.routes";
+import marketRoutes from "./market.routes";
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use("/transactions", transactionRoutes);
 router.use("/admin", adminRoutes);
 router.use("/referrals", referralRoutes);
 router.use("/deposit", depositRoutes);
+router.use("/markets", marketRoutes);
 
 export default router;
