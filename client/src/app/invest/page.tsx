@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { AppNav } from "@/components/AppNav";
 import { InvestModal } from "@/components/InvestModal";
+import { MyInvestments } from "@/components/MyInvestments";
 import { TrustComplianceBlock } from "@/components/TrustCompliance";
 import { useWallet } from "@/contexts/WalletContext";
 import { useSilentPoll } from "@/hooks/useSilentPoll";
@@ -30,6 +31,7 @@ export default function InvestPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<InvestmentPackage | null>(null);
+  const [myPackagesRefresh, setMyPackagesRefresh] = useState(0);
 
   useEffect(() => {
     if (!getStoredAuthToken()) {
@@ -88,6 +90,7 @@ export default function InvestPage() {
 
   async function handlePurchaseSuccess() {
     await refreshWallet({ silent: true });
+    setMyPackagesRefresh((n) => n + 1);
     setSuccessMessage(t("successBanner"));
   }
 
@@ -138,6 +141,8 @@ export default function InvestPage() {
             {successMessage}
           </div>
         ) : null}
+
+        <MyInvestments refreshToken={myPackagesRefresh} />
 
         {isLoadingPackages ? (
           <div className="space-y-4">

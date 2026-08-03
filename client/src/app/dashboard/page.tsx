@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { AppNav } from "@/components/AppNav";
 import { MarketOverview } from "@/components/MarketOverview";
+import { MyInvestments } from "@/components/MyInvestments";
 import { TrustComplianceBlock } from "@/components/TrustCompliance";
 import { useWallet } from "@/contexts/WalletContext";
 import { getStoredAuthToken } from "@/lib/api";
@@ -236,6 +237,8 @@ export default function DashboardPage() {
             {t("pendingWithdrawal", { amount: formatUsdt(wallet.pendingWithdrawalBalance) })}
           </div>
         ) : null}
+
+        <MyInvestments compact />
 
         <MarketOverview />
 

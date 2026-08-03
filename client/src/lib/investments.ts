@@ -44,6 +44,44 @@ export async function getInvestmentPackages() {
   return data;
 }
 
+/** Current user's investments (active + completed), newest first. */
+export async function getMyInvestments() {
+  const { data } = await api.get<ApiSuccessResponse<InvestmentRecord[]>>("/investments/my");
+  return data;
+}
+
+/** Estimated daily profit in USDT for an investment position. */
+export function getDailyProfitUsdt(
+  inv: Pick<InvestmentRecord, "current_amount" | "daily_profit_percent">
+): number {
+  const amount = Number(inv.current_amount);
+  const rate = Number(inv.daily_profit_percent);
+  if (!Number.isFinite(amount) || !Number.isFinite(rate)) return 0;
+  return (amount * rate) / 100;
+}
+
+/** Progress 0–100 through the lock window (clamped). */
+export function getInvestmentProgress(
+  inv: Pick<InvestmentRecord, "start_date" | "end_date" | "status">
+): number {
+  if (inv.status === "COMPLETED") return 100;
+  const start = new Date(inv.start_date).getTime();
+  const end = new Date(inv.end_date).getTime();
+  const now = Date.now();
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return 0;
+  return Math.min(100, Math.max(0, ((now - start) / (end - start)) * 100));
+}
+
+/** Whole days remaining until maturity (0 when completed/past). */
+export function getDaysRemaining(
+  inv: Pick<InvestmentRecord, "end_date" | "status">
+): number {
+  if (inv.status === "COMPLETED") return 0;
+  const end = new Date(inv.end_date).getTime();
+  if (!Number.isFinite(end)) return 0;
+  return Math.max(0, Math.ceil((end - Date.now()) / 86_400_000));
+}
+
 export async function purchaseInvestment(payload: PurchaseInvestmentPayload) {
   const { data } = await api.post<ApiSuccessResponse<PurchaseInvestmentResponse>>(
     "/investments/purchase",
