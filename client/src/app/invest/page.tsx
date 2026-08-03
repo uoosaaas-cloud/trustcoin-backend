@@ -11,17 +11,12 @@ import { useSilentPoll } from "@/hooks/useSilentPoll";
 import { getApiErrorMessage, getStoredAuthToken } from "@/lib/api";
 import { formatUsdt } from "@/lib/format";
 import {
+  durationKey,
   getInvestmentPackages,
   getPeriodReturnPercent,
   groupPackagesByTier,
   type InvestmentPackage,
 } from "@/lib/investments";
-
-function durationKey(days: number): "duration1m" | "duration3m" | "duration6m" {
-  if (days <= 30) return "duration1m";
-  if (days <= 90) return "duration3m";
-  return "duration6m";
-}
 
 export default function InvestPage() {
   const router = useRouter();
@@ -166,7 +161,7 @@ export default function InvestPage() {
                   </p>
                 </div>
 
-                <div className="grid gap-3.5 sm:grid-cols-3">
+                <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
                   {tier.variants.map((pkg) => {
                     const periodReturn = getPeriodReturnPercent(pkg);
                     return (

@@ -11,6 +11,7 @@ import {
 } from "@/lib/admin";
 import { getApiErrorMessage } from "@/lib/api";
 import { formatUsdt } from "@/lib/format";
+import { getPeriodReturnPercent } from "@/lib/investments";
 
 export default function AdminPackagesPage() {
   const ready = useRequireAdmin();
@@ -100,13 +101,14 @@ export default function AdminPackagesPage() {
           <div className="h-40 animate-pulse rounded-2xl border border-white/10 bg-white/5" />
         ) : (
           <div className="table-surface overflow-x-auto">
-            <table className="w-full min-w-[880px] text-left text-sm">
+            <table className="w-full min-w-[980px] text-left text-sm">
               <thead className="border-b border-white/10 bg-white/[0.03] text-xs uppercase tracking-wider text-slate-400">
                 <tr>
                   <th className="px-4 py-3 font-medium">{t("table.name")}</th>
                   <th className="px-4 py-3 font-medium">{t("table.amount")}</th>
                   <th className="px-4 py-3 font-medium">{t("table.duration")}</th>
                   <th className="px-4 py-3 font-medium">{t("table.rate")}</th>
+                  <th className="px-4 py-3 font-medium">{t("table.periodReturn")}</th>
                   <th className="px-4 py-3 font-medium">{t("table.active")}</th>
                   <th className="px-4 py-3 font-medium">{t("table.actions")}</th>
                 </tr>
@@ -132,6 +134,13 @@ export default function AdminPackagesPage() {
                         />
                         <span className="text-xs text-slate-400">%/day</span>
                       </div>
+                    </td>
+                    <td className="px-4 py-3 font-medium text-cyan-100">
+                      {getPeriodReturnPercent({
+                        daily_profit_percent: drafts[pkg.id] ?? pkg.daily_profit_percent,
+                        duration_days: pkg.duration_days,
+                      })}
+                      %
                     </td>
                     <td className="px-4 py-3 text-slate-300">{pkg.activeInvestments}</td>
                     <td className="px-4 py-3">

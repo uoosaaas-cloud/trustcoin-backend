@@ -286,13 +286,14 @@
   "invest": {
     "eyebrow": "Grow your capital",
     "title": "Investment Packages",
-    "subtitle": "Choose a fixed-amount tier and duration. Funds move from your available balance into a locked package until maturity.",
+    "subtitle": "Choose a fixed amount and lock period (7 days, 1 / 3 / 6 months). Funds move from your available balance into a locked package until maturity.",
     "availableLabel": "Available to Invest",
     "availableHint": "Only your available balance can be used for new package purchases.",
     "tierTitle": "Tier {amount} USDT",
     "tierFixedAmount": "Fixed package amount: {amount} USDT",
     "fixedAmountLabel": "Package amount",
     "periodReturn": {
+      "duration7d": "7-day return",
       "duration1m": "1-month return",
       "duration3m": "3-month return",
       "duration6m": "6-month return"
@@ -302,12 +303,14 @@
     "investNow": "Invest Now",
     "successBanner": "Package purchased successfully. Your wallet balances have been updated.",
     "duration": {
+      "duration7d": "7 Days",
       "duration1m": "1 Month",
       "duration3m": "3 Months",
       "duration6m": "6 Months"
     },
     "modal": {
       "eyebrow": "Confirm investment",
+      "duration7d": "7-day lock-in period",
       "duration1m": "1-month lock-in period",
       "duration3m": "3-month lock-in period",
       "duration6m": "6-month lock-in period",
@@ -645,16 +648,17 @@
     "packages": {
       "eyebrow": "Yield control",
       "title": "Package Profit Rates",
-      "subtitle": "Update daily profit percentages live. Changes apply to new purchases; active investments keep their snapshotted rate.",
+      "subtitle": "Update daily profit percentages live for all durations (7 days, 1 / 3 / 6 months). Changes apply to new purchases; active investments keep their snapshotted rate.",
       "save": "Save rate",
       "saving": "Saving…",
       "saved": "Updated {name}.",
-      "note": "Rates are stored as daily % (e.g. 0.7500 = 0.75% per day). No redeploy required.",
+      "note": "Rates are stored as daily % (e.g. 1.4000 = 1.4% per day). Period return shown to users = daily × duration days. No redeploy required.",
       "table": {
         "name": "Package",
         "amount": "Amount",
         "duration": "Duration",
         "rate": "Daily profit %",
+        "periodReturn": "Period return",
         "active": "Active locks",
         "actions": "Actions"
       },

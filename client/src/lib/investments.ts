@@ -52,14 +52,29 @@ export async function purchaseInvestment(payload: PurchaseInvestmentPayload) {
   return data;
 }
 
+export type DurationKey = "duration7d" | "duration1m" | "duration3m" | "duration6m";
+
+/** Maps package duration_days to i18n keys (7d / 1m / 3m / 6m). */
+export function durationKey(days: number): DurationKey {
+  if (days <= 7) return "duration7d";
+  if (days <= 30) return "duration1m";
+  if (days <= 90) return "duration3m";
+  return "duration6m";
+}
+
 /**
- * Period return % for a package = daily rate × duration days
- * (shown as monthly / 3-month / 6-month depending on `duration_days`).
+ * Period return % for a package = daily rate × duration days.
+ * Snaps near-integers so 4 d.p. daily storage still shows clean plan figures (e.g. 350%).
  */
 export function getPeriodReturnPercent(pkg: Pick<InvestmentPackage, "daily_profit_percent" | "duration_days">): string {
   const daily = Number(pkg.daily_profit_percent);
-  if (Number.isNaN(daily)) return "0.00";
-  return (daily * pkg.duration_days).toFixed(2);
+  if (Number.isNaN(daily)) return "0";
+  const raw = daily * pkg.duration_days;
+  const twoDp = Math.round(raw * 100) / 100;
+  if (Math.abs(twoDp - Math.round(twoDp)) < 0.02) {
+    return String(Math.round(twoDp));
+  }
+  return twoDp.toFixed(2);
 }
 
 /** Groups fixed-amount packages into amount tiers for the invest UI. */
