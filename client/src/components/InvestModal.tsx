@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { getApiErrorMessage } from "@/lib/api";
 import { formatUsdt } from "@/lib/format";
 import {
-  durationKey,
+  durationKeyFromPackage,
   getPeriodReturnPercent,
   purchaseInvestment,
   type InvestmentPackage,
@@ -79,12 +79,12 @@ export function InvestModal({ pkg, availableBalance, onClose, onSuccess }: Inves
           <h2 id="invest-modal-title" className="mt-1 text-xl font-bold text-white">
             {pkg.name}
           </h2>
-          <p className="mt-1 text-sm text-slate-400">{t(`modal.${durationKey(pkg.duration_days)}`)}</p>
+          <p className="mt-1 text-sm text-slate-400">{t(`modal.${durationKeyFromPackage(pkg)}`)}</p>
         </div>
 
         <dl className="mb-5 grid grid-cols-2 gap-3 rounded-xl border border-white/12 bg-white/[0.06] p-3.5 text-sm">
           <div>
-            <dt className="text-xs text-slate-400">{t(`periodReturn.${durationKey(pkg.duration_days)}`)}</dt>
+            <dt className="text-xs text-slate-400">{t(`periodReturn.${durationKeyFromPackage(pkg)}`)}</dt>
             <dd className="mt-0.5 font-semibold text-cyan-100">{periodReturn}%</dd>
           </div>
           <div>

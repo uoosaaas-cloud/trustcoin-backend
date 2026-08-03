@@ -54,22 +54,53 @@ export async function purchaseInvestment(payload: PurchaseInvestmentPayload) {
 
 export type DurationKey = "duration7d" | "duration1m" | "duration3m" | "duration6m";
 
-/** Maps package duration_days to i18n keys (7d / 1m / 3m / 6m). */
+/**
+ * Maps package duration_days to i18n keys (7d / 1m / 3m / 6m).
+ * Uses exact known plan lengths first so a 7-day package never
+ * falls into the 1-month bucket.
+ */
 export function durationKey(days: number): DurationKey {
-  if (days <= 7) return "duration7d";
-  if (days <= 30) return "duration1m";
-  if (days <= 90) return "duration3m";
+  const d = Math.round(Number(days));
+  if (!Number.isFinite(d) || d <= 0) return "duration1m";
+
+  if (d === 7) return "duration7d";
+  if (d === 30) return "duration1m";
+  if (d === 90) return "duration3m";
+  if (d === 180) return "duration6m";
+
+  // Nearest bucket for any unexpected duration values.
+  if (d <= 10) return "duration7d";
+  if (d <= 45) return "duration1m";
+  if (d <= 120) return "duration3m";
   return "duration6m";
+}
+
+/** Prefer exact duration_days; fall back to package name hints. */
+export function durationKeyFromPackage(pkg: {
+  duration_days: number;
+  name?: string;
+}): DurationKey {
+  const name = (pkg.name ?? "").toLowerCase();
+  if (/\b7\s*days?\b/.test(name) || name.includes("7-day")) {
+    return "duration7d";
+  }
+  if (/\b1\s*month\b/.test(name)) return "duration1m";
+  if (/\b3\s*months?\b/.test(name)) return "duration3m";
+  if (/\b6\s*months?\b/.test(name)) return "duration6m";
+  return durationKey(pkg.duration_days);
 }
 
 /**
  * Period return % for a package = daily rate × duration days.
  * Snaps near-integers so 4 d.p. daily storage still shows clean plan figures (e.g. 350%).
  */
-export function getPeriodReturnPercent(pkg: Pick<InvestmentPackage, "daily_profit_percent" | "duration_days">): string {
+export function getPeriodReturnPercent(
+  pkg: Pick<InvestmentPackage, "daily_profit_percent" | "duration_days">
+): string {
   const daily = Number(pkg.daily_profit_percent);
-  if (Number.isNaN(daily)) return "0";
-  const raw = daily * pkg.duration_days;
+  const days = Number(pkg.duration_days);
+  if (!Number.isFinite(daily) || !Number.isFinite(days) || days <= 0) return "0";
+  const raw = daily * days;
   const twoDp = Math.round(raw * 100) / 100;
   if (Math.abs(twoDp - Math.round(twoDp)) < 0.02) {
     return String(Math.round(twoDp));

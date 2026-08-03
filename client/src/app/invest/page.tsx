@@ -11,7 +11,7 @@ import { useSilentPoll } from "@/hooks/useSilentPoll";
 import { getApiErrorMessage, getStoredAuthToken } from "@/lib/api";
 import { formatUsdt } from "@/lib/format";
 import {
-  durationKey,
+  durationKeyFromPackage,
   getInvestmentPackages,
   getPeriodReturnPercent,
   groupPackagesByTier,
@@ -170,11 +170,11 @@ export default function InvestPage() {
                         className="flex flex-col rounded-2xl border border-white/14 bg-white/[0.08] p-5 backdrop-blur-sm transition duration-200 hover:border-cyan-300/35 hover:bg-white/[0.11]"
                       >
                         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-300">
-                          {t(`duration.${durationKey(pkg.duration_days)}`)}
+                          {t(`duration.${durationKeyFromPackage(pkg)}`)}
                         </p>
                         <p className="mt-2.5 text-3xl font-bold tracking-tight text-cyan-100">{periodReturn}%</p>
                         <p className="mt-1 text-[13px] text-slate-400">
-                          {t(`periodReturn.${durationKey(pkg.duration_days)}`)}
+                          {t(`periodReturn.${durationKeyFromPackage(pkg)}`)}
                         </p>
 
                         <dl className="mt-5 space-y-2.5 border-t border-white/10 pt-4 text-[13px]">
