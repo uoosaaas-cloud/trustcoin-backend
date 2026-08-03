@@ -38,6 +38,7 @@ const BINANCE_SYMBOLS: Record<string, MarketAssetId> = {
   ETHUSDT: "eth",
   BNBUSDT: "bnb",
   TRXUSDT: "trx",
+  PAXGUSDT: "xau",
 };
 
 /** Public market-data hosts (vision endpoint is more reliable from US cloud regions). */
@@ -206,7 +207,9 @@ async function fetchCryptoAssetsFromBinanceBase(
     }
   }
 
-  return resolved;
+  return resolved.map((item) =>
+    item.id === "xau" ? { ...item, name: "Gold", pair: "XAU/USD" } : item
+  );
 }
 
 async function fetchCryptoAssetsFromBinance(): Promise<MarketAssetPayload[]> {
