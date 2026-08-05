@@ -31,6 +31,13 @@ function resolveAppBaseUrl(): string {
   return raw;
 }
 
+/** Always-allowed browser origins in production (apex, www, Render preview URL). */
+const PRODUCTION_CORS_ORIGINS = [
+  PRODUCTION_APP_BASE_URL,
+  "https://www.trustcoin.cc",
+  "https://trustcoin-app.onrender.com",
+] as const;
+
 /**
  * Browser CORS allow-list. In production, drop localhost leftovers and never keep bare "*".
  */
@@ -40,7 +47,7 @@ function resolveCorsOrigin(appBaseUrl: string): string {
     return raw || "*";
   }
   if (!raw || raw === "*") {
-    return appBaseUrl;
+    return [...new Set([appBaseUrl, ...PRODUCTION_CORS_ORIGINS])].join(",");
   }
   const parts = raw
     .split(",")
@@ -48,10 +55,12 @@ function resolveCorsOrigin(appBaseUrl: string): string {
     .filter(Boolean)
     .filter((value) => value === "*" || !isLocalHostname(value));
   if (!parts.length || parts.includes("*")) {
-    return appBaseUrl;
+    return [...new Set([appBaseUrl, ...PRODUCTION_CORS_ORIGINS])].join(",");
   }
-  if (!parts.includes(appBaseUrl)) {
-    parts.push(appBaseUrl);
+  for (const origin of [appBaseUrl, ...PRODUCTION_CORS_ORIGINS]) {
+    if (!parts.includes(origin)) {
+      parts.push(origin);
+    }
   }
   return parts.join(",");
 }
