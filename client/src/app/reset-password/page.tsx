@@ -71,49 +71,49 @@ function ResetPasswordForm() {
           <div className="card-surface animate-fade-in-up rounded-[1.5rem] p-7 sm:p-9">
             {!token ? (
               <>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-500 sm:text-xs">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300 sm:text-xs">
                   {t("eyebrow")}
                 </p>
-                <h1 className="mt-2.5 text-2xl font-bold tracking-tight text-slate-900 sm:text-[2rem]">
+                <h1 className="mt-2.5 text-2xl font-bold tracking-tight text-white sm:text-[2rem]">
                   {t("missingTokenTitle")}
                 </h1>
-                <p className="mt-2.5 text-[15px] leading-relaxed text-slate-600">{t("missingTokenBody")}</p>
+                <p className="mt-2.5 text-[15px] leading-relaxed text-slate-400">{t("missingTokenBody")}</p>
                 <Link
                   href="/forgot-password"
-                  className="mt-8 inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition hover:brightness-110"
+                  className="mt-8 inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-cyan-400 to-cyan-300 px-4 py-3 text-sm font-bold text-[#041016] shadow-[0_12px_40px_rgba(34,211,238,0.22)] transition hover:brightness-110"
                 >
                   {t("requestNewLink")}
                 </Link>
               </>
             ) : isSuccess ? (
               <>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-500 sm:text-xs">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300 sm:text-xs">
                   {t("eyebrow")}
                 </p>
-                <h1 className="mt-2.5 text-2xl font-bold tracking-tight text-slate-900 sm:text-[2rem]">
+                <h1 className="mt-2.5 text-2xl font-bold tracking-tight text-white sm:text-[2rem]">
                   {t("successTitle")}
                 </h1>
-                <p className="mt-2.5 text-[15px] leading-relaxed text-slate-600">{t("successBody")}</p>
+                <p className="mt-2.5 text-[15px] leading-relaxed text-slate-400">{t("successBody")}</p>
                 <Link
                   href="/login"
-                  className="mt-8 inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition hover:brightness-110"
+                  className="mt-8 inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-cyan-400 to-cyan-300 px-4 py-3 text-sm font-bold text-[#041016] shadow-[0_12px_40px_rgba(34,211,238,0.22)] transition hover:brightness-110"
                 >
                   {t("goToLogin")}
                 </Link>
               </>
             ) : (
               <>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-500 sm:text-xs">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300 sm:text-xs">
                   {t("eyebrow")}
                 </p>
-                <h1 className="mt-2.5 text-2xl font-bold tracking-tight text-slate-900 sm:text-[2rem]">
+                <h1 className="mt-2.5 text-2xl font-bold tracking-tight text-white sm:text-[2rem]">
                   {t("title")}
                 </h1>
-                <p className="mt-2.5 text-[15px] leading-relaxed text-slate-600">{t("subtitle")}</p>
+                <p className="mt-2.5 text-[15px] leading-relaxed text-slate-400">{t("subtitle")}</p>
 
                 <form onSubmit={handleSubmit} className="mt-8 space-y-5">
                   <label className="block">
-                    <span className="mb-1.5 block text-sm font-medium text-slate-700">
+                    <span className="mb-1.5 block text-sm font-medium text-slate-300">
                       {t("passwordLabel")}
                     </span>
                     <div className="relative">
@@ -131,20 +131,20 @@ function ResetPasswordForm() {
                         type="button"
                         onClick={() => setIsPasswordVisible((visible) => !visible)}
                         aria-label={isPasswordVisible ? t("hidePassword") : t("showPassword")}
-                        className="absolute inset-y-0 end-2 flex items-center px-2 text-slate-500 transition hover:text-slate-700"
+                        className="absolute inset-y-0 end-2 flex items-center px-2 text-slate-400 transition hover:text-slate-300"
                       >
                         {isPasswordVisible ? <EyeOffIcon /> : <EyeIcon />}
                       </button>
                     </div>
                     {!isPasswordStrongEnough ? (
-                      <span role="alert" className="mt-1.5 block text-xs font-medium text-rose-600">
+                      <span role="alert" className="mt-1.5 block text-xs font-medium text-rose-300">
                         {t("errors.passwordWeak")}
                       </span>
                     ) : null}
                   </label>
 
                   <label className="block">
-                    <span className="mb-1.5 block text-sm font-medium text-slate-700">
+                    <span className="mb-1.5 block text-sm font-medium text-slate-300">
                       {t("confirmLabel")}
                     </span>
                     <input
@@ -158,14 +158,14 @@ function ResetPasswordForm() {
                       dir="ltr"
                     />
                     {!passwordsMatch ? (
-                      <span role="alert" className="mt-1.5 block text-xs font-medium text-rose-600">
+                      <span role="alert" className="mt-1.5 block text-xs font-medium text-rose-300">
                         {t("errors.passwordMismatch")}
                       </span>
                     ) : null}
                   </label>
 
                   {errorMessage ? (
-                    <div className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-sm text-rose-700">
+                    <div className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-3.5 py-2.5 text-sm text-rose-300">
                       {errorMessage}
                     </div>
                   ) : null}
@@ -173,7 +173,7 @@ function ResetPasswordForm() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
+                    className="w-full rounded-xl bg-gradient-to-r from-cyan-400 to-cyan-300 px-4 py-3 text-sm font-bold text-[#041016] shadow-[0_12px_40px_rgba(34,211,238,0.22)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
                   >
                     {isSubmitting ? t("submitting") : t("submit")}
                   </button>
@@ -186,7 +186,7 @@ function ResetPasswordForm() {
             <TrustComplianceBlock compact />
           </div>
 
-          <p className="mt-6 flex items-center justify-center gap-2 text-center text-xs text-slate-500">
+          <p className="mt-6 flex items-center justify-center gap-2 text-center text-xs text-slate-400">
             <span aria-hidden>🔒</span>
             {tCommon("securedBy")}
           </p>

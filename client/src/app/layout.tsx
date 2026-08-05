@@ -21,10 +21,58 @@ const notoSansArabic = Noto_Sans_Arabic({
   weight: ["400", "500", "600", "700", "800"],
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://trustcoin.cc";
+
 export const metadata: Metadata = {
-  title: "TrustCoin — Invest with Confidence",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "TrustCoin — Invest with Confidence",
+    template: "%s | TrustCoin",
+  },
   description:
-    "TrustCoin is a secure, multilingual crypto investment platform. Create your account to start earning daily returns.",
+    "TrustCoin is a secure, multilingual crypto investment platform. Deposit USDT, choose an investment package, and track daily returns in English or Arabic.",
+  keywords: [
+    "TrustCoin",
+    "crypto investment",
+    "USDT",
+    "investment packages",
+    "daily returns",
+    "استثمار كريبتو",
+  ],
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    alternateLocale: ["ar_SA"],
+    url: SITE_URL,
+    siteName: "TrustCoin",
+    title: "TrustCoin — Invest with Confidence",
+    description:
+      "Secure USDT investment packages with transparent returns. Register, deposit, invest, and grow your capital.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TrustCoin — Invest with Confidence",
+    description:
+      "Secure USDT investment packages with transparent returns. Register, deposit, invest, and grow your capital.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
+  ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? {
+        verification: {
+          google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+        },
+      }
+    : {}),
 };
 
 export default function RootLayout({
@@ -41,7 +89,7 @@ export default function RootLayout({
       dir={dir}
       className={`${geistSans.variable} ${geistMono.variable} ${notoSansArabic.variable} h-full`}
     >
-      <body className="min-h-full bg-[#F6F7FB] font-sans text-slate-900 antialiased">
+      <body className="min-h-full bg-[#071018] font-sans text-slate-100 antialiased">
         <ClientIntlProvider initialLocale={locale}>
           <Providers>{children}</Providers>
         </ClientIntlProvider>

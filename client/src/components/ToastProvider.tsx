@@ -53,10 +53,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {toasts.map((toast) => {
           const styles =
             toast.variant === "success"
-              ? "border-green-300 bg-green-50 text-green-800"
+              ? "border-emerald-400/30 bg-emerald-500/15 text-emerald-200"
               : toast.variant === "error"
-                ? "border-rose-300 bg-rose-50 text-rose-800"
-                : "border-cyan-300 bg-slate-900 text-cyan-100";
+                ? "border-rose-400/30 bg-rose-500/15 text-rose-200"
+                : "border-cyan-400/30 bg-[#0a1220]/95 text-cyan-100";
 
           return (
             <div

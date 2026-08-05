@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /secret-admin-portal/
+Disallow: /admin/
+
+Sitemap: https://trustcoin.cc/sitemap.xml

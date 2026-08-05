@@ -102,6 +102,7 @@ export interface AdminPendingWithdrawal {
   type: "WITHDRAWAL";
   status: "PENDING";
   payment_address: string | null;
+  network: string | null;
   note: string | null;
   created_at: string;
   user: {

@@ -1,4 +1,5 @@
 import { api, type ApiSuccessResponse } from "./api";
+import type { WithdrawNetwork } from "./withdrawNetworks";
 
 export type TransactionType = "DEPOSIT" | "WITHDRAWAL" | "PROFIT" | "REFERRAL";
 export type TransactionStatus = "PENDING" | "COMPLETED" | "FAILED" | "APPROVED" | "REJECTED";
@@ -10,6 +11,7 @@ export interface TransactionRecord {
   type: TransactionType;
   status: TransactionStatus;
   payment_address: string | null;
+  network: WithdrawNetwork | string | null;
   tx_hash: string | null;
   note: string | null;
   created_at: string;
@@ -18,6 +20,7 @@ export interface TransactionRecord {
 
 export interface CreateWithdrawalPayload {
   amount: string;
+  network: WithdrawNetwork;
   payment_address: string;
   note?: string;
   otp_code: string;

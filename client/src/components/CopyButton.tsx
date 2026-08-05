@@ -30,7 +30,7 @@ export function CopyButton({ value, label, copiedLabel, className = "" }: CopyBu
     <button
       type="button"
       onClick={handleCopy}
-      className={`inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-green-300 hover:bg-green-50 hover:text-green-700 ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-300 shadow-sm transition hover:border-emerald-400/40 hover:bg-emerald-400/10 hover:text-emerald-300 ${className}`}
     >
       <span aria-hidden>{copied ? "✓" : "📋"}</span>
       {copied ? copiedLabel : label}

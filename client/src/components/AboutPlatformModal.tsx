@@ -101,7 +101,7 @@ export function AboutPlatformModal({ open, onClose }: AboutPlatformModalProps) {
       >
         <div
           aria-hidden
-          className="pointer-events-none absolute -end-20 -top-24 h-64 w-64 rounded-full bg-blue-500/25 blur-3xl"
+          className="pointer-events-none absolute -end-20 -top-24 h-64 w-64 rounded-full bg-cyan-400/100/25 blur-3xl"
         />
         <div
           aria-hidden
@@ -181,7 +181,7 @@ export function AboutPlatformModal({ open, onClose }: AboutPlatformModalProps) {
             ))}
           </div>
 
-          <p className="mt-6 text-center text-[12px] leading-relaxed text-slate-500">
+          <p className="mt-6 text-center text-[12px] leading-relaxed text-slate-400">
             {t("footer")}
           </p>
         </div>

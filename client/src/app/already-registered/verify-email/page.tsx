@@ -115,40 +115,40 @@ function VerifyEmailForm() {
           <div className="card-surface animate-fade-in-up rounded-[1.5rem] p-7 sm:p-9">
             {isVerified ? (
               <>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-500">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300">
                   {t("eyebrow")}
                 </p>
-                <h1 className="mt-2.5 text-2xl font-bold tracking-tight text-slate-900">
+                <h1 className="mt-2.5 text-2xl font-bold tracking-tight text-white">
                   {pendingApproval ? t("successPending") : t("success")}
                 </h1>
                 {pendingApproval ? (
-                  <p className="mt-3 text-sm leading-relaxed text-slate-600">{t("successPendingHint")}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-400">{t("successPendingHint")}</p>
                 ) : null}
                 <button
                   type="button"
                   onClick={() => router.push("/login")}
-                  className="mt-8 w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/25"
+                  className="mt-8 w-full rounded-xl bg-gradient-to-r from-cyan-400 to-cyan-300 py-3 text-sm font-bold text-[#041016] shadow-[0_12px_40px_rgba(34,211,238,0.22)]"
                 >
                   {t("goToLogin")}
                 </button>
               </>
             ) : (
               <>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-500">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300">
                   {tVerify("eyebrow")}
                 </p>
-                <h1 className="mt-2.5 text-2xl font-bold tracking-tight text-slate-900">{tVerify("title")}</h1>
-                <p className="mt-2.5 text-[15px] leading-relaxed text-slate-600">{tVerify("subtitle")}</p>
+                <h1 className="mt-2.5 text-2xl font-bold tracking-tight text-white">{tVerify("title")}</h1>
+                <p className="mt-2.5 text-[15px] leading-relaxed text-slate-400">{tVerify("subtitle")}</p>
 
                 {errorMessage ? (
-                  <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                  <div className="mt-5 rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
                     {errorMessage}
                   </div>
                 ) : null}
 
                 <form onSubmit={handleVerify} className="mt-7 space-y-5">
                   <div>
-                    <label htmlFor="verify-email" className="block text-sm font-medium text-slate-700">
+                    <label htmlFor="verify-email" className="block text-sm font-medium text-slate-300">
                       {tVerify("emailLabel")}
                     </label>
                     <input
@@ -163,14 +163,14 @@ function VerifyEmailForm() {
                   </div>
 
                   <div>
-                    <p className="mb-3 text-center text-sm font-medium text-slate-700">{t("codeLabel")}</p>
+                    <p className="mb-3 text-center text-sm font-medium text-slate-300">{t("codeLabel")}</p>
                     <OtpInput value={otpCode} onChange={setOtpCode} disabled={isSubmitting} autoFocus />
                   </div>
 
                   <button
                     type="submit"
                     disabled={isSubmitting || otpCode.length !== 6}
-                    className="w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 disabled:opacity-50"
+                    className="w-full rounded-xl bg-gradient-to-r from-cyan-400 to-cyan-300 py-3 text-sm font-bold text-[#041016] shadow-[0_12px_40px_rgba(34,211,238,0.22)] disabled:opacity-50"
                   >
                     {isSubmitting ? t("submitting") : t("submit")}
                   </button>
@@ -181,7 +181,7 @@ function VerifyEmailForm() {
                     type="button"
                     onClick={() => void handleResend()}
                     disabled={cooldownSeconds > 0 || isResending}
-                    className="text-sm font-semibold text-brand-600 disabled:text-slate-400"
+                    className="text-sm font-semibold text-cyan-300 disabled:text-slate-400"
                   >
                     {isResending
                       ? t("resending")
@@ -189,7 +189,7 @@ function VerifyEmailForm() {
                         ? t("resendCooldown", { seconds: cooldownSeconds })
                         : t("resend")}
                   </button>
-                  <Link href="/login" className="text-xs text-slate-500 hover:text-slate-700">
+                  <Link href="/login" className="text-xs text-slate-400 hover:text-slate-300">
                     {tCommon("back")} · {t("goToLogin")}
                   </Link>
                 </div>

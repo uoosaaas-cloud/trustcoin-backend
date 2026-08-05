@@ -8,6 +8,69 @@
     "en": "English",
     "ar": "العربية"
   },
+  "landing": {
+    "heroTitle": "Secure crypto growth, built for serious investors.",
+    "heroSubtitle": "TrustCoin combines disciplined daily yields, verified accounts, and protected wallets — so your capital compounds with clarity.",
+    "login": "Sign in",
+    "register": "Create account",
+    "goDashboard": "Open dashboard",
+    "profitTitle": "Designed for measurable returns",
+    "profitBody": "Choose investment packages with transparent daily profit rates, track locked and available balances in real time, and grow through referrals when your network invests.",
+    "profitPoints": {
+      "daily": {
+        "label": "Daily yield distribution",
+        "body": "Profits are calculated and credited on a clear schedule so you always know what your packages are earning."
+      },
+      "packages": {
+        "label": "Structured packages",
+        "body": "Pick plans that match your capital size and time horizon — returns and duration are shown before you commit."
+      },
+      "referrals": {
+        "label": "Referral upside",
+        "body": "Invite trusted partners and earn bonuses when their investments succeed under platform rules."
+      }
+    },
+    "securityTitle": "Security at every gate",
+    "securityBody": "From registration to withdrawals, TrustCoin verifies identity, protects sessions with OTP, and isolates deposit addresses per user.",
+    "securityPoints": {
+      "otp": {
+        "label": "OTP verification",
+        "body": "Email codes protect account creation, admin access, and sensitive money movements."
+      },
+      "kyc": {
+        "label": "ID review",
+        "body": "New accounts submit identity documents and stay pending until an admin approves access."
+      },
+      "wallets": {
+        "label": "Dedicated deposit addresses",
+        "body": "Each user receives unique on-chain addresses — deposits are matched automatically after confirmation."
+      }
+    },
+    "detailsTitle": "How TrustCoin works",
+    "detailsBody": "Register, verify your email, wait for approval, deposit USDT, invest in a package, and follow live trade signals published by the team. Withdrawals are reviewed by admins before completion."
+  },
+  "trades": {
+    "eyebrow": "Live signals",
+    "title": "Trade board",
+    "subtitle": "Published market trades from the TrustCoin desk — symbol, side, size, and result.",
+    "empty": "No trades published yet. Check back soon.",
+    "columns": {
+      "symbol": "Symbol",
+      "side": "Side",
+      "amount": "Amount",
+      "outcome": "Result",
+      "time": "Published"
+    },
+    "side": {
+      "buy": "Buy",
+      "sell": "Sell"
+    },
+    "outcome": {
+      "profitable": "Profitable",
+      "loss": "Loss",
+      "pending": "Pending"
+    }
+  },
   "register": {
     "eyebrow": "Create your account",
     "title": "Start your investment journey",
@@ -48,11 +111,13 @@
     "title": "Log in to your account",
     "subtitle": "Enter your credentials to access your TrustCoin dashboard.",
     "emailLabel": "Email address",
-    "emailPlaceholder": "you@example.com",
+    "emailPlaceholder": "name@email.com",
     "passwordLabel": "Password",
     "passwordPlaceholder": "Enter your password",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
+    "sessionExpired": "Your session expired. Please sign in again.",
+    "accountSuspended": "Your account has been suspended. Contact support if you need help.",
     "forgotPassword": "Forgot password?",
     "submit": "Log in",
     "submitting": "Logging in...",
@@ -155,6 +220,7 @@
   },
   "nav": {
     "dashboard": "Trading Room",
+    "trades": "Trades",
     "invest": "Invest",
     "deposit": "Deposit",
     "withdraw": "Withdraw",
@@ -162,7 +228,23 @@
     "about": "About Us",
     "logout": "Log out",
     "available": "Available",
-    "locked": "Locked"
+    "locked": "Locked",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "support": "Support"
+  },
+  "accountPending": {
+    "eyebrow": "Under review",
+    "title": "Your account is pending approval",
+    "body": "Thanks for registering. Our team is reviewing your KYC documents. You will be able to sign in once your account is approved.",
+    "timeline": "Reviews usually complete within 24 hours during business days.",
+    "supportLabel": "Need help? Email support",
+    "backToLogin": "Back to login"
+  },
+  "support": {
+    "label": "Customer support",
+    "email": "support@trustcoin.cc",
+    "hint": "Contact us anytime for deposit, withdrawal, or account help."
   },
   "about": {
     "eyebrow": "About the platform",
@@ -211,6 +293,26 @@
     "ctaWithdraw": "Withdraw",
     "ctaInvest": "Invest now",
     "ctaReferrals": "Invite friends",
+    "myPackages": {
+      "eyebrow": "Your positions",
+      "title": "My Packages",
+      "subtitle": "Active lock-ins with daily profit accrual and maturity progress.",
+      "activeCount": "{count} active",
+      "empty": "No active packages yet",
+      "emptyHint": "Choose a fixed package to start earning daily returns.",
+      "ctaInvest": "Browse packages",
+      "statusActive": "Active",
+      "statusCompleted": "Completed",
+      "dailyProfit": "Daily profit",
+      "totalEarned": "Total earned",
+      "daysLeft": "Days left",
+      "matured": "Matured",
+      "days": "days",
+      "progressActive": "{percent}% complete",
+      "progressDone": "Fully matured",
+      "completedHint": "{count} completed package(s).",
+      "viewOnInvest": "View on Invest"
+    },
     "markets": {
       "eyebrow": "Global markets",
       "title": "Market Overview",
@@ -222,13 +324,14 @@
   "invest": {
     "eyebrow": "Grow your capital",
     "title": "Investment Packages",
-    "subtitle": "Choose a fixed-amount tier and duration. Funds move from your available balance into a locked package until maturity.",
+    "subtitle": "Choose a fixed amount and lock period (7 days, 1 / 3 / 6 months). Funds move from your available balance into a locked package until maturity.",
     "availableLabel": "Available to Invest",
     "availableHint": "Only your available balance can be used for new package purchases.",
     "tierTitle": "Tier {amount} USDT",
     "tierFixedAmount": "Fixed package amount: {amount} USDT",
     "fixedAmountLabel": "Package amount",
     "periodReturn": {
+      "duration7d": "7-day return",
       "duration1m": "1-month return",
       "duration3m": "3-month return",
       "duration6m": "6-month return"
@@ -236,14 +339,18 @@
     "durationLabel": "Duration",
     "days": "days",
     "investNow": "Invest Now",
+    "needMore": "Need {amount} more USDT",
+    "depositToInvest": "Deposit to invest",
     "successBanner": "Package purchased successfully. Your wallet balances have been updated.",
     "duration": {
+      "duration7d": "7 Days",
       "duration1m": "1 Month",
       "duration3m": "3 Months",
       "duration6m": "6 Months"
     },
     "modal": {
       "eyebrow": "Confirm investment",
+      "duration7d": "7-day lock-in period",
       "duration1m": "1-month lock-in period",
       "duration3m": "3-month lock-in period",
       "duration6m": "6-month lock-in period",
@@ -300,18 +407,26 @@
     "eyebrow": "Cash out",
     "title": "Withdraw Funds",
     "subtitle": "You can only withdraw from your available balance. Locked package capital stays invested until maturity.",
+    "warningsTitle": "Before you withdraw",
+    "warnings": {
+      "usdtOnly": "Withdrawals are paid in USDT only.",
+      "matchNetwork": "Select the exact network your wallet uses (TRC20 / BEP20 / ERC20).",
+      "wrongNetwork": "A wrong network or address format can permanently lose funds."
+    },
     "availableLabel": "Available for Withdrawal",
     "availableHint": "This is the maximum you can request. Pending requests temporarily reserve funds until an admin reviews them.",
     "lockedNote": "{amount} USDT remains locked in active packages and cannot be withdrawn.",
+    "networkLabel": "Select Network",
+    "networkHint": "Your address must match {network}. Double-check before confirming.",
     "amountLabel": "Withdrawal amount (USDT)",
     "amountPlaceholder": "e.g. 50.00",
     "maxButton": "Max",
     "maxHint": "Maximum: {available} USDT",
     "addressLabel": "Destination wallet address",
-    "addressPlaceholder": "Paste your USDT wallet address",
+    "addressPlaceholder": "Paste your USDT {network} address",
     "noteLabel": "Note",
     "noteOptional": "optional",
-    "notePlaceholder": "e.g. TRC20 personal wallet",
+    "notePlaceholder": "Optional note for our team",
     "submit": "Submit withdrawal request",
     "submitting": "Submitting...",
     "successBanner": "Withdrawal request submitted. The amount is reserved from your available balance pending admin review.",
@@ -334,6 +449,7 @@
     "historyEmpty": "You haven't submitted any withdrawals yet.",
     "table": {
       "amount": "Amount",
+      "network": "Network",
       "status": "Status",
       "address": "Address",
       "date": "Date"
@@ -348,6 +464,8 @@
       "amountRequired": "Please enter a valid amount greater than zero.",
       "exceedsAvailable": "Amount exceeds your available balance of {available} USDT.",
       "addressRequired": "Please enter a valid destination wallet address.",
+      "addressInvalid": "Invalid {network} wallet address. Check the network and try again.",
+      "networkRequired": "Please select a withdrawal network.",
       "generic": "Could not submit your withdrawal request. Please try again."
     }
   },
@@ -359,7 +477,14 @@
     "addressLabel": "Your Unique Deposit Address",
     "copy": "Copy Address",
     "copied": "Copied!",
-    "listeningHint": "Your balance updates within 30 seconds.",
+    "listeningHint": "Your balance updates within 30 seconds after on-chain confirmation.",
+    "warningsTitle": "Important deposit warnings",
+    "warnings": {
+      "usdtOnly": "Send USDT only — other tokens will be lost.",
+      "matchNetwork": "Use {network} only for this address. Do not switch networks after copying.",
+      "wrongNetwork": "Sending on the wrong network can permanently lose your funds.",
+      "minAmount": "Minimum credited deposit is typically 1 USDT (smaller amounts may not sweep)."
+    },
     "historyTitle": "Deposit History",
     "historyEmpty": "No deposits detected yet. Send USDT to the address above.",
     "table": {
@@ -383,6 +508,7 @@
       "brand": "TrustCoin Admin",
       "subtitle": "Management console",
       "overview": "Overview",
+      "trades": "Trades",
       "withdrawals": "Withdrawals",
       "deposits": "Deposits",
       "users": "Users",
@@ -433,6 +559,45 @@
       "goWithdrawals": "Pending withdrawals",
       "goUsers": "Manage users"
     },
+    "trades": {
+      "eyebrow": "Desk signals",
+      "title": "Publish trades",
+      "subtitle": "Add market trades that appear instantly on every user’s Trades board.",
+      "autoRefresh": "This page refreshes every 10 seconds.",
+      "empty": "No trades yet — publish the first signal above.",
+      "created": "Trade published to the user board.",
+      "confirmDelete": "Delete this trade permanently?",
+      "form": {
+        "symbol": "Symbol",
+        "side": "Side",
+        "amount": "Amount ($)",
+        "outcome": "Result",
+        "note": "Note (optional)",
+        "notePlaceholder": "e.g. scalp on London open",
+        "submit": "Publish trade",
+        "submitting": "Publishing…"
+      },
+      "side": { "buy": "Buy", "sell": "Sell" },
+      "outcome": {
+        "profitable": "Profitable",
+        "loss": "Loss",
+        "pending": "Pending"
+      },
+      "columns": {
+        "symbol": "Symbol",
+        "side": "Side",
+        "amount": "Amount",
+        "outcome": "Result",
+        "status": "Visibility",
+        "actions": "Actions"
+      },
+      "status": { "active": "Visible", "hidden": "Hidden" },
+      "actions": { "hide": "Hide", "show": "Show", "delete": "Delete" },
+      "errors": {
+        "invalid": "Enter a valid symbol and amount.",
+        "generic": "Could not save the trade. Please try again."
+      }
+    },
     "withdrawals": {
       "eyebrow": "Cash-out queue",
       "title": "Pending Withdrawals",
@@ -448,6 +613,7 @@
       "table": {
         "user": "User",
         "amount": "Amount",
+        "network": "Network",
         "address": "Wallet address",
         "date": "Requested",
         "actions": "Actions"
@@ -541,16 +707,17 @@
     "packages": {
       "eyebrow": "Yield control",
       "title": "Package Profit Rates",
-      "subtitle": "Update daily profit percentages live. Changes apply to new purchases; active investments keep their snapshotted rate.",
+      "subtitle": "Update daily profit percentages live for all durations (7 days, 1 / 3 / 6 months). Changes apply to new purchases; active investments keep their snapshotted rate.",
       "save": "Save rate",
       "saving": "Saving…",
       "saved": "Updated {name}.",
-      "note": "Rates are stored as daily % (e.g. 0.7500 = 0.75% per day). No redeploy required.",
+      "note": "Rates are stored as daily % (e.g. 1.4000 = 1.4% per day). Period return shown to users = daily × duration days. No redeploy required.",
       "table": {
         "name": "Package",
         "amount": "Amount",
         "duration": "Duration",
         "rate": "Daily profit %",
+        "periodReturn": "Period return",
         "active": "Active locks",
         "actions": "Actions"
       },

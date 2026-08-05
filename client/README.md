@@ -111,3 +111,12 @@ A two-step, dark "crypto" themed flow:
 In non-production backend environments, the OTP code returned by the API is
 auto-filled into the input with a visible "development mode" notice, so the
 whole flow can be tested end-to-end without a real mailbox.
+
+## Deploy (Render)
+
+The frontend is a static export (`output: "export"`) and is deployed via
+Render. Pushing to `main` triggers `.github/workflows/render-deploy.yml`
+when `RENDER_DEPLOY_HOOK` is configured.
+
+Public SEO files: `public/robots.txt` and `public/sitemap.xml` (for
+`https://trustcoin.cc`).
