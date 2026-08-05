@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { AuthChromeHeader } from "@/components/AuthChromeHeader";
 import { TrustComplianceBlock } from "@/components/TrustCompliance";
 import { getApiErrorMessage, getApiErrorKey } from "@/lib/api";
@@ -36,6 +36,15 @@ function LoginForm() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const reason = searchParams.get("reason");
+    if (reason === "session") {
+      setErrorMessage(t("sessionExpired"));
+    } else if (reason === "suspended") {
+      setErrorMessage(t("accountSuspended"));
+    }
+  }, [searchParams, t]);
 
   const isEmailValid = email.length === 0 || EMAIL_REGEX.test(email.trim());
 
@@ -78,6 +87,11 @@ function LoginForm() {
       if (key === "auth.account_not_verified") {
         pushToast(getApiErrorMessage(error, t("errors.generic")), "info");
         router.push(`/already-registered/verify-email?email=${encodeURIComponent(trimmedEmail.toLowerCase())}`);
+        return;
+      }
+      if (key === "auth.account_pending") {
+        pushToast(getApiErrorMessage(error, t("errors.generic")), "info");
+        router.push("/account-pending");
         return;
       }
       setErrorMessage(getApiErrorMessage(error, t("errors.generic")));

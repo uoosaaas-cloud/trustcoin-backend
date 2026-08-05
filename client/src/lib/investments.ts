@@ -82,6 +82,44 @@ export function getDaysRemaining(
   return Math.max(0, Math.ceil((end - Date.now()) / 86_400_000));
 }
 
+/**
+ * Live accruing total earned for active packages.
+ * Uses continuous time since start (capped at end), never below server total_earned.
+ */
+export function getLiveTotalEarned(
+  inv: Pick<
+    InvestmentRecord,
+    "status" | "start_date" | "end_date" | "current_amount" | "daily_profit_percent" | "total_earned"
+  >,
+  nowMs = Date.now()
+): number {
+  const serverTotal = Number(inv.total_earned);
+  if (inv.status !== "ACTIVE") {
+    return Number.isFinite(serverTotal) ? serverTotal : 0;
+  }
+
+  const start = new Date(inv.start_date).getTime();
+  const end = new Date(inv.end_date).getTime();
+  const amount = Number(inv.current_amount);
+  const dailyPct = Number(inv.daily_profit_percent);
+
+  if (
+    !Number.isFinite(start) ||
+    !Number.isFinite(end) ||
+    !Number.isFinite(amount) ||
+    !Number.isFinite(dailyPct) ||
+    end <= start
+  ) {
+    return Number.isFinite(serverTotal) ? serverTotal : 0;
+  }
+
+  const elapsedMs = Math.min(Math.max(0, nowMs - start), end - start);
+  const elapsedDays = elapsedMs / 86_400_000;
+  const projected = amount * (dailyPct / 100) * elapsedDays;
+  const safeServer = Number.isFinite(serverTotal) ? serverTotal : 0;
+  return Math.max(safeServer, projected);
+}
+
 export async function purchaseInvestment(payload: PurchaseInvestmentPayload) {
   const { data } = await api.post<ApiSuccessResponse<PurchaseInvestmentResponse>>(
     "/investments/purchase",

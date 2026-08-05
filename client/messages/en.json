@@ -111,11 +111,13 @@
     "title": "Log in to your account",
     "subtitle": "Enter your credentials to access your TrustCoin dashboard.",
     "emailLabel": "Email address",
-    "emailPlaceholder": "you@example.com",
+    "emailPlaceholder": "name@email.com",
     "passwordLabel": "Password",
     "passwordPlaceholder": "Enter your password",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
+    "sessionExpired": "Your session expired. Please sign in again.",
+    "accountSuspended": "Your account has been suspended. Contact support if you need help.",
     "forgotPassword": "Forgot password?",
     "submit": "Log in",
     "submitting": "Logging in...",
@@ -226,7 +228,23 @@
     "about": "About Us",
     "logout": "Log out",
     "available": "Available",
-    "locked": "Locked"
+    "locked": "Locked",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "support": "Support"
+  },
+  "accountPending": {
+    "eyebrow": "Under review",
+    "title": "Your account is pending approval",
+    "body": "Thanks for registering. Our team is reviewing your KYC documents. You will be able to sign in once your account is approved.",
+    "timeline": "Reviews usually complete within 24 hours during business days.",
+    "supportLabel": "Need help? Email support",
+    "backToLogin": "Back to login"
+  },
+  "support": {
+    "label": "Customer support",
+    "email": "support@trustcoin.cc",
+    "hint": "Contact us anytime for deposit, withdrawal, or account help."
   },
   "about": {
     "eyebrow": "About the platform",
@@ -321,6 +339,8 @@
     "durationLabel": "Duration",
     "days": "days",
     "investNow": "Invest Now",
+    "needMore": "Need {amount} more USDT",
+    "depositToInvest": "Deposit to invest",
     "successBanner": "Package purchased successfully. Your wallet balances have been updated.",
     "duration": {
       "duration7d": "7 Days",
@@ -387,18 +407,26 @@
     "eyebrow": "Cash out",
     "title": "Withdraw Funds",
     "subtitle": "You can only withdraw from your available balance. Locked package capital stays invested until maturity.",
+    "warningsTitle": "Before you withdraw",
+    "warnings": {
+      "usdtOnly": "Withdrawals are paid in USDT only.",
+      "matchNetwork": "Select the exact network your wallet uses (TRC20 / BEP20 / ERC20).",
+      "wrongNetwork": "A wrong network or address format can permanently lose funds."
+    },
     "availableLabel": "Available for Withdrawal",
     "availableHint": "This is the maximum you can request. Pending requests temporarily reserve funds until an admin reviews them.",
     "lockedNote": "{amount} USDT remains locked in active packages and cannot be withdrawn.",
+    "networkLabel": "Select Network",
+    "networkHint": "Your address must match {network}. Double-check before confirming.",
     "amountLabel": "Withdrawal amount (USDT)",
     "amountPlaceholder": "e.g. 50.00",
     "maxButton": "Max",
     "maxHint": "Maximum: {available} USDT",
     "addressLabel": "Destination wallet address",
-    "addressPlaceholder": "Paste your USDT wallet address",
+    "addressPlaceholder": "Paste your USDT {network} address",
     "noteLabel": "Note",
     "noteOptional": "optional",
-    "notePlaceholder": "e.g. TRC20 personal wallet",
+    "notePlaceholder": "Optional note for our team",
     "submit": "Submit withdrawal request",
     "submitting": "Submitting...",
     "successBanner": "Withdrawal request submitted. The amount is reserved from your available balance pending admin review.",
@@ -421,6 +449,7 @@
     "historyEmpty": "You haven't submitted any withdrawals yet.",
     "table": {
       "amount": "Amount",
+      "network": "Network",
       "status": "Status",
       "address": "Address",
       "date": "Date"
@@ -435,6 +464,8 @@
       "amountRequired": "Please enter a valid amount greater than zero.",
       "exceedsAvailable": "Amount exceeds your available balance of {available} USDT.",
       "addressRequired": "Please enter a valid destination wallet address.",
+      "addressInvalid": "Invalid {network} wallet address. Check the network and try again.",
+      "networkRequired": "Please select a withdrawal network.",
       "generic": "Could not submit your withdrawal request. Please try again."
     }
   },
@@ -446,7 +477,14 @@
     "addressLabel": "Your Unique Deposit Address",
     "copy": "Copy Address",
     "copied": "Copied!",
-    "listeningHint": "Your balance updates within 30 seconds.",
+    "listeningHint": "Your balance updates within 30 seconds after on-chain confirmation.",
+    "warningsTitle": "Important deposit warnings",
+    "warnings": {
+      "usdtOnly": "Send USDT only — other tokens will be lost.",
+      "matchNetwork": "Use {network} only for this address. Do not switch networks after copying.",
+      "wrongNetwork": "Sending on the wrong network can permanently lose your funds.",
+      "minAmount": "Minimum credited deposit is typically 1 USDT (smaller amounts may not sweep)."
+    },
     "historyTitle": "Deposit History",
     "historyEmpty": "No deposits detected yet. Send USDT to the address above.",
     "table": {
@@ -575,6 +613,7 @@
       "table": {
         "user": "User",
         "amount": "Amount",
+        "network": "Network",
         "address": "Wallet address",
         "date": "Requested",
         "actions": "Actions"

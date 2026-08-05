@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { AppNav } from "@/components/AppNav";
+import { AuthLoading } from "@/components/AuthLoading";
 import { MarketOverview } from "@/components/MarketOverview";
 import { MyInvestments } from "@/components/MyInvestments";
 import { TrustComplianceBlock } from "@/components/TrustCompliance";
@@ -45,7 +46,7 @@ export default function DashboardPage() {
   }, [isAuthChecked]);
 
   if (!isAuthChecked) {
-    return null;
+    return <AuthLoading />;
   }
 
   const cards: BalanceCard[] = wallet

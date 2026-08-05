@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { AppNav } from "@/components/AppNav";
+import { AuthLoading } from "@/components/AuthLoading";
 import { CopyButton } from "@/components/CopyButton";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useSilentPoll } from "@/hooks/useSilentPoll";
@@ -166,7 +167,7 @@ export default function DepositPage() {
   const isLoadingActiveAddress = Boolean(selectedNetwork) && !activeAddress && !activeAddressError;
 
   if (!isAuthChecked) {
-    return null;
+    return <AuthLoading />;
   }
 
   return (
@@ -243,6 +244,16 @@ export default function DepositPage() {
               )}
             </div>
           )}
+
+          <div className="mt-6 rounded-2xl border border-amber-400/25 bg-amber-500/10 px-4 py-3.5 text-[13px] leading-relaxed text-amber-50">
+            <p className="font-semibold text-amber-100">{t("warningsTitle")}</p>
+            <ul className="mt-2 list-disc space-y-1.5 ps-5 text-amber-100/90">
+              <li>{t("warnings.usdtOnly")}</li>
+              <li>{t("warnings.matchNetwork", { network: selectedNetwork ?? "TRC20" })}</li>
+              <li>{t("warnings.wrongNetwork")}</li>
+              <li>{t("warnings.minAmount")}</li>
+            </ul>
+          </div>
 
           <p className="mt-6 text-center text-sm font-medium text-slate-400">
             {t("listeningHint")}

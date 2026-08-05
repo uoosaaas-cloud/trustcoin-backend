@@ -153,9 +153,22 @@ export function TrustRegulators({ compact = false }: { compact?: boolean }) {
 
 export function TrustComplianceBlock({ compact = false }: { compact?: boolean }) {
   return (
-    <div className={`space-y-4 ${compact ? "" : "sm:space-y-5"}`} dir="ltr" lang="en">
-      <AiTradingBadge compact={compact} />
-      <TrustRegulators compact={compact} />
+    <div className={`space-y-4 ${compact ? "" : "sm:space-y-5"}`}>
+      <div dir="ltr" lang="en">
+        <AiTradingBadge compact={compact} />
+        <div className={compact ? "mt-4" : "mt-5"}>
+          <TrustRegulators compact={compact} />
+        </div>
+      </div>
+      <a
+        href="mailto:support@trustcoin.cc"
+        className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/14 bg-white/[0.06] px-4 py-3 text-sm text-slate-300 transition hover:border-cyan-300/30 hover:bg-white/[0.09]"
+      >
+        <span>Customer support</span>
+        <span dir="ltr" className="font-semibold text-cyan-200">
+          support@trustcoin.cc
+        </span>
+      </a>
     </div>
   );
 }

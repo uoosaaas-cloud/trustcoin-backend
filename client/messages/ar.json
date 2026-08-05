@@ -111,11 +111,13 @@
     "title": "تسجيل الدخول إلى حسابك",
     "subtitle": "أدخل بيانات حسابك للوصول إلى غرفة التداول في TrustCoin.",
     "emailLabel": "البريد الإلكتروني",
-    "emailPlaceholder": "you@example.com",
+    "emailPlaceholder": "name@email.com",
     "passwordLabel": "كلمة المرور",
     "passwordPlaceholder": "أدخل كلمة المرور",
     "showPassword": "إظهار كلمة المرور",
     "hidePassword": "إخفاء كلمة المرور",
+    "sessionExpired": "انتهت جلستك. يرجى تسجيل الدخول مجدداً.",
+    "accountSuspended": "تم تعليق حسابك. تواصل مع الدعم إذا احتجت مساعدة.",
     "forgotPassword": "نسيت كلمة المرور؟",
     "submit": "تسجيل الدخول",
     "submitting": "جارٍ تسجيل الدخول...",
@@ -226,7 +228,23 @@
     "about": "من نحن",
     "logout": "تسجيل الخروج",
     "available": "متاح",
-    "locked": "مقفل"
+    "locked": "مقفل",
+    "openMenu": "فتح القائمة",
+    "closeMenu": "إغلاق القائمة",
+    "support": "الدعم"
+  },
+  "accountPending": {
+    "eyebrow": "قيد المراجعة",
+    "title": "حسابك بانتظار الموافقة",
+    "body": "شكراً لتسجيلك. فريقنا يراجع مستندات التحقق الخاصة بك. ستتمكن من تسجيل الدخول بعد اعتماد الحساب.",
+    "timeline": "عادةً تكتمل المراجعة خلال 24 ساعة في أيام العمل.",
+    "supportLabel": "تحتاج مساعدة؟ راسل الدعم",
+    "backToLogin": "العودة لتسجيل الدخول"
+  },
+  "support": {
+    "label": "خدمة العملاء",
+    "email": "support@trustcoin.cc",
+    "hint": "تواصل معنا في أي وقت بخصوص الإيداع أو السحب أو الحساب."
   },
   "about": {
     "eyebrow": "عن المنصة",
@@ -321,6 +339,8 @@
     "durationLabel": "المدة",
     "days": "يوم",
     "investNow": "استثمر الآن",
+    "needMore": "تحتاج {amount} USDT إضافية",
+    "depositToInvest": "أودع للاستثمار",
     "successBanner": "تم شراء الباقة بنجاح. تم تحديث أرصدة محفظتك.",
     "duration": {
       "duration7d": "7 أيام",
@@ -387,18 +407,26 @@
     "eyebrow": "سحب الأموال",
     "title": "سحب الأموال",
     "subtitle": "يمكنك السحب فقط من رصيدك المتاح. رأس مال الباقات المقفلة يبقى مستثمراً حتى الاستحقاق.",
+    "warningsTitle": "قبل السحب",
+    "warnings": {
+      "usdtOnly": "تُصرف عمليات السحب بعملة USDT فقط.",
+      "matchNetwork": "اختر الشبكة الصحيحة لمحفظتك (TRC20 / BEP20 / ERC20).",
+      "wrongNetwork": "اختيار شبكة أو عنوان خاطئ قد يؤدي لفقدان الأموال نهائياً."
+    },
     "availableLabel": "متاح للسحب",
     "availableHint": "هذا هو الحد الأقصى الذي يمكنك طلبه. الطلبات المعلقة تحجز المبلغ مؤقتاً حتى يراجعه المشرف.",
     "lockedNote": "{amount} USDT لا يزال مقفلاً في باقات نشطة ولا يمكن سحبه.",
+    "networkLabel": "اختر الشبكة",
+    "networkHint": "يجب أن يطابق العنوان شبكة {network}. تحقق جيداً قبل التأكيد.",
     "amountLabel": "مبلغ السحب (USDT)",
     "amountPlaceholder": "مثال: 50.00",
     "maxButton": "الحد الأقصى",
     "maxHint": "الحد الأقصى: {available} USDT",
     "addressLabel": "عنوان المحفظة الوجهة",
-    "addressPlaceholder": "الصق عنوان محفظة USDT الخاصة بك",
+    "addressPlaceholder": "الصق عنوان USDT على شبكة {network}",
     "noteLabel": "ملاحظة",
     "noteOptional": "اختياري",
-    "notePlaceholder": "مثال: محفظة شخصية TRC20",
+    "notePlaceholder": "ملاحظة اختيارية لفريق الدعم",
     "submit": "إرسال طلب السحب",
     "submitting": "جارٍ الإرسال...",
     "successBanner": "تم إرسال طلب السحب. تم حجز المبلغ من رصيدك المتاح بانتظار مراجعة المشرف.",
@@ -421,6 +449,7 @@
     "historyEmpty": "لم تقم بإرسال أي طلبات سحب بعد.",
     "table": {
       "amount": "المبلغ",
+      "network": "الشبكة",
       "status": "الحالة",
       "address": "العنوان",
       "date": "التاريخ"
@@ -435,6 +464,8 @@
       "amountRequired": "يرجى إدخال مبلغ صحيح أكبر من الصفر.",
       "exceedsAvailable": "المبلغ يتجاوز رصيدك المتاح {available} USDT.",
       "addressRequired": "يرجى إدخال عنوان محفظة وجهة صالح.",
+      "addressInvalid": "عنوان محفظة {network} غير صالح. تحقق من الشبكة وحاول مجدداً.",
+      "networkRequired": "يرجى اختيار شبكة السحب.",
       "generic": "تعذر إرسال طلب السحب. يرجى المحاولة مرة أخرى."
     }
   },
@@ -446,7 +477,14 @@
     "addressLabel": "عنوان إيداعك الفريد",
     "copy": "نسخ العنوان",
     "copied": "تم النسخ!",
-    "listeningHint": "يُحدَّث رصيدك خلال 30 ثانية.",
+    "listeningHint": "يتحدّث رصيدك خلال 30 ثانية بعد تأكيد المعاملة على السلسلة.",
+    "warningsTitle": "تحذيرات مهمة للإيداع",
+    "warnings": {
+      "usdtOnly": "أرسل USDT فقط — أي عملة أخرى ستُفقد.",
+      "matchNetwork": "استخدم شبكة {network} فقط لهذا العنوان. لا تغيّر الشبكة بعد النسخ.",
+      "wrongNetwork": "الإرسال على شبكة خاطئة قد يؤدي لفقدان أموالك نهائياً.",
+      "minAmount": "الحد الأدنى للإيداع المعتمد عادةً 1 USDT (المبالغ الأصغر قد لا تُكنس)."
+    },
     "historyTitle": "سجل الإيداعات",
     "historyEmpty": "لم يُرصد أي إيداع بعد. أرسل USDT إلى العنوان أعلاه.",
     "table": {
@@ -575,6 +613,7 @@
       "table": {
         "user": "المستخدم",
         "amount": "المبلغ",
+        "network": "الشبكة",
         "address": "عنوان المحفظة",
         "date": "تاريخ الطلب",
         "actions": "إجراءات"

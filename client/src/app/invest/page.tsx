@@ -3,7 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { AppNav } from "@/components/AppNav";
+import { AuthLoading } from "@/components/AuthLoading";
 import { InvestModal } from "@/components/InvestModal";
 import { MyInvestments } from "@/components/MyInvestments";
 import { TrustComplianceBlock } from "@/components/TrustCompliance";
@@ -95,7 +97,7 @@ export default function InvestPage() {
   }
 
   if (!isAuthChecked) {
-    return null;
+    return <AuthLoading />;
   }
 
   const tiers = groupPackagesByTier(packages);
@@ -195,14 +197,29 @@ export default function InvestPage() {
                           </div>
                         </dl>
 
-                        <button
-                          type="button"
-                          disabled={Number(availableBalance) < Number(pkg.amount)}
-                          onClick={() => openInvestModal(pkg)}
-                          className="mt-5 w-full rounded-xl bg-gradient-to-r from-cyan-300 to-cyan-200 py-3 text-sm font-bold text-[#041016] shadow-[0_8px_24px_rgba(34,211,238,0.2)] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                          {t("investNow")}
-                        </button>
+                        {Number(availableBalance) < Number(pkg.amount) ? (
+                          <div className="mt-5 space-y-2">
+                            <p className="text-center text-[12px] text-amber-200/90">
+                              {t("needMore", {
+                                amount: formatUsdt(Number(pkg.amount) - Number(availableBalance)),
+                              })}
+                            </p>
+                            <Link
+                              href="/deposit"
+                              className="inline-flex w-full items-center justify-center rounded-xl border border-cyan-300/30 bg-cyan-400/10 py-3 text-sm font-bold text-cyan-100 transition hover:bg-cyan-400/15"
+                            >
+                              {t("depositToInvest")}
+                            </Link>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => openInvestModal(pkg)}
+                            className="mt-5 w-full rounded-xl bg-gradient-to-r from-cyan-300 to-cyan-200 py-3 text-sm font-bold text-[#041016] shadow-[0_8px_24px_rgba(34,211,238,0.2)] transition hover:brightness-105"
+                          >
+                            {t("investNow")}
+                          </button>
+                        )}
                       </div>
                     );
                   })}

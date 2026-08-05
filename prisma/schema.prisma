@@ -381,6 +381,8 @@ model Transaction {
   status          TransactionStatus
   tx_hash         String?           @unique @db.VarChar(191)
   payment_address String?           @db.VarChar(255)
+  /// Withdrawal destination network (TRC20 / BEP20 / ERC20). Null on older rows.
+  network         String?           @db.VarChar(20)
   private_key     String?           @db.Text // Encrypted at rest — never store plaintext keys.
   note            String?           @db.Text
   created_at      DateTime          @default(now())

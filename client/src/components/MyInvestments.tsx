@@ -11,6 +11,7 @@ import {
   getDailyProfitUsdt,
   getDaysRemaining,
   getInvestmentProgress,
+  getLiveTotalEarned,
   getMyInvestments,
   getPeriodReturnPercent,
   type InvestmentRecord,
@@ -145,6 +146,25 @@ export function MyInvestments({ compact = false, refreshToken = 0 }: MyInvestmen
   );
 }
 
+function useLiveTotalEarned(investment: InvestmentRecord): number {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (investment.status !== "ACTIVE") return;
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, [investment.status, investment.id]);
+
+  return getLiveTotalEarned(investment, now);
+}
+
+function formatLiveUsdt(value: number): string {
+  return value.toLocaleString("en-US", {
+    minimumFractionDigits: 4,
+    maximumFractionDigits: 6,
+  });
+}
+
 function InvestmentCard({
   investment,
   durationLabel,
@@ -161,6 +181,7 @@ function InvestmentCard({
   const progress = getInvestmentProgress(investment);
   const daysLeft = getDaysRemaining(investment);
   const dailyProfit = getDailyProfitUsdt(investment);
+  const liveEarned = useLiveTotalEarned(investment);
 
   return (
     <article className="group relative overflow-hidden rounded-2xl border border-white/14 bg-white/[0.08] p-5 backdrop-blur-sm transition duration-200 hover:border-cyan-300/35 hover:bg-white/[0.11] sm:p-6">
@@ -196,7 +217,13 @@ function InvestmentCard({
 
       <div className="relative mt-5 grid grid-cols-2 gap-3">
         <Metric label={t("dailyProfit")} value={`+${formatUsdt(dailyProfit)}`} suffix="USDT" accent />
-        <Metric label={t("totalEarned")} value={formatUsdt(investment.total_earned)} suffix="USDT" />
+        <Metric
+          label={t("totalEarned")}
+          value={isActive ? formatLiveUsdt(liveEarned) : formatUsdt(investment.total_earned)}
+          suffix="USDT"
+          accent={isActive}
+          live={isActive}
+        />
         <Metric label={periodReturnLabel} value={`${periodReturn}%`} />
         <Metric
           label={isActive ? t("daysLeft") : t("matured")}
@@ -233,17 +260,33 @@ function Metric({
   value,
   suffix,
   accent = false,
+  live = false,
 }: {
   label: string;
   value: string;
   suffix?: string;
   accent?: boolean;
+  live?: boolean;
 }) {
   return (
     <div className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</p>
-      <p className={`mt-1 text-sm font-bold tracking-tight ${accent ? "text-cyan-200" : "text-white"}`}>
-        {value}
+      <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+        {label}
+        {live ? (
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
+          </span>
+        ) : null}
+      </p>
+      <p
+        className={`mt-1 font-bold tracking-tight tabular-nums ${
+          live ? "text-base text-cyan-200 transition-all duration-300" : "text-sm"
+        } ${accent && !live ? "text-cyan-200" : ""} ${!accent && !live ? "text-white" : ""} ${
+          accent && live ? "" : ""
+        } ${!live && !accent ? "text-white" : ""}`}
+      >
+        <span className={live || accent ? "text-cyan-200" : "text-white"}>{value}</span>
         {suffix ? <span className="ms-1 text-[11px] font-medium text-slate-400">{suffix}</span> : null}
       </p>
     </div>

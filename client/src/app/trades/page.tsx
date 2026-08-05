@@ -121,7 +121,7 @@ export default function UserTradesPage() {
                     </td>
                     <td className={`${bodyCellClass} font-semibold text-slate-100`}>
                       <span dir="ltr" className="inline-block tabular-nums">
-                        {formatUsdt(trade.amount)}$
+                        {formatUsdt(trade.amount)} USDT
                       </span>
                     </td>
                     <td className={bodyCellClass}>

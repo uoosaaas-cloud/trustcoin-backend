@@ -146,7 +146,17 @@ export default function LandingPage() {
       </section>
 
       <footer className="relative z-10 border-t border-white/10 px-5 py-8 text-center text-xs text-slate-500 sm:px-8">
-        © {new Date().getFullYear()} {tBrand("name")} · {tBrand("tagline")}
+        <p>
+          © {new Date().getFullYear()} {tBrand("name")} · {tBrand("tagline")}
+        </p>
+        <p className="mt-2">
+          <a
+            href="mailto:support@trustcoin.cc"
+            className="font-medium text-cyan-300/90 transition hover:text-cyan-200"
+          >
+            support@trustcoin.cc
+          </a>
+        </p>
       </footer>
     </main>
   );

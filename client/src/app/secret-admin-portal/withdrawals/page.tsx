@@ -146,6 +146,7 @@ export default function AdminWithdrawalsPage() {
                 <tr>
                   <th className="px-4 py-3 font-medium">{t("table.user")}</th>
                   <th className="px-4 py-3 font-medium">{t("table.amount")}</th>
+                  <th className="px-4 py-3 font-medium">{t("table.network")}</th>
                   <th className="min-w-[280px] px-4 py-3 font-medium">{t("table.address")}</th>
                   <th className="px-4 py-3 font-medium">{t("table.date")}</th>
                   <th className="px-4 py-3 font-medium">{t("table.actions")}</th>
@@ -166,6 +167,9 @@ export default function AdminWithdrawalsPage() {
                       </td>
                       <td className="whitespace-nowrap px-4 py-3 align-top font-semibold text-cyan-300">
                         {formatUsdt(row.amount)} USDT
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 align-top font-mono text-xs text-cyan-100">
+                        {row.network ?? "—"}
                       </td>
                       <td className="px-4 py-3 align-top">
                         {address ? (
