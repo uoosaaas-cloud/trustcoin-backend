@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { TrustCoinLogo } from "@/components/TrustCoinLogo";
 import { getApiErrorMessage, getStoredAuthToken } from "@/lib/api";
 import { loginAdmin, verifyAdminLoginOtp } from "@/lib/admin";
 import { ADMIN_ROUTES } from "@/lib/adminPaths";
@@ -102,12 +102,7 @@ export default function AdminLoginPage() {
   return (
     <div className="page-shell flex flex-col">
       <header className="relative z-10 flex items-center justify-between px-6 py-6 sm:px-10">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-brand-500 text-lg font-bold text-white shadow-md">
-            A
-          </span>
-          <span className="text-lg font-semibold text-white">TrustCoin Admin</span>
-        </Link>
+        <TrustCoinLogo href="/" name="TrustCoin Admin" />
         <LanguageSwitcher />
       </header>
 

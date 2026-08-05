@@ -1,7 +1,7 @@
 {
   "brand": {
     "name": "TrustCoin",
-    "tagline": "Invest with confidence, grow with trust."
+    "tagline": "Forex trading & investment with AXS confidence."
   },
   "languageSwitcher": {
     "label": "Language",
@@ -9,13 +9,13 @@
     "ar": "العربية"
   },
   "landing": {
-    "heroTitle": "Secure crypto growth, built for serious investors.",
-    "heroSubtitle": "TrustCoin combines disciplined daily yields, verified accounts, and protected wallets — so your capital compounds with clarity.",
+    "heroTitle": "Certified, trusted forex trading & investment robot",
+    "heroSubtitle": "Officially presented by AXS. We provide a secure forex trading environment and advanced tools to help you get the most from your investments.",
     "login": "Sign in",
     "register": "Create account",
     "goDashboard": "Open dashboard",
-    "profitTitle": "Designed for measurable returns",
-    "profitBody": "Choose investment packages with transparent daily profit rates, track locked and available balances in real time, and grow through referrals when your network invests.",
+    "profitTitle": "Structured investing with live trading signals",
+    "profitBody": "Choose investment packages with transparent daily returns, follow forex trades published by the AXS desk, and track your available and locked balance in real time.",
     "profitPoints": {
       "daily": {
         "label": "Daily yield distribution",
@@ -47,7 +47,7 @@
       }
     },
     "detailsTitle": "How TrustCoin works",
-    "detailsBody": "Register, verify your email, wait for approval, deposit USDT, invest in a package, and follow live trade signals published by the team. Withdrawals are reviewed by admins before completion."
+    "detailsBody": "Register, verify your email, wait for approval, deposit USDT, invest in a package, and follow trading signals and trades published by the AXS robot. Withdrawals are reviewed by admins before completion."
   },
   "trades": {
     "eyebrow": "Live signals",
@@ -74,7 +74,7 @@
   "register": {
     "eyebrow": "Create your account",
     "title": "Start your investment journey",
-    "subtitle": "Join TrustCoin and unlock secure, high-yield crypto investment plans.",
+    "subtitle": "Join TrustCoin and invest through secure forex packages powered by AXS.",
     "emailLabel": "Email address",
     "emailPlaceholder": "you@example.com",
     "passwordLabel": "Password",

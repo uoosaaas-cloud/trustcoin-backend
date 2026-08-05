@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { TrustCoinLogo } from "@/components/TrustCoinLogo";
 import { clearAuthSession, getStoredUser } from "@/lib/auth";
 import { ADMIN_ROUTES } from "@/lib/adminPaths";
 
@@ -32,15 +33,7 @@ export function AdminNav() {
     <header className="relative z-10 border-b border-white/10 bg-[#071018]/80 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6">
         <div className="flex items-center gap-6">
-          <Link href={ADMIN_ROUTES.home} className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-brand-500 text-lg font-bold text-[#041016] shadow-[0_0_28px_rgba(34,211,238,0.3)]">
-              A
-            </span>
-            <div>
-              <p className="text-sm font-semibold text-white">{t("brand")}</p>
-              <p className="text-[11px] text-slate-400">{t("subtitle")}</p>
-            </div>
-          </Link>
+          <TrustCoinLogo href={ADMIN_ROUTES.home} name={t("brand")} subtitle={t("subtitle")} />
 
           <nav className="hidden items-center gap-1 sm:flex">
             {NAV_ITEMS.map((item) => {

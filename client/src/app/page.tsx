@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { TrustCoinLogo } from "@/components/TrustCoinLogo";
 import { getStoredAuthToken } from "@/lib/api";
 
 export default function LandingPage() {
@@ -38,12 +39,7 @@ export default function LandingPage() {
       />
 
       <header className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-5 py-6 sm:px-8">
-        <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-brand-500 text-lg font-bold text-[#041016] shadow-[0_0_28px_rgba(34,211,238,0.35)]">
-            T
-          </span>
-          <span className="text-lg font-semibold tracking-tight text-white">{tBrand("name")}</span>
-        </div>
+        <TrustCoinLogo href="/" name={tBrand("name")} size="lg" />
         <div className="flex items-center gap-3">
           <LanguageSwitcher />
           {authed ? (

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none" role="img" aria-label="TrustCoin">
+  <defs>
+    <linearGradient id="tc-logo-grad" x1="4" y1="4" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22d3ee"/>
+      <stop stop-color="#ef4444"/>
+    </linearGradient>
+  </defs>
+  <rect width="40" height="40" rx="10" fill="url(#tc-logo-grad)"/>
+  <circle cx="20" cy="20" r="11.5" stroke="#041016" stroke-width="2.2" opacity="0.92"/>
+  <circle cx="20" cy="20" r="7.5" fill="#041016" opacity="0.88"/>
+  <path d="M9.5 27.5L14.5 22.5L18.5 24.5L25 15.5L30.5 18.5" stroke="#67e8f9" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M16 14.5H24M20 14.5V18.5" stroke="#67e8f9" stroke-width="1.8" stroke-linecap="round"/>
+</svg>

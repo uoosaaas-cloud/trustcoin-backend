@@ -26,18 +26,19 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://trustcoin.cc";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "TrustCoin — Invest with Confidence",
+    default: "TrustCoin — Forex Trading & Investment by AXS",
     template: "%s | TrustCoin",
   },
   description:
-    "TrustCoin is a secure, multilingual crypto investment platform. Deposit USDT, choose an investment package, and track daily returns in English or Arabic.",
+    "TrustCoin is an AXS-powered forex trading and investment platform. Deposit USDT, choose a package, follow live trading signals, and track returns in English or Arabic.",
   keywords: [
     "TrustCoin",
-    "crypto investment",
-    "USDT",
+    "forex trading",
+    "AXS",
     "investment packages",
-    "daily returns",
-    "استثمار كريبتو",
+    "trading robot",
+    "تداول فوركس",
+    "استثمار",
   ],
   alternates: {
     canonical: "/",
@@ -48,15 +49,15 @@ export const metadata: Metadata = {
     alternateLocale: ["ar_SA"],
     url: SITE_URL,
     siteName: "TrustCoin",
-    title: "TrustCoin — Invest with Confidence",
+    title: "TrustCoin — Forex Trading & Investment by AXS",
     description:
-      "Secure USDT investment packages with transparent returns. Register, deposit, invest, and grow your capital.",
+      "Secure forex investment packages powered by AXS. Register, deposit, invest, and follow live trading signals.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "TrustCoin — Invest with Confidence",
+    title: "TrustCoin — Forex Trading & Investment by AXS",
     description:
-      "Secure USDT investment packages with transparent returns. Register, deposit, invest, and grow your capital.",
+      "Secure forex investment packages powered by AXS. Register, deposit, invest, and follow live trading signals.",
   },
   robots: {
     index: true,
@@ -65,6 +66,10 @@ export const metadata: Metadata = {
       index: true,
       follow: true,
     },
+  },
+  icons: {
+    icon: [{ url: "/logo-icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/logo-icon.svg", type: "image/svg+xml" }],
   },
   ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
     ? {

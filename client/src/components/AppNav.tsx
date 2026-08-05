@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { AboutPlatformModal } from "@/components/AboutPlatformModal";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { TrustCoinLogo } from "@/components/TrustCoinLogo";
 import { useWallet } from "@/contexts/WalletContext";
 import { clearAuthSession } from "@/lib/auth";
 import { formatUsdt } from "@/lib/format";
@@ -26,6 +27,7 @@ export function AppNav() {
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations("nav");
+  const tBrand = useTranslations("brand");
   const { wallet, isLoading, refreshWallet } = useWallet();
   const [aboutOpen, setAboutOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -52,12 +54,7 @@ export function AppNav() {
       <header className="relative z-20 border-b border-white/14 bg-[#071018]/85 px-4 py-4 backdrop-blur-md sm:px-8">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-brand-500 text-lg font-bold text-[#041016] shadow-[0_0_28px_rgba(34,211,238,0.3)]">
-                T
-              </span>
-              <span className="text-lg font-semibold tracking-tight text-white">TrustCoin</span>
-            </Link>
+            <TrustCoinLogo href="/dashboard" name={tBrand("name")} />
 
             <nav className="hidden items-center gap-1 lg:flex">
               {NAV_ITEMS.map((item) => {

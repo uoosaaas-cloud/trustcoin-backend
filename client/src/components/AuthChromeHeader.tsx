@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { AboutPlatformModal } from "@/components/AboutPlatformModal";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { TrustCoinLogo } from "@/components/TrustCoinLogo";
 
 interface AuthChromeHeaderProps {
   brandHref?: string;
@@ -13,17 +13,13 @@ interface AuthChromeHeaderProps {
 /** Shared header for login/register with About Us + language switcher. */
 export function AuthChromeHeader({ brandHref = "/" }: AuthChromeHeaderProps) {
   const t = useTranslations("nav");
+  const tBrand = useTranslations("brand");
   const [aboutOpen, setAboutOpen] = useState(false);
 
   return (
     <>
       <header className="relative z-10 flex items-center justify-between px-6 py-6 sm:px-10">
-        <Link href={brandHref} className="flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-brand-500 text-lg font-bold text-[#041016] shadow-[0_0_28px_rgba(34,211,238,0.35)]">
-            T
-          </span>
-          <span className="text-lg font-semibold tracking-tight text-white">TrustCoin</span>
-        </Link>
+        <TrustCoinLogo href={brandHref} name={tBrand("name")} />
         <div className="flex items-center gap-2 sm:gap-3">
           <button
             type="button"
