@@ -74,8 +74,9 @@ export async function createWithdrawal(userId: string, input: CreateWithdrawalIn
         amount,
         type: "WITHDRAWAL",
         status: "PENDING",
-        payment_address: input.payment_address,
-        note: input.note,
+        payment_address: input.payment_address.trim(),
+        network: input.network,
+        note: input.note?.trim() || null,
       },
     });
   });
@@ -93,7 +94,8 @@ export async function createWithdrawal(userId: string, input: CreateWithdrawalIn
           adminInbox,
           user.email,
           amount,
-          input.payment_address
+          input.payment_address.trim(),
+          input.network
         ),
       `withdraw-admin-alert:${withdrawal.id}`
     );

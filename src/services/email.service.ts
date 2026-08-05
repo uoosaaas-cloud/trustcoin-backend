@@ -335,9 +335,16 @@ export async function sendAdminNewWithdrawalAlert(
   adminEmail: string,
   userEmail: string,
   amount: string,
-  walletAddress: string
+  walletAddress: string,
+  network?: string
 ): Promise<void> {
   const subject = `[TrustCoin Admin] طلب سحب جديد — ${amount} USDT`;
+  const networkRow = network
+    ? `<tr>
+          <td style="padding:10px 0;color:#64748b;">الشبكة</td>
+          <td style="padding:10px 0;color:#e2e8f0;direction:ltr;text-align:left;">${escapeHtml(network)}</td>
+        </tr>`
+    : "";
   const html = wrapTrustCoinEmail({
     title: "طلب سحب جديد يحتاج مراجعة",
     bodyHtml: `
@@ -351,6 +358,7 @@ export async function sendAdminNewWithdrawalAlert(
           <td style="padding:10px 0;color:#64748b;">المبلغ</td>
           <td style="padding:10px 0;color:#22d3ee;font-weight:700;direction:ltr;text-align:left;">${escapeHtml(amount)} USDT</td>
         </tr>
+        ${networkRow}
         <tr>
           <td style="padding:10px 0;color:#64748b;">المحفظة</td>
           <td style="padding:10px 0;color:#cbd5e1;word-break:break-all;direction:ltr;text-align:left;font-family:ui-monospace,Menlo,Consolas,monospace;">
@@ -367,6 +375,6 @@ export async function sendAdminNewWithdrawalAlert(
     to: adminEmail,
     subject,
     html,
-    text: `طلب سحب جديد: ${userEmail} — ${amount} USDT → ${walletAddress}`,
+    text: `طلب سحب جديد: ${userEmail} — ${amount} USDT [${network ?? "n/a"}] → ${walletAddress}`,
   });
 }
