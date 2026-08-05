@@ -82,9 +82,20 @@ export function getDaysRemaining(
   return Math.max(0, Math.ceil((end - Date.now()) / 86_400_000));
 }
 
+/** Accrual display step for live total earned (6 hours). */
+export const EARNINGS_ACCRUAL_STEP_MS = 6 * 60 * 60 * 1000;
+
+/** Ms until the next 6-hour accrual step from package start. */
+export function msUntilNextEarningsStep(startDate: string, nowMs = Date.now()): number {
+  const start = new Date(startDate).getTime();
+  if (!Number.isFinite(start) || nowMs <= start) return 0;
+  const elapsed = nowMs - start;
+  return EARNINGS_ACCRUAL_STEP_MS - (elapsed % EARNINGS_ACCRUAL_STEP_MS);
+}
+
 /**
  * Live accruing total earned for active packages.
- * Uses continuous time since start (capped at end), never below server total_earned.
+ * Advances in 6-hour steps from start, never below server total_earned.
  */
 export function getLiveTotalEarned(
   inv: Pick<
@@ -114,7 +125,9 @@ export function getLiveTotalEarned(
   }
 
   const elapsedMs = Math.min(Math.max(0, nowMs - start), end - start);
-  const elapsedDays = elapsedMs / 86_400_000;
+  const steppedMs =
+    Math.floor(elapsedMs / EARNINGS_ACCRUAL_STEP_MS) * EARNINGS_ACCRUAL_STEP_MS;
+  const elapsedDays = steppedMs / 86_400_000;
   const projected = amount * (dailyPct / 100) * elapsedDays;
   const safeServer = Number.isFinite(serverTotal) ? serverTotal : 0;
   return Math.max(safeServer, projected);

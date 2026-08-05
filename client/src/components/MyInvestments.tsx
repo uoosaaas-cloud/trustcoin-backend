@@ -8,12 +8,14 @@ import { getApiErrorMessage } from "@/lib/api";
 import { formatDate, formatUsdt } from "@/lib/format";
 import {
   durationKeyFromPackage,
+  EARNINGS_ACCRUAL_STEP_MS,
   getDailyProfitUsdt,
   getDaysRemaining,
   getInvestmentProgress,
   getLiveTotalEarned,
   getMyInvestments,
   getPeriodReturnPercent,
+  msUntilNextEarningsStep,
   type InvestmentRecord,
 } from "@/lib/investments";
 
@@ -151,9 +153,22 @@ function useLiveTotalEarned(investment: InvestmentRecord): number {
 
   useEffect(() => {
     if (investment.status !== "ACTIVE") return;
-    const id = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(id);
-  }, [investment.status, investment.id]);
+
+    let intervalId: number | undefined;
+
+    const tick = () => setNow(Date.now());
+
+    const delay = msUntilNextEarningsStep(investment.start_date);
+    const timeoutId = window.setTimeout(() => {
+      tick();
+      intervalId = window.setInterval(tick, EARNINGS_ACCRUAL_STEP_MS);
+    }, delay);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      if (intervalId !== undefined) window.clearInterval(intervalId);
+    };
+  }, [investment.status, investment.id, investment.start_date]);
 
   return getLiveTotalEarned(investment, now);
 }
@@ -222,7 +237,6 @@ function InvestmentCard({
           value={isActive ? formatLiveUsdt(liveEarned) : formatUsdt(investment.total_earned)}
           suffix="USDT"
           accent={isActive}
-          live={isActive}
         />
         <Metric label={periodReturnLabel} value={`${periodReturn}%`} />
         <Metric
