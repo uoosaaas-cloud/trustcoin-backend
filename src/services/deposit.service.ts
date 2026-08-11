@@ -161,8 +161,121 @@ export async function creditDetectedOnChainUsdt(params: {
   return { credited: result.credited, claimId: result.claimId };
 }
 
+/**
+ * Backfills missing `DepositRequest` rows for completed DEPOSIT ledger
+ * entries (e.g. exceptional manual credits that never created a claim).
+ * Idempotent — safe to call on history / admin monitoring reads.
+ */
+export async function reconcileOrphanDepositLedgerEntries(userId?: string): Promise<number> {
+  const ledgerDeposits = await prisma.transaction.findMany({
+    where: {
+      type: "DEPOSIT",
+      status: "COMPLETED",
+      ...(userId ? { user_id: userId } : {}),
+    },
+    select: {
+      id: true,
+      user_id: true,
+      amount: true,
+      tx_hash: true,
+      payment_address: true,
+      note: true,
+      created_at: true,
+    },
+    orderBy: { created_at: "asc" },
+  });
+
+  let created = 0;
+
+  for (const row of ledgerDeposits) {
+    const hash = row.tx_hash ?? "";
+    let claimId: string | null = null;
+    if (hash.startsWith("onchain-credit:")) {
+      claimId = hash.slice("onchain-credit:".length);
+    } else if (hash.startsWith("manual-credit:")) {
+      claimId = hash.slice("manual-credit:".length);
+    }
+
+    if (claimId) {
+      const existing = await prisma.depositRequest.findUnique({
+        where: { id: claimId },
+        select: { id: true },
+      });
+      if (existing) continue;
+    }
+
+    const nearby = await prisma.depositRequest.findFirst({
+      where: {
+        user_id: row.user_id,
+        amount: row.amount,
+        status: "APPROVED",
+        created_at: {
+          gte: new Date(row.created_at.getTime() - 60_000),
+          lte: new Date(row.created_at.getTime() + 60_000),
+        },
+      },
+      select: { id: true },
+    });
+    if (nearby) continue;
+
+    let depositAddressId: string | null = null;
+    let network: DepositNetwork = "TRC20";
+
+    if (row.payment_address) {
+      const matched = await prisma.userDepositAddress.findFirst({
+        where: { user_id: row.user_id, address: row.payment_address },
+        select: { id: true, network: true },
+      });
+      if (matched && (DEPOSIT_NETWORKS as readonly string[]).includes(matched.network)) {
+        depositAddressId = matched.id;
+        network = matched.network as DepositNetwork;
+      }
+    }
+
+    if (!depositAddressId) {
+      const preferred = await prisma.userDepositAddress.findFirst({
+        where: { user_id: row.user_id },
+        orderBy: { created_at: "asc" },
+        select: { id: true, network: true },
+      });
+      if (preferred && (DEPOSIT_NETWORKS as readonly string[]).includes(preferred.network)) {
+        depositAddressId = preferred.id;
+        network = preferred.network as DepositNetwork;
+      }
+    }
+
+    const data = {
+      user_id: row.user_id,
+      amount: toDecimalString(row.amount.toString()),
+      currency: "USDT",
+      network,
+      deposit_address_id: depositAddressId,
+      status: "APPROVED" as const,
+      tx_hash: hash.startsWith("manual-credit:") ? hash : null,
+      created_at: row.created_at,
+      updated_at: row.created_at,
+    };
+
+    try {
+      if (claimId) {
+        await prisma.depositRequest.create({ data: { id: claimId, ...data } });
+      } else {
+        await prisma.depositRequest.create({ data });
+      }
+      created += 1;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(`[deposit] Failed to backfill DepositRequest for ledger ${row.id}:`, error);
+    }
+  }
+
+  return created;
+}
+
 /** Returns the logged-in user's deposit request history, newest first. */
 export async function listUserDepositRequests(userId: string) {
+  await reconcileOrphanDepositLedgerEntries(userId);
+
   const rows = await prisma.depositRequest.findMany({
     where: { user_id: userId },
     orderBy: { created_at: "desc" },

@@ -949,6 +949,19 @@ export interface AdminDepositMonitoring {
     user: { id: string; email: string; status: string };
     depositAddress: string | null;
   }>;
+  /** Recently credited deposits (APPROVED claims) — what users see in deposit history. */
+  recentApprovedClaims: Array<{
+    id: string;
+    amount: string;
+    network: string;
+    status: string;
+    tx_hash: string | null;
+    sweep_tx_hash: string | null;
+    swept_at: Date | null;
+    created_at: Date;
+    user: { id: string; email: string; status: string };
+    depositAddress: string | null;
+  }>;
   subWallets: Array<{
     id: string;
     network: string;
@@ -974,6 +987,10 @@ export interface AdminDepositMonitoring {
 }
 
 export async function getDepositMonitoringOverview(): Promise<AdminDepositMonitoring> {
+  // Ensure exceptional/manual ledger credits appear in deposit history tables.
+  const { reconcileOrphanDepositLedgerEntries } = await import("./deposit.service");
+  await reconcileOrphanDepositLedgerEntries();
+
   const [
     pendingClaimsCount,
     approvedClaimsCount,
@@ -981,6 +998,7 @@ export async function getDepositMonitoringOverview(): Promise<AdminDepositMonito
     recentSweepSuccess,
     recentSweepFailed,
     pendingClaims,
+    recentApprovedClaims,
     subWallets,
     recentSweeps,
   ] = await Promise.all([
@@ -991,6 +1009,15 @@ export async function getDepositMonitoringOverview(): Promise<AdminDepositMonito
     prisma.depositSweep.count({ where: { status: "FAILED" } }),
     prisma.depositRequest.findMany({
       where: { status: "PENDING" },
+      orderBy: { created_at: "desc" },
+      take: 50,
+      include: {
+        user: { select: { id: true, email: true, status: true } },
+        depositAddress: { select: { address: true } },
+      },
+    }),
+    prisma.depositRequest.findMany({
+      where: { status: "APPROVED" },
       orderBy: { created_at: "desc" },
       take: 50,
       include: {
@@ -1050,6 +1077,18 @@ export async function getDepositMonitoringOverview(): Promise<AdminDepositMonito
       status: c.status,
       tx_hash: c.tx_hash,
       proof_image: c.proof_image,
+      created_at: c.created_at,
+      user: c.user,
+      depositAddress: c.depositAddress?.address ?? null,
+    })),
+    recentApprovedClaims: recentApprovedClaims.map((c) => ({
+      id: c.id,
+      amount: toDecimalString(c.amount.toString()),
+      network: c.network,
+      status: c.status,
+      tx_hash: c.tx_hash,
+      sweep_tx_hash: c.sweep_tx_hash,
+      swept_at: c.swept_at,
       created_at: c.created_at,
       user: c.user,
       depositAddress: c.depositAddress?.address ?? null,
