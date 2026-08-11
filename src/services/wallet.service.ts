@@ -50,8 +50,16 @@ export interface WalletBalanceSummary {
  * - Locked = sum of ACTIVE investment `current_amount`
  * - Pending referral bonus = `User.pending_referral_bonus` (not withdrawable)
  * - Total = Available + Locked
+ *
+ * Before reading, settles ACTIVE investments so matured principal moves from
+ * Locked → Available even if the daily cron was missed (e.g. sleeping dyno).
  */
 export async function getWalletBalanceSummary(userId: string): Promise<WalletBalanceSummary> {
+  // Dynamic import avoids a circular dependency with investment.service
+  // (which imports debitAvailableBalance from this module).
+  const { settleUserActiveInvestments } = await import("./investment.service");
+  await settleUserActiveInvestments(userId);
+
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { balance: true, pending_referral_bonus: true },
