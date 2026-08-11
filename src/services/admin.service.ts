@@ -151,6 +151,10 @@ export async function listUsers(search?: string, status?: string): Promise<Admin
       ? trimmedStatus
       : undefined;
 
+  // Unlock matured packages before reporting locked/available balances.
+  const { settleOverdueInvestments } = await import("./investment.service");
+  await settleOverdueInvestments();
+
   const users = await prisma.user.findMany({
     where: {
       ...(trimmedSearch ? { email: { contains: trimmedSearch } } : {}),

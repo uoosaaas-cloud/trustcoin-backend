@@ -18,6 +18,9 @@ export async function listPackages() {
 }
 
 export async function listUserInvestments(userId: string) {
+  // Catch up missed daily profits / principal unlock before listing.
+  await settleUserActiveInvestments(userId);
+
   return prisma.investment.findMany({
     where: { user_id: userId },
     include: { package: true },
@@ -39,8 +42,75 @@ export function calculateExpectedPackageProfit(
 }
 
 /** UTC calendar day key used for daily-profit idempotency. */
-function utcDayKey(date = new Date()): string {
+export function utcDayKey(date = new Date()): string {
   return date.toISOString().slice(0, 10);
+}
+
+/**
+ * UTC midnights that should receive daily profit for a package.
+ * Matches the midnight cron model: each 00:00 UTC with
+ * `start_date < midnight <= end_date` earns one day (≈ duration_days ticks).
+ */
+export function expectedProfitDayKeys(startDate: Date, endDate: Date): string[] {
+  const keys: string[] = [];
+  const cursor = new Date(
+    Date.UTC(startDate.getUTCFullYear(), startDate.getUTCMonth(), startDate.getUTCDate() + 1)
+  );
+
+  while (cursor.getTime() <= endDate.getTime()) {
+    keys.push(utcDayKey(cursor));
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+
+  return keys;
+}
+
+/**
+ * Settles all ACTIVE investments for a user (missed daily profits + principal
+ * unlock after end_date). Safe / idempotent to call on wallet reads.
+ */
+export async function settleUserActiveInvestments(userId: string): Promise<number> {
+  const active = await prisma.investment.findMany({
+    where: { user_id: userId, status: "ACTIVE" },
+    select: { id: true },
+    orderBy: { end_date: "asc" },
+  });
+
+  let settled = 0;
+  for (const { id } of active) {
+    try {
+      await distributeDailyProfit(id);
+      settled += 1;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(`[investments] Failed to settle investment ${id} for user ${userId}:`, error);
+    }
+  }
+  return settled;
+}
+
+/**
+ * Settles every ACTIVE investment past end_date (principal unlock + any missed
+ * profits). Used by admin listings and startup catch-up paths.
+ */
+export async function settleOverdueInvestments(): Promise<number> {
+  const overdue = await prisma.investment.findMany({
+    where: { status: "ACTIVE", end_date: { lte: new Date() } },
+    select: { id: true },
+    orderBy: { end_date: "asc" },
+  });
+
+  let settled = 0;
+  for (const { id } of overdue) {
+    try {
+      await distributeDailyProfit(id);
+      settled += 1;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(`[investments] Failed to settle overdue investment ${id}:`, error);
+    }
+  }
+  return settled;
 }
 
 /**
@@ -146,123 +216,140 @@ export async function createInvestment(userId: string, input: CreateInvestmentIn
 }
 
 /**
- * Distributes one day of profit for a single active investment (idempotent per UTC day).
- * On maturity, returns principal once and marks referral rewards awaiting admin.
+ * Credits any missing daily profits (idempotent per UTC day) and, once
+ * `end_date` has passed, returns principal to Available Balance and marks the
+ * investment COMPLETED. Safe to re-run after missed cron ticks.
+ *
+ * Catch-up of many missed days can exceed the default 5s interactive
+ * transaction timeout on remote DBs, so timeout is raised for this path.
  */
 export async function distributeDailyProfit(investmentId: string) {
-  return prisma.$transaction(async (tx) => {
-    const investment = await tx.investment.findUnique({ where: { id: investmentId } });
+  return prisma.$transaction(
+    async (tx) => {
+      const investment = await tx.investment.findUnique({ where: { id: investmentId } });
 
-    if (!investment) {
-      throw ApiError.notFound("investments.not_found");
-    }
+      if (!investment) {
+        throw ApiError.notFound("investments.not_found");
+      }
 
-    if (investment.status !== "ACTIVE") {
-      // Already completed / inactive — safe no-op for cron re-runs.
-      return {
-        investment,
-        userBalance: null,
-        profitCredited: null as string | null,
-        principalReturned: false,
-        skipped: true as const,
-      };
-    }
+      if (investment.status !== "ACTIVE") {
+        // Already completed / inactive — safe no-op for cron re-runs.
+        return {
+          investment,
+          userBalance: null,
+          profitCredited: null as string | null,
+          principalReturned: false,
+          skipped: true as const,
+        };
+      }
 
-    const dayKey = utcDayKey();
-    const profitTxHash = `profit:${investmentId}:${dayKey}`;
-    const existingProfit = await tx.transaction.findUnique({
-      where: { tx_hash: profitTxHash },
-      select: { id: true },
-    });
+      const todayKey = utcDayKey();
+      const dueDayKeys = expectedProfitDayKeys(investment.start_date, investment.end_date).filter(
+        (dayKey) => dayKey <= todayKey
+      );
+      const profitHashes = dueDayKeys.map((dayKey) => `profit:${investmentId}:${dayKey}`);
 
-    let profitCredited: string | null = null;
-    let userBalance: string | null = null;
+      const existingProfits =
+        profitHashes.length === 0
+          ? []
+          : await tx.transaction.findMany({
+              where: { tx_hash: { in: profitHashes } },
+              select: { tx_hash: true },
+            });
+      const paidHashes = new Set(existingProfits.map((row) => row.tx_hash).filter(Boolean) as string[]);
 
-    if (!existingProfit) {
+      let profitCredited: string | null = null;
+      let userBalance: string | null = null;
       const dailyProfit = calculateDailyProfit(
         investment.current_amount.toString(),
         investment.daily_profit_percent.toString()
       );
 
-      await tx.investment.update({
-        where: { id: investmentId },
-        data: { total_earned: add(investment.total_earned.toString(), dailyProfit) },
-      });
+      for (const dayKey of dueDayKeys) {
+        const profitTxHash = `profit:${investmentId}:${dayKey}`;
+        if (paidHashes.has(profitTxHash)) continue;
 
-      const user = await tx.user.update({
-        where: { id: investment.user_id },
-        data: { balance: { increment: dailyProfit } },
-        select: { balance: true },
-      });
-
-      await tx.transaction.create({
-        data: {
-          user_id: investment.user_id,
-          amount: dailyProfit,
-          type: "PROFIT_DISTRIBUTION",
-          status: "COMPLETED",
-          tx_hash: profitTxHash,
-          note: `Daily profit for investment ${investment.id} (${dayKey})`,
-        },
-      });
-
-      profitCredited = dailyProfit;
-      userBalance = toDecimalString(user.balance.toString());
-    }
-
-    let principalReturned = false;
-    const isMatured = new Date() >= investment.end_date;
-
-    if (isMatured) {
-      const completed = await tx.investment.updateMany({
-        where: { id: investment.id, status: "ACTIVE" },
-        data: { status: "COMPLETED" },
-      });
-
-      if (completed.count === 1) {
-        const returnTxHash = `return:${investment.id}`;
-        const existingReturn = await tx.transaction.findUnique({
-          where: { tx_hash: returnTxHash },
-          select: { id: true },
+        await tx.investment.update({
+          where: { id: investmentId },
+          data: { total_earned: { increment: dailyProfit } },
         });
 
-        if (!existingReturn) {
-          const principal = toDecimalString(investment.current_amount.toString());
-          const user = await tx.user.update({
-            where: { id: investment.user_id },
-            data: { balance: { increment: principal } },
-            select: { balance: true },
-          });
-          userBalance = toDecimalString(user.balance.toString());
-
-          await tx.transaction.create({
-            data: {
-              user_id: investment.user_id,
-              amount: principal,
-              type: "PACKAGE_RETURN",
-              status: "COMPLETED",
-              tx_hash: returnTxHash,
-              note: `Principal returned for completed investment ${investment.id}`,
-            },
-          });
-          principalReturned = true;
-        }
-
-        await tx.referralReward.updateMany({
-          where: { investment_id: investment.id, status: "PENDING_PACKAGE_ACTIVE" },
-          data: { status: "PACKAGE_COMPLETED_AWAITING_ADMIN" },
+        const user = await tx.user.update({
+          where: { id: investment.user_id },
+          data: { balance: { increment: dailyProfit } },
+          select: { balance: true },
         });
+
+        await tx.transaction.create({
+          data: {
+            user_id: investment.user_id,
+            amount: dailyProfit,
+            type: "PROFIT_DISTRIBUTION",
+            status: "COMPLETED",
+            tx_hash: profitTxHash,
+            note: `Daily profit for investment ${investment.id} (${dayKey})`,
+          },
+        });
+
+        profitCredited = profitCredited ? add(profitCredited, dailyProfit) : dailyProfit;
+        userBalance = toDecimalString(user.balance.toString());
       }
-    }
 
-    const refreshed = await tx.investment.findUniqueOrThrow({ where: { id: investmentId } });
+      let principalReturned = false;
+      const isMatured = new Date() >= investment.end_date;
 
-    return {
-      investment: refreshed,
-      userBalance,
-      profitCredited,
-      principalReturned,
-      skipped: false as const,
-    };
-  });
+      if (isMatured) {
+        const completed = await tx.investment.updateMany({
+          where: { id: investment.id, status: "ACTIVE" },
+          data: { status: "COMPLETED" },
+        });
+
+        if (completed.count === 1) {
+          const returnTxHash = `return:${investment.id}`;
+          const existingReturn = await tx.transaction.findUnique({
+            where: { tx_hash: returnTxHash },
+            select: { id: true },
+          });
+
+          if (!existingReturn) {
+            const principal = toDecimalString(investment.current_amount.toString());
+            const user = await tx.user.update({
+              where: { id: investment.user_id },
+              data: { balance: { increment: principal } },
+              select: { balance: true },
+            });
+            userBalance = toDecimalString(user.balance.toString());
+
+            await tx.transaction.create({
+              data: {
+                user_id: investment.user_id,
+                amount: principal,
+                type: "PACKAGE_RETURN",
+                status: "COMPLETED",
+                tx_hash: returnTxHash,
+                note: `Principal returned for completed investment ${investment.id}`,
+              },
+            });
+            principalReturned = true;
+          }
+
+          await tx.referralReward.updateMany({
+            where: { investment_id: investment.id, status: "PENDING_PACKAGE_ACTIVE" },
+            data: { status: "PACKAGE_COMPLETED_AWAITING_ADMIN" },
+          });
+        }
+      }
+
+      const refreshed = await tx.investment.findUniqueOrThrow({ where: { id: investmentId } });
+
+      return {
+        investment: refreshed,
+        userBalance,
+        profitCredited,
+        principalReturned,
+        skipped: false as const,
+      };
+    },
+    { maxWait: 20_000, timeout: 120_000 }
+  );
 }

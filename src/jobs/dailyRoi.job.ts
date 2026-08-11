@@ -1,8 +1,12 @@
 import cron, { ScheduledTask } from "node-cron";
 import { prisma } from "../config/prisma";
 import { env, isProduction } from "../config/env";
-import { calculateDailyProfit, toDecimalString } from "../utils/money";
-import { distributeDailyProfit } from "../services/investment.service";
+import { calculateDailyProfit, multiply, toDecimalString } from "../utils/money";
+import {
+  distributeDailyProfit,
+  expectedProfitDayKeys,
+  utcDayKey,
+} from "../services/investment.service";
 
 export interface DailyRoiRunOptions {
   /** When set, only this investment is processed. */
@@ -77,12 +81,16 @@ async function executeDailyRoiDistribution(
   }
 
   if (dryRun) {
+    const todayKey = utcDayKey();
     const previews: DailyRoiPreviewItem[] = activeInvestments.map((investment) => {
       const dailyProfit = calculateDailyProfit(
         investment.current_amount.toString(),
         investment.daily_profit_percent.toString()
       );
       const matured = new Date() >= investment.end_date;
+      const dueDays = expectedProfitDayKeys(investment.start_date, investment.end_date).filter(
+        (dayKey) => dayKey <= todayKey
+      ).length;
 
       return {
         investmentId: investment.id,
@@ -90,7 +98,8 @@ async function executeDailyRoiDistribution(
         packageName: investment.package.name,
         currentAmount: toDecimalString(investment.current_amount.toString()),
         dailyProfitPercent: toDecimalString(investment.daily_profit_percent.toString()),
-        dailyProfit,
+        // Preview shows one-day amount; live run backfills every missing due day.
+        dailyProfit: dueDays > 1 ? multiply(dailyProfit, dueDays) : dailyProfit,
         matured,
         principalReturn: matured ? toDecimalString(investment.current_amount.toString()) : null,
       };
