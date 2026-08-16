@@ -25,7 +25,7 @@ export interface DepositRequestRecord {
   user_id: string;
   amount: string;
   currency: string;
-  network: DepositNetworkCode;
+  network: DepositNetworkCode | "GIFT" | string;
   tx_hash: string | null;
   proof_image: string | null;
   status: DepositStatus;

@@ -1,7 +1,7 @@
 import { api, type ApiSuccessResponse } from "./api";
 import type { WithdrawNetwork } from "./withdrawNetworks";
 
-export type TransactionType = "DEPOSIT" | "WITHDRAWAL" | "PROFIT" | "REFERRAL";
+export type TransactionType = "DEPOSIT" | "WITHDRAWAL" | "PROFIT" | "REFERRAL" | "GIFT";
 export type TransactionStatus = "PENDING" | "COMPLETED" | "FAILED" | "APPROVED" | "REJECTED";
 
 export interface TransactionRecord {

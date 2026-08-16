@@ -7,7 +7,9 @@ import * as tradeService from "../services/trade.service";
 import { getClientIp, recordFailedAdminAttempt, clearFailedAdminAttempts } from "../middlewares/ipGuard.middleware";
 import { ApiError } from "../utils/apiError";
 import { runDepositSweepJob } from "../jobs/depositSweep.job";
+import { distributeGifts } from "../services/gift.service";
 import type { TriggerSweepInput } from "../validators/sweep.validator";
+import type { DistributeGiftsInput } from "../validators/gift.validator";
 
 export const login = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body as { email: string; password: string };
@@ -164,6 +166,12 @@ export const updatePackage = asyncHandler(async (req: Request, res: Response) =>
 export const getDepositMonitoring = asyncHandler(async (req: Request, res: Response) => {
   const overview = await adminService.getDepositMonitoringOverview();
   sendSuccess(res, 200, translate("common.fetched", req.lang), overview);
+});
+
+export const sendGifts = asyncHandler(async (req: Request, res: Response) => {
+  const input = req.body as DistributeGiftsInput;
+  const result = await distributeGifts(req.user!.id, input);
+  sendSuccess(res, 200, translate("admin.gifts_distributed", req.lang), result);
 });
 
 export const listTrades = asyncHandler(async (req: Request, res: Response) => {

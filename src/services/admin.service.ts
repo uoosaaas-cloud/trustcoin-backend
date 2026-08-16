@@ -95,7 +95,7 @@ export async function getOverviewStats(): Promise<AdminOverviewStats> {
     await Promise.all([
       prisma.user.count({ where: { role: "USER" } }),
       prisma.transaction.aggregate({
-        where: { type: "DEPOSIT", status: "COMPLETED" },
+        where: { type: { in: ["DEPOSIT", "GIFT"] }, status: "COMPLETED" },
         _sum: { amount: true },
       }),
       prisma.transaction.aggregate({

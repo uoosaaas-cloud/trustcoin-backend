@@ -4,7 +4,12 @@
     "action_success": "Action completed successfully."
   },
   "admin": {
-    "package_updated": "Package settings updated successfully. New purchases will use the new rates."
+    "package_updated": "Package settings updated successfully. New purchases will use the new rates.",
+    "gifts_distributed": "Gift credited to available balances and users were notified by email.",
+    "gift_amount_invalid": "Gift amount must be greater than zero.",
+    "gift_no_recipients": "No eligible users found. Admins and inactive accounts are excluded.",
+    "gift_users_not_found": "One or more selected users were not found.",
+    "gift_admin_excluded": "Admin accounts cannot receive gifts."
   },
   "user": {
     "profile_fetched": "Profile fetched successfully.",

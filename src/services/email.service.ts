@@ -274,6 +274,44 @@ export async function sendDepositNotification(
   });
 }
 
+/** إشعار المستخدم بعد إضافة هدية إدارية إلى الرصيد المتاح. */
+export async function sendGiftNotification(
+  toEmail: string,
+  amount: string,
+  note?: string | null
+): Promise<void> {
+  const subject = `تم إضافة هدية ${amount} USDT إلى حسابك — TrustCoin`;
+  const noteHtml = note
+    ? `<p style="margin:16px 0 0;color:#94a3b8;">ملاحظة الإدارة: ${escapeHtml(note)}</p>`
+    : "";
+  const html = wrapTrustCoinEmail({
+    title: "تم إضافة هدية إلى رصيدك",
+    bodyHtml: `
+      <p style="margin:0;">أضافت إدارة TrustCoin هدية إلى رصيدك المتاح.</p>
+      <table role="presentation" style="margin:20px 0;width:100%;border-collapse:collapse;">
+        <tr>
+          <td style="padding:12px 14px;background:#05070f;border:1px solid #1a2f4a;border-radius:12px;">
+            <p style="margin:0;font-size:12px;color:#64748b;">مبلغ الهدية</p>
+            <p style="margin:6px 0 0;font-size:22px;font-weight:800;color:#22d3ee;direction:ltr;text-align:right;">
+              ${escapeHtml(amount)} USDT
+            </p>
+          </td>
+        </tr>
+      </table>
+      ${noteHtml}
+      <p style="margin:16px 0 0;">يمكنك الاستثمار أو السحب من الرصيد المتاح الآن.</p>
+    `,
+    footerNote: "هذه رسالة تلقائية من TrustCoin بعد إضافة هدية إلى حسابك.",
+  });
+
+  await deliverEmail({
+    to: toEmail,
+    subject,
+    html,
+    text: `تم إضافة هدية ${amount} USDT إلى رصيدك المتاح في TrustCoin.${note ? ` ملاحظة: ${note}` : ""}`,
+  });
+}
+
 export type WithdrawalEmailStatus = "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED";
 
 /** إشعار المستخدم بحالة طلب السحب. */

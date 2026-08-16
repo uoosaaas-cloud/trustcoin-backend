@@ -320,3 +320,22 @@ export async function triggerAdminDepositSweep(payload?: {
   const { data } = await api.post<ApiSuccessResponse<unknown>>("/admin/deposits/trigger-sweep", payload ?? {});
   return data;
 }
+
+export interface AdminGiftDistributionResult {
+  amount: string;
+  targeted: number;
+  credited: number;
+  failed: number;
+  skippedAdmin: number;
+  recipients: Array<{ userId: string; email: string; transactionId: string }>;
+}
+
+export async function distributeAdminGifts(payload: {
+  amount: string;
+  note?: string;
+  scope: "ALL_EXCEPT_ADMIN" | "SELECTED";
+  userIds?: string[];
+}) {
+  const { data } = await api.post<ApiSuccessResponse<AdminGiftDistributionResult>>("/admin/gifts", payload);
+  return data;
+}

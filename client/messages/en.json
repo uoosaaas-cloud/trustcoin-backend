@@ -487,6 +487,7 @@
     },
     "historyTitle": "Deposit History",
     "historyEmpty": "No deposits detected yet. Send USDT to the address above.",
+    "networkGift": "Gift",
     "table": {
       "amount": "Amount",
       "network": "Network",
@@ -497,6 +498,7 @@
     "status": {
       "PENDING": "Processing",
       "APPROVED": "Credited",
+      "GIFT": "Gift deposit",
       "REJECTED": "Failed"
     },
     "errors": {
@@ -512,6 +514,7 @@
       "withdrawals": "Withdrawals",
       "deposits": "Deposits",
       "users": "Users",
+      "gifts": "Gifts",
       "packages": "Packages",
       "referrals": "Referrals",
       "logout": "Log out"
@@ -557,7 +560,8 @@
       "pendingAlert": "{count} withdrawal request(s) awaiting review.",
       "reviewWithdrawals": "Review withdrawals",
       "goWithdrawals": "Pending withdrawals",
-      "goUsers": "Manage users"
+      "goUsers": "Manage users",
+      "goGifts": "Send gifts"
     },
     "trades": {
       "eyebrow": "Desk signals",
@@ -620,6 +624,33 @@
       },
       "errors": {
         "actionFailed": "Could not update this withdrawal. Please try again."
+      }
+    },
+    "gifts": {
+      "eyebrow": "Rewards",
+      "title": "Send user gifts",
+      "subtitle": "Credit a gift to available balances. Admin accounts are never included. Users receive an email and a gift deposit in their history.",
+      "amountLabel": "Gift amount (USDT)",
+      "amountPlaceholder": "50",
+      "noteLabel": "Note (optional)",
+      "notePlaceholder": "Ramadan gift",
+      "scopeLabel": "Recipients",
+      "scopeSelected": "Selected users ({count})",
+      "scopeAll": "All active users except admin ({count})",
+      "usersTitle": "Active users",
+      "searchPlaceholder": "Search by email…",
+      "selectVisible": "Select visible",
+      "clearSelection": "Clear",
+      "available": "Available {amount} USDT",
+      "empty": "No active users found.",
+      "submit": "Send gift",
+      "sending": "Sending…",
+      "confirm": "Credit {amount} USDT to {count} user(s)? This cannot be undone.",
+      "success": "Gift of {amount} USDT credited to {credited} of {targeted} users. Emails were queued.",
+      "errors": {
+        "amountRequired": "Enter a gift amount greater than zero.",
+        "usersRequired": "Select at least one user, or choose all users except admin.",
+        "generic": "Could not send the gift. Please try again."
       }
     },
     "users": {

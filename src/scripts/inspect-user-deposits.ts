@@ -60,7 +60,8 @@ async function main() {
         : t.type === "DEPOSIT" ||
             t.type === "PROFIT_DISTRIBUTION" ||
             t.type === "PACKAGE_RETURN" ||
-            t.type === "REFERRAL_BONUS_ADDED"
+            t.type === "REFERRAL_BONUS_ADDED" ||
+            t.type === "GIFT"
           ? amt
           : 0;
     // Only completed credits/debits affect available roughly

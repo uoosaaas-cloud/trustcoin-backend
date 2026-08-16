@@ -487,6 +487,7 @@
     },
     "historyTitle": "سجل الإيداعات",
     "historyEmpty": "لم يُرصد أي إيداع بعد. أرسل USDT إلى العنوان أعلاه.",
+    "networkGift": "هدية",
     "table": {
       "amount": "المبلغ",
       "network": "الشبكة",
@@ -497,6 +498,7 @@
     "status": {
       "PENDING": "قيد المعالجة",
       "APPROVED": "تم الإيداع",
+      "GIFT": "إيداع هدية",
       "REJECTED": "فاشل"
     },
     "errors": {
@@ -512,6 +514,7 @@
       "withdrawals": "السحوبات",
       "deposits": "الإيداعات",
       "users": "المستخدمون",
+      "gifts": "الهدايا",
       "packages": "الباقات",
       "referrals": "الإحالات",
       "logout": "تسجيل الخروج"
@@ -557,7 +560,8 @@
       "pendingAlert": "{count} طلب سحب بانتظار المراجعة.",
       "reviewWithdrawals": "مراجعة السحوبات",
       "goWithdrawals": "السحوبات المعلقة",
-      "goUsers": "إدارة المستخدمين"
+      "goUsers": "إدارة المستخدمين",
+      "goGifts": "إرسال هدايا"
     },
     "trades": {
       "eyebrow": "إشارات المكتب",
@@ -620,6 +624,33 @@
       },
       "errors": {
         "actionFailed": "تعذر تحديث طلب السحب. يرجى المحاولة مرة أخرى."
+      }
+    },
+    "gifts": {
+      "eyebrow": "المكافآت",
+      "title": "إرسال هدايا للمستخدمين",
+      "subtitle": "أضف هدية إلى الرصيد المتاح. حسابات الإدارة مستثناة دائماً. يصل إشعار بالبريد ويظهر إيداع هدية في سجل المستخدم.",
+      "amountLabel": "مبلغ الهدية (USDT)",
+      "amountPlaceholder": "50",
+      "noteLabel": "ملاحظة (اختياري)",
+      "notePlaceholder": "هدية رمضان",
+      "scopeLabel": "المستلمون",
+      "scopeSelected": "المستخدمون المحددون ({count})",
+      "scopeAll": "كل المستخدمين النشطين ما عدا الإدارة ({count})",
+      "usersTitle": "المستخدمون النشطون",
+      "searchPlaceholder": "بحث بالبريد الإلكتروني…",
+      "selectVisible": "تحديد الظاهر",
+      "clearSelection": "مسح التحديد",
+      "available": "المتاح {amount} USDT",
+      "empty": "لا يوجد مستخدمون نشطون.",
+      "submit": "إرسال الهدية",
+      "sending": "جارٍ الإرسال…",
+      "confirm": "إضافة {amount} USDT إلى {count} مستخدم؟ لا يمكن التراجع عن هذا الإجراء.",
+      "success": "تم إضافة هدية {amount} USDT إلى {credited} من أصل {targeted} مستخدم. تم جدولة رسائل البريد.",
+      "errors": {
+        "amountRequired": "أدخل مبلغ هدية أكبر من صفر.",
+        "usersRequired": "حدد مستخدماً واحداً على الأقل، أو اختر الجميع ما عدا الإدارة.",
+        "generic": "تعذر إرسال الهدية. حاول مرة أخرى."
       }
     },
     "users": {
