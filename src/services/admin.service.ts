@@ -5,7 +5,7 @@ import { comparePassword } from "../utils/password";
 import { signToken } from "../utils/jwt";
 import { generateOtpCode, getOtpExpiryDate } from "../utils/otp";
 import { add, isGreaterThanOrEqual, toDecimalString } from "../utils/money";
-import { queueEmail, sendAdminLoginOtp, sendWithdrawalStatusEmail } from "./email.service";
+import { queueEmail, sendAdminLoginOtp, sendWithdrawalStatusEmail, sendKycReuploadRequest } from "./email.service";
 import { consumeOtp } from "./otp.service";
 import { resolveStoredIdDocument } from "../utils/upload";
 
@@ -266,6 +266,19 @@ export async function getUserIdDocument(userId: string): Promise<{ data: Buffer;
   }
 
   return stored;
+}
+
+export async function requestIdDocumentReupload(userId: string, adminId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true, role: true, status: true },
+  });
+  if (!user) throw ApiError.notFound("auth.user_not_found");
+  if (user.role === "ADMIN") throw ApiError.badRequest("errors.forbidden");
+
+  queueEmail(() => sendKycReuploadRequest(user.email), `kyc-reupload:${user.email}`);
+  await logAdminAction(adminId, "REQUEST_ID_REUPLOAD", `Asked ${user.email} to re-upload ID/passport photo`, userId);
+  return { email: user.email };
 }
 
 export async function approveUser(userId: string, adminId: string) {

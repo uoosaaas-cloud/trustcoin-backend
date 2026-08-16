@@ -63,6 +63,11 @@ export const getUserIdDocument = asyncHandler(async (req: Request, res: Response
   res.status(200).send(document.data);
 });
 
+export const requestIdDocumentReupload = asyncHandler(async (req: Request, res: Response) => {
+  const result = await adminService.requestIdDocumentReupload(req.params.userId, req.user!.id);
+  sendSuccess(res, 200, translate("admin.id_reupload_requested", req.lang), result);
+});
+
 export const approveUser = asyncHandler(async (req: Request, res: Response) => {
   const user = await adminService.approveUser(req.params.userId, req.user!.id);
   sendSuccess(res, 200, translate("common.action_success", req.lang), user);

@@ -312,6 +312,42 @@ export async function sendGiftNotification(
   });
 }
 
+function kycReuploadUrl(): string {
+  return `${env.APP_BASE_URL.replace(/\/+$/, "")}/account-pending/`;
+}
+
+/** طلب رسمي لإعادة رفع صورة أوضح لبطاقة الهوية أو جواز السفر. */
+export async function sendKycReuploadRequest(toEmail: string): Promise<void> {
+  const reuploadUrl = kycReuploadUrl();
+  const subject = "طلب إعادة رفع وثيقة الهوية — TrustCoin";
+  const html = wrapTrustCoinEmail({
+    title: "نحتاج صورة أوضح لوثيقة الهوية",
+    bodyHtml: `
+      <p style="margin:0;">مرحباً،</p>
+      <p style="margin:14px 0 0;">لم نتمكن من استكمال مراجعة حسابك في TrustCoin لأن صورة وثيقة الهوية غير واضحة أو غير متوفرة لدينا.</p>
+      <p style="margin:14px 0 0;">يرجى إعادة رفع <strong style="color:#f8fafc;">صورة واضحة لبطاقة الهوية أو جواز السفر</strong> من صفحة انتظار الموافقة.</p>
+      <ul style="margin:16px 0 0;padding-right:18px;color:#94a3b8;font-size:14px;line-height:1.8;">
+        <li>صورة ملونة وحديثة</li>
+        <li>تظهر جميع البيانات والأركان الأربعة</li>
+        <li>بدون قص أو تغطية أو وهج ضوء</li>
+      </ul>
+      ${ctaButton("إعادة رفع وثيقة الهوية", reuploadUrl)}
+      <p style="margin:0;font-size:12px;color:#64748b;word-break:break-all;direction:ltr;text-align:left;">${escapeHtml(reuploadUrl)}</p>
+    `,
+    footerNote: "هذه رسالة رسمية من إدارة TrustCoin بخصوص التحقق من الهوية. إذا لم تسجّل حساباً لدينا، يمكنك تجاهل هذه الرسالة.",
+  });
+
+  await deliverEmail({
+    to: toEmail,
+    subject,
+    html,
+    text:
+      `طلب إعادة رفع وثيقة الهوية — TrustCoin\n\n` +
+      `لم نتمكن من استكمال مراجعة حسابك لأن صورة الهوية غير واضحة أو غير متوفرة.\n` +
+      `يرجى رفع صورة أوضح لبطاقة الهوية أو جواز السفر من:\n${reuploadUrl}\n`,
+  });
+}
+
 export type WithdrawalEmailStatus = "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED";
 
 /** إشعار المستخدم بحالة طلب السحب. */

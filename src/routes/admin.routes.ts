@@ -30,6 +30,7 @@ router.use(authMiddleware, adminOnlyMiddleware, adminActionsRateLimiter);
 router.get("/overview", adminController.getOverview);
 router.get("/users", adminController.getUsers);
 router.get("/users/:userId/id-document", adminController.getUserIdDocument);
+router.post("/users/:userId/request-id-reupload", adminController.requestIdDocumentReupload);
 router.post("/users/:userId/approve", adminController.approveUser);
 router.post("/users/:userId/block", adminController.blockUser);
 router.delete("/users/:userId", adminController.deleteUser);
