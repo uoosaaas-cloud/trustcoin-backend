@@ -8,7 +8,15 @@ export function validateBody(schema: ZodSchema) {
     const result = schema.safeParse(req.body);
 
     if (!result.success) {
-      throw ApiError.badRequest("errors.validation_failed", result.error.flatten());
+      const flattened = result.error.flatten();
+      const fieldMessages = Object.entries(flattened.fieldErrors)
+        .flatMap(([field, messages]) => (messages ?? []).map((message) => `${field}: ${message}`));
+      // eslint-disable-next-line no-console
+      console.warn(`[validate] ${req.method} ${req.originalUrl} failed:`, fieldMessages);
+      throw ApiError.badRequest("errors.validation_failed", {
+        ...flattened,
+        summary: fieldMessages.join("; ") || flattened.formErrors.join("; "),
+      });
     }
 
     req.body = result.data;
@@ -22,7 +30,15 @@ export function validateQuery(schema: ZodSchema) {
     const result = schema.safeParse(req.query);
 
     if (!result.success) {
-      throw ApiError.badRequest("errors.validation_failed", result.error.flatten());
+      const flattened = result.error.flatten();
+      const fieldMessages = Object.entries(flattened.fieldErrors)
+        .flatMap(([field, messages]) => (messages ?? []).map((message) => `${field}: ${message}`));
+      // eslint-disable-next-line no-console
+      console.warn(`[validate] ${req.method} ${req.originalUrl} failed:`, fieldMessages);
+      throw ApiError.badRequest("errors.validation_failed", {
+        ...flattened,
+        summary: fieldMessages.join("; ") || flattened.formErrors.join("; "),
+      });
     }
 
     req.query = result.data;
