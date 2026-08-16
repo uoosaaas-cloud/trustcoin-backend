@@ -4,7 +4,7 @@ import { sendSuccess } from "../utils/apiResponse";
 import { translate } from "../utils/i18n";
 import { isProduction } from "../config/env";
 import { ApiError } from "../utils/apiError";
-import { buildIdDocumentUrl } from "../utils/upload";
+import { buildIdDocumentUrl, readUploadedImage } from "../utils/upload";
 import * as authService from "../services/auth.service";
 import type {
   ForgotPasswordInput,
@@ -20,10 +20,13 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
     throw ApiError.badRequest("auth.id_document_required");
   }
 
-  const parsed = req.body as Omit<RegisterInput, "idDocumentPath">;
+  const uploaded = readUploadedImage(req.file);
+  const parsed = req.body as Omit<RegisterInput, "idDocumentPath" | "idDocumentMime" | "idDocumentData">;
   const input: RegisterInput = {
     ...parsed,
-    idDocumentPath: buildIdDocumentUrl(req.file.filename),
+    idDocumentPath: buildIdDocumentUrl(uploaded.filename),
+    idDocumentMime: uploaded.mime,
+    idDocumentData: uploaded.data,
   };
 
   const { user, otpCode } = await authService.registerUser(input);
@@ -91,4 +94,15 @@ export const resetPassword = asyncHandler(async (req: Request, res: Response) =>
   await authService.resetPasswordWithToken(input);
 
   sendSuccess(res, 200, translate("auth.reset_password_success", req.lang));
+});
+
+export const resubmitIdDocument = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.file) {
+    throw ApiError.badRequest("auth.id_document_required");
+  }
+
+  const { email, password } = req.body as LoginInput;
+  const uploaded = readUploadedImage(req.file);
+  const result = await authService.resubmitIdDocument(email, password, uploaded);
+  sendSuccess(res, 200, translate("auth.id_document_updated", req.lang), result);
 });

@@ -77,6 +77,8 @@ export const resetPasswordSchema = z.object({
 
 export type RegisterInput = z.infer<typeof registerSchema> & {
   idDocumentPath: string;
+  idDocumentMime?: string;
+  idDocumentData?: Buffer;
 };
 export type LoginInput = z.infer<typeof loginSchema>;
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;

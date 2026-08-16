@@ -7,6 +7,7 @@ import { generateOtpCode, getOtpExpiryDate } from "../utils/otp";
 import { add, isGreaterThanOrEqual, toDecimalString } from "../utils/money";
 import { queueEmail, sendAdminLoginOtp, sendWithdrawalStatusEmail } from "./email.service";
 import { consumeOtp } from "./otp.service";
+import { resolveStoredIdDocument } from "../utils/upload";
 
 /**
  * Step 1 of admin login: validate credentials, then issue a short-lived email OTP.
@@ -126,6 +127,7 @@ export interface AdminUserListItem {
   created_at: Date;
   id_passport_number: string | null;
   id_document_path: string | null;
+  has_id_document: boolean;
   availableBalance: string;
   lockedBalance: string;
   totalBalance: string;
@@ -172,6 +174,7 @@ export async function listUsers(search?: string, status?: string): Promise<Admin
       created_at: true,
       id_passport_number: true,
       id_document_path: true,
+      id_document_mime: true,
     },
     orderBy: { created_at: "desc" },
   });
@@ -227,12 +230,42 @@ export async function listUsers(search?: string, status?: string): Promise<Admin
       created_at: user.created_at,
       id_passport_number: user.id_passport_number,
       id_document_path: user.id_document_path,
+      has_id_document: Boolean(user.id_document_path || user.id_document_mime),
       availableBalance,
       lockedBalance,
       totalBalance: add(availableBalance, lockedBalance),
       activePackages: packagesByUser.get(user.id) ?? [],
     };
   });
+}
+
+export async function getUserIdDocument(userId: string): Promise<{ data: Buffer; mime: string }> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      role: true,
+      id_document_path: true,
+      id_document_mime: true,
+      id_document_data: true,
+    },
+  });
+
+  if (!user || user.role === "ADMIN") {
+    throw ApiError.notFound("auth.user_not_found");
+  }
+
+  const stored = resolveStoredIdDocument({
+    data: user.id_document_data ? Buffer.from(user.id_document_data) : null,
+    mime: user.id_document_mime,
+    path: user.id_document_path,
+  });
+
+  if (!stored) {
+    throw ApiError.notFound("admin.id_document_missing");
+  }
+
+  return stored;
 }
 
 export async function approveUser(userId: string, adminId: string) {

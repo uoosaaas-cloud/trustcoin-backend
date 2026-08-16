@@ -70,6 +70,8 @@ export async function registerUser(input: RegisterInput): Promise<{ user: User; 
         referred_by_id: referrer?.id ?? null,
         id_passport_number: input.idPassportNumber,
         id_document_path: input.idDocumentPath,
+        id_document_mime: input.idDocumentMime ?? null,
+        id_document_data: input.idDocumentData ?? null,
         status: "PENDING",
         role: "USER",
         is_verified: false,
@@ -95,6 +97,37 @@ export async function registerUser(input: RegisterInput): Promise<{ user: User; 
   const otpCode = await issueOtp(user.email, user.language, "EMAIL_VERIFY");
 
   return { user, otpCode };
+}
+
+export async function resubmitIdDocument(
+  email: string,
+  password: string,
+  uploaded: { filename: string; mime: string; data: Buffer }
+): Promise<{ email: string }> {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    throw ApiError.unauthorized("auth.invalid_credentials");
+  }
+
+  const passwordOk = await comparePassword(password, user.password_hash);
+  if (!passwordOk) {
+    throw ApiError.unauthorized("auth.invalid_credentials");
+  }
+
+  if (user.status === "BLOCKED") {
+    throw ApiError.forbidden("auth.account_suspended");
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      id_document_path: `/uploads/id-documents/${uploaded.filename}`,
+      id_document_mime: uploaded.mime,
+      id_document_data: uploaded.data,
+    },
+  });
+
+  return { email: user.email };
 }
 
 export async function verifyOtp(email: string, code: string): Promise<User> {

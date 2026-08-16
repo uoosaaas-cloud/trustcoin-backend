@@ -41,5 +41,12 @@ router.post(
   validateBody(resetPasswordSchema),
   authController.resetPassword
 );
+router.post(
+  "/resubmit-id-document",
+  authRateLimiter,
+  idDocumentUpload.single("idDocument"),
+  validateBody(loginSchema),
+  authController.resubmitIdDocument
+);
 
 export default router;

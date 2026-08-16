@@ -55,6 +55,14 @@ export const getUsers = asyncHandler(async (req: Request, res: Response) => {
   sendSuccess(res, 200, translate("common.fetched", req.lang), users);
 });
 
+export const getUserIdDocument = asyncHandler(async (req: Request, res: Response) => {
+  const document = await adminService.getUserIdDocument(req.params.userId);
+  res.setHeader("Content-Type", document.mime);
+  res.setHeader("Cache-Control", "private, no-store");
+  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+  res.status(200).send(document.data);
+});
+
 export const approveUser = asyncHandler(async (req: Request, res: Response) => {
   const user = await adminService.approveUser(req.params.userId, req.user!.id);
   sendSuccess(res, 200, translate("common.action_success", req.lang), user);

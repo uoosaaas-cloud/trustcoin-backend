@@ -52,3 +52,45 @@ export const idDocumentUpload = multer({
 export function buildIdDocumentUrl(filename: string): string {
   return `/uploads/id-documents/${filename}`;
 }
+
+export function readUploadedImage(file: Express.Multer.File): {
+  filename: string;
+  mime: string;
+  data: Buffer;
+} {
+  const data = file.buffer?.length ? file.buffer : fs.readFileSync(file.path);
+  return {
+    filename: file.filename || path.basename(file.path),
+    mime: file.mimetype,
+    data,
+  };
+}
+
+export function readIdDocumentFromDisk(relativePath: string): Buffer | null {
+  const filename = path.basename(relativePath);
+  if (!filename || filename.includes("..")) return null;
+  const fullPath = path.join(ID_DOCUMENTS_DIR, filename);
+  if (!fs.existsSync(fullPath)) return null;
+  return fs.readFileSync(fullPath);
+}
+
+function mimeFromFilename(filename: string): string {
+  const ext = path.extname(filename).toLowerCase();
+  if (ext === ".png") return "image/png";
+  if (ext === ".webp") return "image/webp";
+  return "image/jpeg";
+}
+
+export function resolveStoredIdDocument(params: {
+  data: Buffer | null;
+  mime: string | null;
+  path: string | null;
+}): { data: Buffer; mime: string } | null {
+  if (params.data && params.data.length > 0) {
+    return { data: params.data, mime: params.mime || "image/jpeg" };
+  }
+  if (!params.path) return null;
+  const fromDisk = readIdDocumentFromDisk(params.path);
+  if (!fromDisk) return null;
+  return { data: fromDisk, mime: params.mime || mimeFromFilename(params.path) };
+}

@@ -109,6 +109,11 @@ model User {
   referrals_count     Int           @default(0)
   id_passport_number  String?       @unique @db.VarChar(64)
   id_document_path    String?       @db.VarChar(500)
+  /// MIME type for the persisted KYC image (e.g. image/jpeg).
+  id_document_mime    String?       @db.VarChar(80)
+  /// Raw ID/passport image bytes. Stored in the database so KYC photos survive
+  /// ephemeral host disks (Render redeploys). Never returned from list APIs.
+  id_document_data    Bytes?        @db.LongBlob
   created_at          DateTime      @default(now())
 
   investments      Investment[]
