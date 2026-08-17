@@ -59,6 +59,19 @@ export const authRateLimiter = rateLimit({
 });
 
 /**
+ * Separate from login/register so a few failed sign-in attempts cannot
+ * block KYC photo re-upload from the pending-approval page.
+ */
+export const idResubmitRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: isProduction ? 20 : 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: tooManyMessage,
+  skip: (req) => isLocalhostRequest(req),
+});
+
+/**
  * IP-scoped guard for the resend-OTP endpoint: at most one request per
  * minute per IP. This is a secondary defense — the authoritative, per-email
  * cooldown is enforced in `auth.service.ts` regardless of the caller's IP.

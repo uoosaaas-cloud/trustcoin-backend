@@ -9,7 +9,7 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
 } from "../validators/auth.validator";
-import { authRateLimiter, resendOtpRateLimiter } from "../middlewares/rateLimiter.middleware";
+import { authRateLimiter, idResubmitRateLimiter, resendOtpRateLimiter } from "../middlewares/rateLimiter.middleware";
 import { idDocumentUpload } from "../utils/upload";
 
 const router = Router();
@@ -43,7 +43,7 @@ router.post(
 );
 router.post(
   "/resubmit-id-document",
-  authRateLimiter,
+  idResubmitRateLimiter,
   idDocumentUpload.single("idDocument"),
   validateBody(loginSchema),
   authController.resubmitIdDocument

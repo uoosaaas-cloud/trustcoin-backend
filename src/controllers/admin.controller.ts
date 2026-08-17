@@ -58,9 +58,10 @@ export const getUsers = asyncHandler(async (req: Request, res: Response) => {
 export const getUserIdDocument = asyncHandler(async (req: Request, res: Response) => {
   const document = await adminService.getUserIdDocument(req.params.userId);
   res.setHeader("Content-Type", document.mime);
+  res.setHeader("Content-Length", String(document.data.length));
   res.setHeader("Cache-Control", "private, no-store");
   res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
-  res.status(200).send(document.data);
+  res.status(200).end(document.data);
 });
 
 export const requestIdDocumentReupload = asyncHandler(async (req: Request, res: Response) => {

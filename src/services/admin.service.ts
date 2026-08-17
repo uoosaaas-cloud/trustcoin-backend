@@ -7,7 +7,7 @@ import { generateOtpCode, getOtpExpiryDate } from "../utils/otp";
 import { add, isGreaterThanOrEqual, toDecimalString } from "../utils/money";
 import { queueEmail, sendAdminLoginOtp, sendWithdrawalStatusEmail, sendKycReuploadRequest } from "./email.service";
 import { consumeOtp } from "./otp.service";
-import { resolveStoredIdDocument } from "../utils/upload";
+import { bytesToBuffer, resolveStoredIdDocument } from "../utils/upload";
 
 /**
  * Step 1 of admin login: validate credentials, then issue a short-lived email OTP.
@@ -256,7 +256,7 @@ export async function getUserIdDocument(userId: string): Promise<{ data: Buffer;
   }
 
   const stored = resolveStoredIdDocument({
-    data: user.id_document_data ? Buffer.from(user.id_document_data) : null,
+    data: bytesToBuffer(user.id_document_data),
     mime: user.id_document_mime,
     path: user.id_document_path,
   });

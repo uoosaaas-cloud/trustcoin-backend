@@ -58,10 +58,11 @@ export function readUploadedImage(file: Express.Multer.File): {
   mime: string;
   data: Buffer;
 } {
+  const filename = file.filename || path.basename(file.path);
   const data = file.buffer?.length ? file.buffer : fs.readFileSync(file.path);
   return {
-    filename: file.filename || path.basename(file.path),
-    mime: file.mimetype,
+    filename,
+    mime: normalizeImageMime(file.mimetype, filename),
     data,
   };
 }
@@ -81,16 +82,32 @@ function mimeFromFilename(filename: string): string {
   return "image/jpeg";
 }
 
+/** Browsers will not render a blob tagged `image/jpg`; always store `image/jpeg`. */
+export function normalizeImageMime(mime: string | null | undefined, filename?: string): string {
+  const value = (mime ?? "").toLowerCase().split(";")[0]?.trim() ?? "";
+  if (value === "image/jpeg" || value === "image/jpg" || value === "image/pjpeg") return "image/jpeg";
+  if (value === "image/png" || value === "image/x-png") return "image/png";
+  if (value === "image/webp") return "image/webp";
+  return mimeFromFilename(filename ?? "");
+}
+
+export function bytesToBuffer(value: unknown): Buffer | null {
+  if (value == null) return null;
+  if (Buffer.isBuffer(value)) return value.length > 0 ? value : null;
+  if (value instanceof Uint8Array) return value.byteLength > 0 ? Buffer.from(value) : null;
+  return null;
+}
+
 export function resolveStoredIdDocument(params: {
   data: Buffer | null;
   mime: string | null;
   path: string | null;
 }): { data: Buffer; mime: string } | null {
   if (params.data && params.data.length > 0) {
-    return { data: params.data, mime: params.mime || "image/jpeg" };
+    return { data: params.data, mime: normalizeImageMime(params.mime) };
   }
   if (!params.path) return null;
   const fromDisk = readIdDocumentFromDisk(params.path);
   if (!fromDisk) return null;
-  return { data: fromDisk, mime: params.mime || mimeFromFilename(params.path) };
+  return { data: fromDisk, mime: normalizeImageMime(params.mime, params.path) };
 }
