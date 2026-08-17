@@ -28,7 +28,9 @@ export const authMiddleware = asyncHandler(async (req: Request, _res: Response, 
   }
 
   if (user.status === "PENDING") {
-    throw ApiError.forbidden("auth.account_pending");
+    throw ApiError.forbidden("auth.account_pending", {
+      idReuploadRequested: Boolean(user.id_reupload_requested_at),
+    });
   }
 
   if (user.status !== "ACTIVE") {

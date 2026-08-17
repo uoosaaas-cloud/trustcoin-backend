@@ -276,6 +276,10 @@ export async function requestIdDocumentReupload(userId: string, adminId: string)
   if (!user) throw ApiError.notFound("auth.user_not_found");
   if (user.role === "ADMIN") throw ApiError.badRequest("errors.forbidden");
 
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { id_reupload_requested_at: new Date() },
+  });
   queueEmail(() => sendKycReuploadRequest(user.email), `kyc-reupload:${user.email}`);
   await logAdminAction(adminId, "REQUEST_ID_REUPLOAD", `Asked ${user.email} to re-upload ID/passport photo`, userId);
   return { email: user.email };
@@ -288,7 +292,7 @@ export async function approveUser(userId: string, adminId: string) {
 
   const updated = await prisma.user.update({
     where: { id: userId },
-    data: { status: "ACTIVE", is_verified: true },
+    data: { status: "ACTIVE", is_verified: true, id_reupload_requested_at: null },
   });
 
   await logAdminAction(adminId, "APPROVE_USER", `Approved user ${user.email}`, userId);

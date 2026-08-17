@@ -114,6 +114,9 @@ model User {
   /// Raw ID/passport image bytes. Stored in the database so KYC photos survive
   /// ephemeral host disks (Render redeploys). Never returned from list APIs.
   id_document_data    Bytes?        @db.LongBlob
+  /// Set when admin emails this user asking to re-upload ID. The pending page
+  /// only shows the re-upload form while this is set. Cleared after a successful re-upload.
+  id_reupload_requested_at DateTime?
   created_at          DateTime      @default(now())
 
   investments      Investment[]

@@ -24,8 +24,8 @@ export class ApiError extends Error {
     return new ApiError(401, messageKey);
   }
 
-  static forbidden(messageKey = "errors.forbidden"): ApiError {
-    return new ApiError(403, messageKey);
+  static forbidden(messageKey = "errors.forbidden", details?: unknown): ApiError {
+    return new ApiError(403, messageKey, details);
   }
 
   static notFound(messageKey = "errors.not_found"): ApiError {

@@ -40,7 +40,8 @@
     "forgot_password_sent": "If an account exists for that email, a password reset link has been sent.",
     "reset_password_success": "Your password has been updated. You can now log in.",
     "reset_token_invalid": "This password reset link is invalid or has expired.",
-    "id_document_updated": "ID document updated. Our team will review it shortly."
+    "id_document_updated": "ID document updated. Our team will review it shortly.",
+    "id_reupload_not_requested": "Your account is still under review. A new ID photo is only needed if our team emailed you."
   },
   "mail": {
     "otp_subject": "Your TrustCoin verification code",

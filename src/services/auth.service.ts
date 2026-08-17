@@ -118,12 +118,17 @@ export async function resubmitIdDocument(
     throw ApiError.forbidden("auth.account_suspended");
   }
 
+  if (!user.id_reupload_requested_at) {
+    throw ApiError.forbidden("auth.id_reupload_not_requested");
+  }
+
   await prisma.user.update({
     where: { id: user.id },
     data: {
       id_document_path: `/uploads/id-documents/${uploaded.filename}`,
       id_document_mime: uploaded.mime,
       id_document_data: uploaded.data,
+      id_reupload_requested_at: null,
     },
   });
 
@@ -179,7 +184,9 @@ export async function loginUser(input: LoginInput): Promise<{ user: User; token:
   }
 
   if (user.status === "PENDING") {
-    throw ApiError.forbidden("auth.account_pending");
+    throw ApiError.forbidden("auth.account_pending", {
+      idReuploadRequested: Boolean(user.id_reupload_requested_at),
+    });
   }
 
   if (user.status !== "ACTIVE") {

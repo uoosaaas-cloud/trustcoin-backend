@@ -320,7 +320,7 @@ export async function sendKycReuploadRequest(toEmail: string): Promise<void> {
     bodyHtml: `
       <p style="margin:0;">مرحباً،</p>
       <p style="margin:14px 0 0;">لم نتمكن من استكمال مراجعة حسابك في TrustCoin لأن صورة وثيقة الهوية غير واضحة أو غير متوفرة لدينا.</p>
-      <p style="margin:14px 0 0;">يرجى إعادة رفع <strong style="color:#f8fafc;">صورة واضحة لبطاقة الهوية أو جواز السفر</strong> من خلال صفحة انتظار الموافقة.</p>
+      <p style="margin:14px 0 0;">يرجى تسجيل الدخول إلى حسابك، ثم رفع <strong style="color:#f8fafc;">صورة واضحة لبطاقة الهوية أو جواز السفر</strong> من صفحة انتظار الموافقة.</p>
       <ul style="margin:16px 0 0;padding-right:18px;color:#94a3b8;font-size:14px;line-height:1.8;">
         <li>صورة ملونة وحديثة</li>
         <li>تظهر جميع البيانات والأركان الأربعة</li>
@@ -346,7 +346,7 @@ export async function sendKycReuploadRequest(toEmail: string): Promise<void> {
     text:
       `طلب إعادة رفع وثيقة الهوية — TrustCoin\n\n` +
       `لم نتمكن من استكمال مراجعة حسابك لأن صورة الهوية غير واضحة أو غير متوفرة.\n` +
-      `يرجى رفع صورة أوضح لبطاقة الهوية أو جواز السفر من خلال صفحة انتظار الموافقة.\n` +
+      `يرجى تسجيل الدخول إلى حسابك، ثم رفع صورة أوضح لبطاقة الهوية أو جواز السفر من صفحة انتظار الموافقة.\n` +
       `بعد رفع الصورة سيتم إضافة 20 USDT إلى رصيدك المتاح. هذه هدية مقدمة من شركة TrustCoin.\n`,
   });
 }
