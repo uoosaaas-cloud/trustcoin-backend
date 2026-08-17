@@ -68,6 +68,8 @@ export async function registerUser(input: RegisterInput): Promise<{ user: User; 
         language: input.language,
         referral_code: ownReferralCode,
         referred_by_id: referrer?.id ?? null,
+        full_name: input.fullName,
+        date_of_birth: input.dateOfBirth,
         id_passport_number: input.idPassportNumber,
         id_document_path: input.idDocumentPath,
         id_document_mime: input.idDocumentMime ?? null,

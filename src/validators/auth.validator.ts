@@ -25,6 +25,58 @@ const optionalReferralCode = z
     return normalized || undefined;
   });
 
+const fullNameField = z
+  .string()
+  .trim()
+  .transform((value) => value.replace(/\s+/g, " "))
+  .pipe(
+    z
+      .string()
+      .min(2, "Full name is required.")
+      .max(80, "Full name must be at most 80 characters.")
+      .regex(/^[\p{L}\p{M}]+(?:[ '\-][\p{L}\p{M}]+)*$/u, "Please enter a valid full name.")
+  );
+
+function parseIsoDateOnly(value: string): Date | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) {
+    return null;
+  }
+  return date;
+}
+
+function ageInYears(date: Date): number {
+  const now = new Date();
+  let age = now.getUTCFullYear() - date.getUTCFullYear();
+  const monthDelta = now.getUTCMonth() - date.getUTCMonth();
+  if (monthDelta < 0 || (monthDelta === 0 && now.getUTCDate() < date.getUTCDate())) {
+    age -= 1;
+  }
+  return age;
+}
+
+const dateOfBirthField = z
+  .string()
+  .trim()
+  .transform((value, ctx) => {
+    const date = parseIsoDateOnly(value);
+    if (!date) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Date of birth is required." });
+      return z.NEVER;
+    }
+    const age = ageInYears(date);
+    if (age < 18 || age > 120) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "You must be at least 18 years old." });
+      return z.NEVER;
+    }
+    return date;
+  });
+
 /**
  * Multipart register body — every field arrives as a string.
  * Accepts either `referralCode` or `ref` (query-style invite param).
@@ -44,6 +96,8 @@ export const registerSchema = z.preprocess(
     language: z.enum(["en", "ar"]).default("en"),
     referralCode: optionalReferralCode,
     ref: z.string().optional(),
+    fullName: fullNameField,
+    dateOfBirth: dateOfBirthField,
     idPassportNumber: z
       .string()
       .trim()

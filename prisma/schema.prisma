@@ -107,6 +107,8 @@ model User {
   referred_by_id      String?       @db.VarChar(36)
   /// Denormalized count of users who registered with this user's referral code.
   referrals_count     Int           @default(0)
+  full_name           String?       @db.VarChar(120)
+  date_of_birth       DateTime?     @db.Date
   id_passport_number  String?       @unique @db.VarChar(64)
   id_document_path    String?       @db.VarChar(500)
   /// MIME type for the persisted KYC image (e.g. image/jpeg).

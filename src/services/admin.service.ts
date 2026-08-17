@@ -125,6 +125,8 @@ export interface AdminUserListItem {
   language: string;
   referral_code: string;
   created_at: Date;
+  full_name: string | null;
+  date_of_birth: Date | null;
   id_passport_number: string | null;
   id_document_path: string | null;
   has_id_document: boolean;
@@ -172,6 +174,8 @@ export async function listUsers(search?: string, status?: string): Promise<Admin
       referral_code: true,
       balance: true,
       created_at: true,
+      full_name: true,
+      date_of_birth: true,
       id_passport_number: true,
       id_document_path: true,
       id_document_mime: true,
@@ -228,6 +232,8 @@ export async function listUsers(search?: string, status?: string): Promise<Admin
       language: user.language,
       referral_code: user.referral_code,
       created_at: user.created_at,
+      full_name: user.full_name,
+      date_of_birth: user.date_of_birth,
       id_passport_number: user.id_passport_number,
       id_document_path: user.id_document_path,
       has_id_document: Boolean(user.id_document_path || user.id_document_mime),
