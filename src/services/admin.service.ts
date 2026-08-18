@@ -236,7 +236,7 @@ export async function listUsers(search?: string, status?: string): Promise<Admin
       date_of_birth: user.date_of_birth,
       id_passport_number: user.id_passport_number,
       id_document_path: user.id_document_path,
-      has_id_document: Boolean(user.id_document_path || user.id_document_mime),
+      has_id_document: Boolean(user.id_document_mime),
       availableBalance,
       lockedBalance,
       totalBalance: add(availableBalance, lockedBalance),

@@ -137,6 +137,27 @@ export async function resubmitIdDocument(
   return { email: user.email };
 }
 
+export async function getIdReuploadStatus(
+  email: string,
+  password: string
+): Promise<{ email: string; requested: boolean }> {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    throw ApiError.unauthorized("auth.invalid_credentials");
+  }
+
+  const passwordOk = await comparePassword(password, user.password_hash);
+  if (!passwordOk) {
+    throw ApiError.unauthorized("auth.invalid_credentials");
+  }
+
+  if (user.status === "BLOCKED") {
+    throw ApiError.forbidden("auth.account_suspended");
+  }
+
+  return { email: user.email, requested: Boolean(user.id_reupload_requested_at) };
+}
+
 export async function verifyOtp(email: string, code: string): Promise<User> {
   const user = await prisma.user.findUnique({ where: { email } });
 

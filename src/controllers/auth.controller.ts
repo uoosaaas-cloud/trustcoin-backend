@@ -106,3 +106,9 @@ export const resubmitIdDocument = asyncHandler(async (req: Request, res: Respons
   const result = await authService.resubmitIdDocument(email, password, uploaded);
   sendSuccess(res, 200, translate("auth.id_document_updated", req.lang), result);
 });
+
+export const getIdReuploadStatus = asyncHandler(async (req: Request, res: Response) => {
+  const { email, password } = req.body as LoginInput;
+  const result = await authService.getIdReuploadStatus(email, password);
+  sendSuccess(res, 200, translate("common.fetched", req.lang), result);
+});

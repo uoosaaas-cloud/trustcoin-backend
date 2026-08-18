@@ -48,5 +48,11 @@ router.post(
   validateBody(loginSchema),
   authController.resubmitIdDocument
 );
+router.post(
+  "/id-reupload-status",
+  idResubmitRateLimiter,
+  validateBody(loginSchema),
+  authController.getIdReuploadStatus
+);
 
 export default router;
