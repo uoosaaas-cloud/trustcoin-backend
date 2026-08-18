@@ -2,10 +2,12 @@ import crypto from "crypto";
 import type { User } from "@prisma/client";
 import { prisma } from "../config/prisma";
 import { env, isProduction } from "../config/env";
+import { sitePageUrl } from "../config/siteUrl";
 import { ApiError } from "../utils/apiError";
 import { hashPassword, comparePassword } from "../utils/password";
 import { signToken } from "../utils/jwt";
 import { findUserByReferralCode, generateUniqueReferralCode } from "../utils/referral";
+import { buildIdDocumentUrl } from "../utils/upload";
 import type { LoginInput, RegisterInput, ResetPasswordInput } from "../validators/auth.validator";
 import { issueOtp, consumeOtp } from "./otp.service";
 import { queueEmail, sendPasswordResetEmail } from "./email.service";
@@ -15,8 +17,7 @@ function hashResetToken(rawToken: string): string {
 }
 
 function buildPasswordResetLink(rawToken: string): string {
-  const base = env.APP_BASE_URL.replace(/\/+$/, "");
-  return `${base}/reset-password?token=${encodeURIComponent(rawToken)}`;
+  return sitePageUrl("/reset-password", { token: rawToken });
 }
 
 export async function registerUser(input: RegisterInput): Promise<{ user: User; otpCode: string }> {
@@ -127,7 +128,7 @@ export async function resubmitIdDocument(
   await prisma.user.update({
     where: { id: user.id },
     data: {
-      id_document_path: `/uploads/id-documents/${uploaded.filename}`,
+      id_document_path: buildIdDocumentUrl(uploaded.filename),
       id_document_mime: uploaded.mime,
       id_document_data: uploaded.data,
       id_reupload_requested_at: null,

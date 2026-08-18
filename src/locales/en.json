@@ -107,6 +107,7 @@
     "ip_banned": "Your IP address has been banned due to suspicious activity.",
     "database_unavailable": "We couldn't reach the database. Please try again in a moment.",
     "invalid_file_type": "Unsupported file type. Please upload a JPG, PNG, or WEBP image.",
+    "heic_not_supported": "iPhone HEIC photos are not supported. Please upload the image as JPG or PNG.",
     "file_too_large": "The uploaded file is too large."
   },
   "trade": {

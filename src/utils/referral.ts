@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { prisma } from "../config/prisma";
-import { env } from "../config/env";
+import { sitePageUrl } from "../config/siteUrl";
 
 // Excludes visually-ambiguous characters (0/O, 1/I/L) for easy sharing.
 const REFERRAL_CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
@@ -76,8 +76,7 @@ export async function findUserByReferralCode(rawCode: string) {
 
 /** Builds the shareable referral signup link for a given referral code. */
 export function buildReferralLink(referralCode: string): string {
-  const base = env.APP_BASE_URL.replace(/\/+$/, "");
-  return `${base}/register?ref=${encodeURIComponent(referralCode)}`;
+  return sitePageUrl("/register", { ref: referralCode });
 }
 
 /** Masks an email for referral list privacy: `jo***@example.com`. */
