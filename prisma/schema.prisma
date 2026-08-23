@@ -87,6 +87,11 @@ enum TradeOutcome {
   PENDING
 }
 
+enum TradeSource {
+  ADMIN
+  AUTO
+}
+
 // ---------------------------------------------------------------------------
 // Users
 // ---------------------------------------------------------------------------
@@ -432,6 +437,10 @@ model Trade {
   outcome              TradeOutcome @default(PROFITABLE)
   note                 String?      @db.VarChar(255)
   is_active            Boolean      @default(true)
+  /// ADMIN = desk-published; AUTO = site-wide generated. Not shown to users.
+  source               TradeSource  @default(ADMIN)
+  /// Stable slot id for AUTO rows, e.g. "2026-08-24#0". Null for ADMIN rows.
+  auto_key             String?      @unique @db.VarChar(32)
   created_by_admin_id  String       @db.VarChar(36)
   created_at           DateTime     @default(now())
   updated_at           DateTime     @updatedAt

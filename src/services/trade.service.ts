@@ -2,6 +2,7 @@ import { prisma } from "../config/prisma";
 import { ApiError } from "../utils/apiError";
 import { toDecimalString } from "../utils/money";
 import { logAdminAction } from "./admin.service";
+import { publishDueAutoTradesSafe } from "./autoTrade.service";
 import type { CreateTradeInput, UpdateTradeInput } from "../validators/trade.validator";
 
 function serializeTrade(trade: {
@@ -12,6 +13,7 @@ function serializeTrade(trade: {
   outcome: string;
   note: string | null;
   is_active: boolean;
+  source?: string;
   created_by_admin_id: string;
   created_at: Date;
   updated_at: Date;
@@ -24,6 +26,7 @@ function serializeTrade(trade: {
     outcome: trade.outcome,
     note: trade.note,
     isActive: trade.is_active,
+    source: trade.source ?? "ADMIN",
     createdByAdminId: trade.created_by_admin_id,
     createdAt: trade.created_at.toISOString(),
     updatedAt: trade.updated_at.toISOString(),
@@ -32,6 +35,8 @@ function serializeTrade(trade: {
 
 /** Public list of active trades for authenticated users. */
 export async function listActiveTradesForUsers() {
+  await publishDueAutoTradesSafe();
+
   const trades = await prisma.trade.findMany({
     where: { is_active: true },
     orderBy: { created_at: "desc" },
@@ -58,6 +63,7 @@ export async function createTrade(adminId: string, input: CreateTradeInput) {
       outcome: input.outcome,
       note: input.note || null,
       is_active: input.isActive ?? true,
+      source: "ADMIN",
       created_by_admin_id: adminId,
     },
   });

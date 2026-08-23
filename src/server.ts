@@ -3,6 +3,7 @@ import { env } from "./config/env";
 import { prisma } from "./config/prisma";
 import { runDailyRoiDistribution, startDailyRoiJob, stopDailyRoiJob } from "./jobs/dailyRoi.job";
 import { startDepositSweepJob, stopDepositSweepJob } from "./jobs/depositSweep.job";
+import { runAutoTradePublish, startAutoTradeJob, stopAutoTradeJob } from "./jobs/autoTrade.job";
 
 const app = createApp();
 
@@ -13,6 +14,7 @@ const server = app.listen(env.PORT, () => {
 
 startDailyRoiJob();
 startDepositSweepJob();
+startAutoTradeJob();
 
 // Catch up missed daily profits / matured principal unlocks after deploys or
 // sleeping dynos (in-process cron alone is not enough on free/sleeping hosts).
@@ -28,11 +30,17 @@ runDailyRoiDistribution()
     console.error("[startup] ROI catch-up failed:", error);
   });
 
+runAutoTradePublish().catch((error) => {
+  // eslint-disable-next-line no-console
+  console.error("[startup] Auto-trade catch-up failed:", error);
+});
+
 async function shutdown(signal: string) {
   // eslint-disable-next-line no-console
   console.log(`Received ${signal}, shutting down gracefully...`);
   stopDailyRoiJob();
   stopDepositSweepJob();
+  stopAutoTradeJob();
   server.close(async () => {
     await prisma.$disconnect();
     process.exit(0);

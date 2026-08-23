@@ -112,6 +112,11 @@ export const env = {
   // Cron expression controlling when the daily ROI distribution job runs (default: every day at 00:00 server time).
   DAILY_ROI_CRON_SCHEDULE: process.env.DAILY_ROI_CRON_SCHEDULE ?? "0 0 * * *",
 
+  // Site-wide auto trade board (global rows, not per-user). Off switch for incidents.
+  AUTO_TRADES_ENABLED: (process.env.AUTO_TRADES_ENABLED ?? "true") === "true",
+  /** Default: every 15 minutes. */
+  AUTO_TRADES_CRON_SCHEDULE: process.env.AUTO_TRADES_CRON_SCHEDULE ?? "*/15 * * * *",
+
   // --- Email (Resend primary; SMTP kept as legacy fallback for mailer.ts) ---
   RESEND_API_KEY: process.env.RESEND_API_KEY ?? "",
   /** Must use a verified Resend domain in production, e.g. TrustCoin <noreply@trustcoin.cc>. */
