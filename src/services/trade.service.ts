@@ -5,20 +5,23 @@ import { logAdminAction } from "./admin.service";
 import { publishDueAutoTradesSafe } from "./autoTrade.service";
 import type { CreateTradeInput, UpdateTradeInput } from "../validators/trade.validator";
 
-function serializeTrade(trade: {
-  id: string;
-  symbol: string;
-  side: string;
-  amount: { toString(): string };
-  outcome: string;
-  note: string | null;
-  is_active: boolean;
-  source?: string;
-  created_by_admin_id: string;
-  created_at: Date;
-  updated_at: Date;
-}) {
-  return {
+function serializeTrade(
+  trade: {
+    id: string;
+    symbol: string;
+    side: string;
+    amount: { toString(): string };
+    outcome: string;
+    note: string | null;
+    is_active: boolean;
+    source?: string;
+    created_by_admin_id: string | null;
+    created_at: Date;
+    updated_at: Date;
+  },
+  visibility: "public" | "admin" = "public"
+) {
+  const base = {
     id: trade.id,
     symbol: trade.symbol,
     side: trade.side,
@@ -26,10 +29,18 @@ function serializeTrade(trade: {
     outcome: trade.outcome,
     note: trade.note,
     isActive: trade.is_active,
-    source: trade.source ?? "ADMIN",
-    createdByAdminId: trade.created_by_admin_id,
     createdAt: trade.created_at.toISOString(),
     updatedAt: trade.updated_at.toISOString(),
+  };
+
+  if (visibility === "public") {
+    return base;
+  }
+
+  return {
+    ...base,
+    source: trade.source ?? "ADMIN",
+    createdByAdminId: trade.created_by_admin_id,
   };
 }
 
@@ -42,7 +53,7 @@ export async function listActiveTradesForUsers() {
     orderBy: { created_at: "desc" },
     take: 100,
   });
-  return trades.map(serializeTrade);
+  return trades.map((trade) => serializeTrade(trade, "public"));
 }
 
 /** Admin list — includes inactive rows. */
@@ -51,7 +62,7 @@ export async function listTradesForAdmin() {
     orderBy: { created_at: "desc" },
     take: 200,
   });
-  return trades.map(serializeTrade);
+  return trades.map((trade) => serializeTrade(trade, "admin"));
 }
 
 export async function createTrade(adminId: string, input: CreateTradeInput) {
@@ -74,7 +85,7 @@ export async function createTrade(adminId: string, input: CreateTradeInput) {
     `${trade.symbol} ${trade.side} ${toDecimalString(trade.amount.toString())} ${trade.outcome}`
   );
 
-  return serializeTrade(trade);
+  return serializeTrade(trade, "admin");
 }
 
 export async function updateTrade(adminId: string, tradeId: string, input: UpdateTradeInput) {
@@ -96,7 +107,7 @@ export async function updateTrade(adminId: string, tradeId: string, input: Updat
   });
 
   await logAdminAction(adminId, "UPDATE_TRADE", `tradeId=${tradeId}`);
-  return serializeTrade(trade);
+  return serializeTrade(trade, "admin");
 }
 
 export async function deleteTrade(adminId: string, tradeId: string) {

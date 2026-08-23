@@ -118,15 +118,6 @@ export async function publishDueAutoTrades(): Promise<AutoTradePublishSummary> {
       return { skipped: true, reason: "weekend", published: 0, alreadyPresent: 0 };
     }
 
-    const admin = await prisma.user.findFirst({
-      where: { role: "ADMIN" },
-      orderBy: { created_at: "asc" },
-      select: { id: true },
-    });
-    if (!admin) {
-      return { skipped: true, reason: "no_admin", published: 0, alreadyPresent: 0 };
-    }
-
     const now = new Date();
     const slots = planForDay(clock.year, clock.month, clock.day);
     let published = 0;
@@ -157,7 +148,6 @@ export async function publishDueAutoTrades(): Promise<AutoTradePublishSummary> {
             is_active: true,
             source: "AUTO",
             auto_key: slot.autoKey,
-            created_by_admin_id: admin.id,
             created_at: slot.scheduledAt,
           },
         });

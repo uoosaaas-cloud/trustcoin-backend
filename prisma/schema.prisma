@@ -441,11 +441,11 @@ model Trade {
   source               TradeSource  @default(ADMIN)
   /// Stable slot id for AUTO rows, e.g. "2026-08-24#0". Null for ADMIN rows.
   auto_key             String?      @unique @db.VarChar(32)
-  created_by_admin_id  String       @db.VarChar(36)
+  created_by_admin_id  String?      @db.VarChar(36)
   created_at           DateTime     @default(now())
   updated_at           DateTime     @updatedAt
 
-  createdByAdmin User @relation("TradesCreatedByAdmin", fields: [created_by_admin_id], references: [id], onDelete: Cascade)
+  createdByAdmin User? @relation("TradesCreatedByAdmin", fields: [created_by_admin_id], references: [id], onDelete: SetNull)
 
   @@index([is_active, created_at])
   @@index([created_by_admin_id])
