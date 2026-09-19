@@ -18,7 +18,7 @@ import { bytesToBuffer, resolveStoredIdDocument } from "../utils/upload";
 
 /**
  * Step 1 of admin login: validate credentials, then email an OTP.
- * If OTP mail cannot be delivered, a session is issued so the admin is not locked out.
+ * Delivery must succeed — skipping OTP hid the broken mail path.
  */
 export async function loginAdmin(email: string, password: string) {
   try {
@@ -67,15 +67,10 @@ export async function loginAdmin(email: string, password: string) {
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(
-      "[admin-login] OTP email failed; issuing session so admin is not locked out:",
+      "[admin-login] OTP email failed:",
       error instanceof Error ? error.message : String(error)
     );
-    const token = signToken({ userId: user.id, role: user.role, language: user.language });
-    return {
-      requiresOtp: false as const,
-      token,
-      user: { id: user.id, email: user.email, role: user.role as "ADMIN" },
-    };
+    throw ApiError.serviceUnavailable("auth.email_delivery_failed");
   }
 
   return {

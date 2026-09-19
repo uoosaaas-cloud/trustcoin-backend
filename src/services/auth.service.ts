@@ -11,7 +11,7 @@ import { findUserByReferralCode, generateUniqueReferralCode } from "../utils/ref
 import { buildIdDocumentUrl } from "../utils/upload";
 import type { LoginInput, RegisterInput, ResetPasswordInput } from "../validators/auth.validator";
 import { issueOtp, consumeOtp } from "./otp.service";
-import { queueEmail, sendPasswordResetEmail } from "./email.service";
+import { sendPasswordResetEmail } from "./email.service";
 
 function hashResetToken(rawToken: string): string {
   return crypto.createHash("sha256").update(rawToken).digest("hex");
@@ -253,7 +253,18 @@ export async function requestPasswordReset(email: string): Promise<{ resetLink?:
   ]);
 
   const resetLink = buildPasswordResetLink(rawToken);
-  queueEmail(() => sendPasswordResetEmail(user.email, resetLink), `password-reset:${user.email}`);
+  try {
+    await sendPasswordResetEmail(user.email, resetLink);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(
+      "[auth] password-reset email failed:",
+      error instanceof Error ? error.message : String(error)
+    );
+    if (isProduction) {
+      throw ApiError.serviceUnavailable("auth.email_delivery_failed");
+    }
+  }
 
   return isProduction ? {} : { resetLink };
 }

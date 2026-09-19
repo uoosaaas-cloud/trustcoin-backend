@@ -13,14 +13,20 @@ function maskRecipient(email: string): string {
   return `${visible}@${domain}`;
 }
 
-function isSmtpConfigured(): boolean {
+function smtpSkipReason(): string | null {
   const host = env.SMTP_HOST.trim();
   const user = env.SMTP_USER.trim();
   const pass = env.SMTP_PASSWORD.trim();
-  if (!host || !user || !pass) return false;
+  if (!host) return "missing_host";
+  if (!user) return "missing_user";
+  if (!pass) return "missing_pass";
   // Mailtrap sandbox never reaches real inboxes — ignore it in production.
-  if (isProduction && /mailtrap/i.test(host)) return false;
-  return true;
+  if (isProduction && /mailtrap/i.test(host)) return "mailtrap_ignored_in_production";
+  return null;
+}
+
+function isSmtpConfigured(): boolean {
+  return smtpSkipReason() === null;
 }
 
 function isResendConfigured(): boolean {
@@ -43,10 +49,14 @@ export function describeEmailTransport(): { provider: EmailProviderName; host?: 
 
 export function logEmailTransportStatus(): void {
   const info = describeEmailTransport();
-  const fromHost = info.from.includes("@") ? info.from.slice(info.from.lastIndexOf("@")) : "(unset)";
+  const fromMatch = info.from.match(/@([^>\s]+)/);
+  const fromHost = fromMatch ? `@${fromMatch[1]}` : "(unset)";
+  const smtpSkip = smtpSkipReason();
   // eslint-disable-next-line no-console
   console.log(
-    `[email] provider=${info.provider}${info.host ? ` smtpHost=${info.host}` : ""} fromHost=${fromHost}`
+    `[email] provider=${info.provider}${info.host ? ` smtpHost=${info.host}` : ""}${
+      smtpSkip ? ` smtpSkip=${smtpSkip}` : ""
+    } fromHost=${fromHost}`
   );
   if (isProduction && info.provider === "none") {
     // eslint-disable-next-line no-console
