@@ -8,21 +8,32 @@ const AMOUNT_MIN = 300_000;
 const AMOUNT_MAX = 3_200_000;
 const AMOUNT_STEP = 10_000;
 const AMOUNT_STEP_COUNT = (AMOUNT_MAX - AMOUNT_MIN) / AMOUNT_STEP;
-
-/** One AUTO row per tick, matching the cron cadence. */
-const TICK_MS = 15 * 60 * 1000;
-/** Replay missed ticks after deploys / sleeping Render dynos. */
-const BACKFILL_MS = 36 * 60 * 60 * 1000;
+const TRADES_PER_DAY_MIN = 3;
+const TRADES_PER_DAY_SPAN = 3;
+/** Replay a few NY calendar days after deploys / sleeping hosts. */
+const BACKFILL_DAYS = 8;
 /** Spot FX closes Friday 17:00 New York and reopens Sunday 17:00 New York. */
 const FOREX_WEEKEND_CUTOVER_MINUTES = 17 * 60;
 
 const NY_CLOCK = new Intl.DateTimeFormat("en-US", {
   timeZone: "America/New_York",
   weekday: "short",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
   hour: "numeric",
   minute: "numeric",
   hourCycle: "h23",
 });
+
+type NyWallClock = {
+  weekday: string;
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+};
 
 type AutoTradeSlot = {
   autoKey: string;
@@ -61,62 +72,105 @@ function mulberry32(seed: number): () => number {
   };
 }
 
-function floorToTick(date: Date): Date {
-  return new Date(Math.floor(date.getTime() / TICK_MS) * TICK_MS);
+function pad2(value: number): string {
+  return String(value).padStart(2, "0");
 }
 
-/** Compact UTC key, e.g. t202609191045 — fits trades.auto_key VARCHAR(32). */
-function autoKeyForTick(at: Date): string {
-  const year = at.getUTCFullYear();
-  const month = String(at.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(at.getUTCDate()).padStart(2, "0");
-  const hour = String(at.getUTCHours()).padStart(2, "0");
-  const minute = String(at.getUTCMinutes()).padStart(2, "0");
-  return `t${year}${month}${day}${hour}${minute}`;
-}
-
-function planTick(at: Date): AutoTradeSlot {
-  const autoKey = autoKeyForTick(at);
-  const random = mulberry32(hashDay(`trustcoin-auto-trades:${autoKey}`));
-  return {
-    autoKey,
-    symbol: SYMBOLS[Math.floor(random() * SYMBOLS.length)],
-    side: SIDES[Math.floor(random() * SIDES.length)],
-    amount: AMOUNT_MIN + Math.floor(random() * (AMOUNT_STEP_COUNT + 1)) * AMOUNT_STEP,
-    scheduledAt: at,
-  };
-}
-
-function nyWeekdayAndMinutes(date: Date): { weekday: string; minutes: number } {
+function nyWallClock(date: Date): NyWallClock {
   const parts = NY_CLOCK.formatToParts(date);
   const value = (type: Intl.DateTimeFormatPartTypes) =>
     parts.find((part) => part.type === type)?.value ?? "";
   return {
     weekday: value("weekday"),
-    minutes: Number(value("hour")) * 60 + Number(value("minute")),
+    year: Number(value("year")),
+    month: Number(value("month")),
+    day: Number(value("day")),
+    hour: Number(value("hour")),
+    minute: Number(value("minute")),
   };
 }
 
-/** True while the global spot FX session is open (Sun 17:00 NY → Fri 17:00 NY). */
+function nyLocalToUtc(year: number, month: number, day: number, hour: number, minute: number): Date {
+  const target = Date.UTC(year, month - 1, day, hour, minute, 0, 0);
+  let guess = target + 4 * 60 * 60 * 1000;
+  for (let index = 0; index < 4; index += 1) {
+    const shown = nyWallClock(new Date(guess));
+    const shownAsUtc = Date.UTC(shown.year, shown.month - 1, shown.day, shown.hour, shown.minute);
+    guess += target - shownAsUtc;
+  }
+  return new Date(guess);
+}
+
+/** Open minutes from NY midnight. Saturday is fully closed. */
+function openWindowMinutes(weekday: string): { start: number; end: number } | null {
+  if (weekday === "Sat") return null;
+  if (weekday === "Sun") return { start: FOREX_WEEKEND_CUTOVER_MINUTES, end: 24 * 60 };
+  if (weekday === "Fri") return { start: 0, end: FOREX_WEEKEND_CUTOVER_MINUTES };
+  return { start: 0, end: 24 * 60 };
+}
+
 function isForexMarketOpen(date: Date): boolean {
-  const { weekday, minutes } = nyWeekdayAndMinutes(date);
-  if (weekday === "Sat") return false;
-  if (weekday === "Sun") return minutes >= FOREX_WEEKEND_CUTOVER_MINUTES;
-  if (weekday === "Fri") return minutes < FOREX_WEEKEND_CUTOVER_MINUTES;
+  const clock = nyWallClock(date);
+  const minutes = clock.hour * 60 + clock.minute;
+  if (clock.weekday === "Sat") return false;
+  if (clock.weekday === "Sun") return minutes >= FOREX_WEEKEND_CUTOVER_MINUTES;
+  if (clock.weekday === "Fri") return minutes < FOREX_WEEKEND_CUTOVER_MINUTES;
   return true;
 }
 
-function dueTicks(now: Date): Date[] {
-  const latest = floorToTick(now);
-  const earliest = new Date(latest.getTime() - BACKFILL_MS);
-  const ticks: Date[] = [];
-  for (let at = earliest.getTime(); at <= latest.getTime(); at += TICK_MS) {
-    const tick = new Date(at);
-    if (isForexMarketOpen(tick)) {
-      ticks.push(tick);
+function dayKey(year: number, month: number, day: number): string {
+  return `${year}-${pad2(month)}-${pad2(day)}`;
+}
+
+function planForNyDay(year: number, month: number, day: number, weekday: string): AutoTradeSlot[] {
+  const window = openWindowMinutes(weekday);
+  if (!window) return [];
+
+  const span = window.end - window.start;
+  if (span <= 0) return [];
+
+  const key = dayKey(year, month, day);
+  const random = mulberry32(hashDay(`trustcoin-auto-trades:${key}`));
+  const count = TRADES_PER_DAY_MIN + Math.floor(random() * TRADES_PER_DAY_SPAN);
+  const chosen = new Set<number>();
+  let guard = 0;
+  while (chosen.size < count && guard < 80) {
+    chosen.add(window.start + Math.floor(random() * span));
+    guard += 1;
+  }
+
+  return [...chosen]
+    .sort((left, right) => left - right)
+    .map((totalMinutes, index) => {
+      const hour = Math.floor(totalMinutes / 60);
+      const minute = totalMinutes % 60;
+      return {
+        autoKey: `${key}#${index}`,
+        symbol: SYMBOLS[Math.floor(random() * SYMBOLS.length)],
+        side: SIDES[Math.floor(random() * SIDES.length)],
+        amount: AMOUNT_MIN + Math.floor(random() * (AMOUNT_STEP_COUNT + 1)) * AMOUNT_STEP,
+        scheduledAt: nyLocalToUtc(year, month, day, hour, minute),
+      };
+    });
+}
+
+function dueSlots(now: Date): AutoTradeSlot[] {
+  const seen = new Set<string>();
+  const slots: AutoTradeSlot[] = [];
+
+  for (let offset = 0; offset < BACKFILL_DAYS; offset += 1) {
+    const clock = nyWallClock(new Date(now.getTime() - offset * 24 * 60 * 60 * 1000));
+    const key = dayKey(clock.year, clock.month, clock.day);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    for (const slot of planForNyDay(clock.year, clock.month, clock.day, clock.weekday)) {
+      if (slot.scheduledAt <= now) {
+        slots.push(slot);
+      }
     }
   }
-  return ticks;
+
+  return slots;
 }
 
 function isUniqueConstraintError(error: unknown): boolean {
@@ -124,9 +178,9 @@ function isUniqueConstraintError(error: unknown): boolean {
 }
 
 /**
- * Inserts due AUTO trades for open FX-session ticks in the last 36 hours.
+ * Inserts 3–5 AUTO trades per NY trading day, only after each slot's time.
  * Pauses for the global forex weekend (Fri 17:00 NY → Sun 17:00 NY).
- * Weekday sessions run around the clock. Idempotent via auto_key.
+ * Idempotent via auto_key. Backfills a few missed days after sleep/deploys.
  */
 export async function publishDueAutoTrades(): Promise<AutoTradePublishSummary> {
   if (!env.AUTO_TRADES_ENABLED) {
@@ -141,7 +195,7 @@ export async function publishDueAutoTrades(): Promise<AutoTradePublishSummary> {
   try {
     const now = new Date();
     const marketOpen = isForexMarketOpen(now);
-    const slots = dueTicks(now).map(planTick);
+    const slots = dueSlots(now);
 
     if (slots.length === 0) {
       return {
@@ -153,7 +207,6 @@ export async function publishDueAutoTrades(): Promise<AutoTradePublishSummary> {
     }
 
     const keys = slots.map((slot) => slot.autoKey);
-
     const existingRows = await prisma.trade.findMany({
       where: { auto_key: { in: keys } },
       select: { auto_key: true },
