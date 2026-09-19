@@ -515,6 +515,7 @@
       "deposits": "الإيداعات",
       "users": "المستخدمون",
       "gifts": "الهدايا",
+      "email": "البريد",
       "packages": "الباقات",
       "referrals": "الإحالات",
       "logout": "تسجيل الخروج"
@@ -651,6 +652,31 @@
         "amountRequired": "أدخل مبلغ هدية أكبر من صفر.",
         "usersRequired": "حدد مستخدماً واحداً على الأقل، أو اختر الجميع ما عدا الإدارة.",
         "generic": "تعذر إرسال الهدية. حاول مرة أخرى."
+      }
+    },
+    "email": {
+      "eyebrow": "الدعم",
+      "title": "إرسال بريد للمستخدم",
+      "subtitle": "أرسل بريداً لأي مستخدم مسجّل من لوحة الإدارة. يستخدم نفس نظام بريد إشعارات الهدايا.",
+      "usersTitle": "اختيار المستخدم",
+      "searchPlaceholder": "بحث بالبريد الإلكتروني…",
+      "emailLabel": "بريد المستلم",
+      "emailPlaceholder": "user@example.com",
+      "selected": "المحدد: {email}",
+      "status": "{status}",
+      "subjectLabel": "الموضوع",
+      "subjectPlaceholder": "تحديث الحساب",
+      "bodyLabel": "محتوى الرسالة",
+      "bodyPlaceholder": "اكتب نص البريد الذي سيصل للمستخدم…",
+      "empty": "لا يوجد مستخدمون مطابقون.",
+      "submit": "إرسال البريد",
+      "sending": "جاري الإرسال…",
+      "success": "تم إرسال البريد إلى {email}.",
+      "errors": {
+        "userRequired": "حدد مستخدماً أو أدخل بريده المسجّل.",
+        "subjectRequired": "أدخل موضوع الرسالة.",
+        "bodyRequired": "أدخل محتوى الرسالة.",
+        "generic": "تعذر إرسال البريد. حاول مرة أخرى."
       }
     },
     "users": {

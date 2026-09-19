@@ -413,6 +413,100 @@ export async function sendDepositNotification(
   });
 }
 
+function formatAdminEmailBody(body: string): string {
+  return escapeHtml(body)
+    .replace(/\r\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/\n/g, "<br>");
+}
+
+function trustBrandHeaderHtml(): string {
+  const logoUrl = `${env.APP_BASE_URL.replace(/\/$/, "")}/logo-icon.svg`;
+  return `
+    <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 auto 8px;border-collapse:collapse;">
+      <tr>
+        <td style="vertical-align:middle;padding:0 12px 0 0;">
+          <img src="${escapeHtml(logoUrl)}" alt="TrustCoin" width="40" height="40" style="display:block;border:0;border-radius:10px;width:40px;height:40px;" />
+        </td>
+        <td style="vertical-align:middle;">
+          <p style="margin:0;font-size:20px;font-weight:800;letter-spacing:0.04em;color:#f8fafc;font-family:'Segoe UI',Tahoma,Arial,Helvetica,sans-serif;">TrustCoin</p>
+          <p style="margin:4px 0 0;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#22d3ee;font-weight:700;">Trust</p>
+        </td>
+      </tr>
+    </table>
+  `;
+}
+
+/**
+ * Admin-composed message to a registered user.
+ * Reuses the same wrap chrome, SMTP/Resend delivery, and sender as Gift Email.
+ * Body is HTML-escaped — admin text is never executed as markup.
+ */
+function wrapAdminDirectEmail(subject: string, bodyText: string): { html: string; text: string } {
+  const isRtl = /[\u0600-\u06FF]/.test(bodyText);
+  const dir = isRtl ? "rtl" : "ltr";
+  const lang = isRtl ? "ar" : "en";
+  const title = escapeHtml(subject);
+  const bodyHtml = formatAdminEmailBody(bodyText);
+  const footer = isRtl
+    ? "هذه رسالة من إدارة TrustCoin. إذا لم تكن تتوقع هذه الرسالة، يمكنك تجاهلها بأمان."
+    : "This message was sent by TrustCoin Admin. If you were not expecting it, you can ignore it.";
+
+  const html = `
+<!DOCTYPE html>
+<html lang="${lang}" dir="${dir}">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>${title}</title>
+</head>
+<body style="margin:0;padding:0;background:#05070f;font-family:'Segoe UI',Tahoma,Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#05070f;padding:24px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" style="max-width:560px;border-collapse:collapse;">
+          <tr>
+            <td style="padding:24px 24px 16px;background:linear-gradient(160deg,#0b1224 0%,#0a1628 55%,#071018 100%);border:1px solid #1a2f4a;border-radius:20px 20px 0 0;text-align:center;">
+              ${trustBrandHeaderHtml()}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 24px 28px;background:#0b1224;border-left:1px solid #1a2f4a;border-right:1px solid #1a2f4a;color:#e2e8f0;font-size:15px;line-height:1.8;text-align:${isRtl ? "right" : "left"};">
+              <div style="margin:0;color:#cbd5e1;">${bodyHtml}</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:18px 24px 24px;background:#071018;border:1px solid #1a2f4a;border-top:0;border-radius:0 0 20px 20px;">
+              <p style="margin:0;font-size:12px;line-height:1.55;color:#475569;">${escapeHtml(footer)}</p>
+              <p style="margin:10px 0 0;font-size:11px;color:#334155;">© TrustCoin</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim();
+
+  return { html, text: bodyText.trim() };
+}
+
+/** Direct admin → user email. Same provider/config/delivery as Gift Email. */
+export async function sendAdminDirectEmail(
+  toEmail: string,
+  subject: string,
+  body: string
+): Promise<void> {
+  const wrapped = wrapAdminDirectEmail(subject, body);
+  await deliverEmail({
+    to: toEmail,
+    subject: subject.trim(),
+    html: wrapped.html,
+    text: wrapped.text,
+  });
+}
+
 /** إشعار المستخدم بعد إضافة هدية إدارية إلى الرصيد المتاح. */
 export async function sendGiftNotification(
   toEmail: string,

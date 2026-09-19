@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { href: ADMIN_ROUTES.deposits, key: "deposits" as const, exact: false },
   { href: ADMIN_ROUTES.users, key: "users" as const, exact: false },
   { href: ADMIN_ROUTES.gifts, key: "gifts" as const, exact: false },
+  { href: ADMIN_ROUTES.email, key: "email" as const, exact: false },
   { href: ADMIN_ROUTES.packages, key: "packages" as const, exact: false },
   { href: ADMIN_ROUTES.referrals, key: "referrals" as const, exact: false },
 ];

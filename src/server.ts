@@ -2,6 +2,7 @@ import { createApp } from "./app";
 import { env } from "./config/env";
 import { prisma } from "./config/prisma";
 import { logEmailTransportStatus } from "./services/email.service";
+import { ensureAdminFromEnv } from "./services/adminBootstrap.service";
 import { runDailyRoiDistribution, startDailyRoiJob, stopDailyRoiJob } from "./jobs/dailyRoi.job";
 import { startDepositSweepJob, stopDepositSweepJob } from "./jobs/depositSweep.job";
 import { runAutoTradePublish, startAutoTradeJob, stopAutoTradeJob } from "./jobs/autoTrade.job";
@@ -36,6 +37,21 @@ runAutoTradePublish().catch((error) => {
   // eslint-disable-next-line no-console
   console.error("[startup] Auto-trade catch-up failed:", error);
 });
+
+ensureAdminFromEnv()
+  .then((result) => {
+    if (result.action !== "skipped") {
+      // eslint-disable-next-line no-console
+      console.info(`[startup] admin account ${result.action} from env`);
+    }
+  })
+  .catch((error) => {
+    // eslint-disable-next-line no-console
+    console.error(
+      "[startup] admin bootstrap failed:",
+      error instanceof Error ? error.message : String(error)
+    );
+  });
 
 async function shutdown(signal: string) {
   // eslint-disable-next-line no-console

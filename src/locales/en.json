@@ -11,7 +11,10 @@
     "gift_users_not_found": "One or more selected users were not found.",
     "gift_admin_excluded": "Admin accounts cannot receive gifts.",
     "id_document_missing": "The ID photo is no longer on the server. Ask the user to re-upload it from the pending-account page.",
-    "id_reupload_requested": "An official email was sent asking the user to re-upload a clearer ID or passport photo."
+    "id_reupload_requested": "An official email was sent asking the user to re-upload a clearer ID or passport photo.",
+    "email_sent": "The email was sent to the user successfully.",
+    "email_user_not_found": "No user was found with that ID or email.",
+    "email_delivery_failed": "The email could not be sent. Try again in a moment."
   },
   "user": {
     "profile_fetched": "Profile fetched successfully.",

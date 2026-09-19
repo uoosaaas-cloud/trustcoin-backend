@@ -515,6 +515,7 @@
       "deposits": "Deposits",
       "users": "Users",
       "gifts": "Gifts",
+      "email": "Email",
       "packages": "Packages",
       "referrals": "Referrals",
       "logout": "Log out"
@@ -651,6 +652,31 @@
         "amountRequired": "Enter a gift amount greater than zero.",
         "usersRequired": "Select at least one user, or choose all users except admin.",
         "generic": "Could not send the gift. Please try again."
+      }
+    },
+    "email": {
+      "eyebrow": "Support",
+      "title": "Send Email to User",
+      "subtitle": "Email a registered user from TrustCoin Admin. The message uses the same mail system as gift notifications.",
+      "usersTitle": "Choose a user",
+      "searchPlaceholder": "Search by email…",
+      "emailLabel": "Recipient email",
+      "emailPlaceholder": "user@example.com",
+      "selected": "Selected: {email}",
+      "status": "{status}",
+      "subjectLabel": "Subject",
+      "subjectPlaceholder": "Account update",
+      "bodyLabel": "Message",
+      "bodyPlaceholder": "Write the email the user will receive…",
+      "empty": "No matching users.",
+      "submit": "Send Email",
+      "sending": "Sending…",
+      "success": "Email sent to {email}.",
+      "errors": {
+        "userRequired": "Select a user or enter their registered email.",
+        "subjectRequired": "Enter a subject.",
+        "bodyRequired": "Enter the message body.",
+        "generic": "Could not send the email. Please try again."
       }
     },
     "users": {

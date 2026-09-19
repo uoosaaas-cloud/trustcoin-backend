@@ -10,6 +10,7 @@ import { triggerSweepSchema } from "../validators/sweep.validator";
 import { updateAdminPackageSchema } from "../validators/adminPackage.validator";
 import { createTradeSchema, updateTradeSchema } from "../validators/trade.validator";
 import { distributeGiftsSchema } from "../validators/gift.validator";
+import { sendAdminUserEmailSchema } from "../validators/adminEmail.validator";
 
 const router = Router();
 
@@ -59,6 +60,7 @@ router.patch(
 router.get("/deposits/monitoring", adminController.getDepositMonitoring);
 router.post("/deposits/trigger-sweep", validateBody(triggerSweepSchema), adminController.triggerDepositSweep);
 router.post("/gifts", validateBody(distributeGiftsSchema), adminController.sendGifts);
+router.post("/emails", validateBody(sendAdminUserEmailSchema), adminController.sendUserEmail);
 
 router.get("/trades", adminController.listTrades);
 router.post("/trades", validateBody(createTradeSchema), adminController.createTrade);

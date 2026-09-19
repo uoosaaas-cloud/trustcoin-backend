@@ -341,3 +341,17 @@ export async function distributeAdminGifts(payload: {
   const { data } = await api.post<ApiSuccessResponse<AdminGiftDistributionResult>>("/admin/gifts", payload);
   return data;
 }
+
+export async function sendAdminUserEmail(payload: {
+  userId?: string;
+  email?: string;
+  subject: string;
+  body: string;
+}) {
+  const { data } = await api.post<ApiSuccessResponse<{ to: string; subject: string }>>(
+    "/admin/emails",
+    payload,
+    { timeout: 60000 }
+  );
+  return data;
+}

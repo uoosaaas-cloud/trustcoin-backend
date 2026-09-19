@@ -10,6 +10,7 @@ import { runDepositSweepJob } from "../jobs/depositSweep.job";
 import { distributeGifts } from "../services/gift.service";
 import type { TriggerSweepInput } from "../validators/sweep.validator";
 import type { DistributeGiftsInput } from "../validators/gift.validator";
+import type { SendAdminUserEmailInput } from "../validators/adminEmail.validator";
 
 export const login = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body as { email: string; password: string };
@@ -186,6 +187,12 @@ export const sendGifts = asyncHandler(async (req: Request, res: Response) => {
   const input = req.body as DistributeGiftsInput;
   const result = await distributeGifts(req.user!.id, input);
   sendSuccess(res, 200, translate("admin.gifts_distributed", req.lang), result);
+});
+
+export const sendUserEmail = asyncHandler(async (req: Request, res: Response) => {
+  const input = req.body as SendAdminUserEmailInput;
+  const result = await adminService.sendDirectUserEmail(req.user!.id, input);
+  sendSuccess(res, 200, translate("admin.email_sent", req.lang), result);
 });
 
 export const listTrades = asyncHandler(async (req: Request, res: Response) => {

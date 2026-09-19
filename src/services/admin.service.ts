@@ -5,7 +5,14 @@ import { comparePassword } from "../utils/password";
 import { signToken } from "../utils/jwt";
 import { generateOtpCode, getOtpExpiryDate } from "../utils/otp";
 import { add, isGreaterThanOrEqual, toDecimalString } from "../utils/money";
-import { queueEmail, sendAdminLoginOtp, sendWithdrawalStatusEmail, sendKycReuploadRequest } from "./email.service";
+import {
+  queueEmail,
+  sendAdminLoginOtp,
+  sendWithdrawalStatusEmail,
+  sendKycReuploadRequest,
+  sendAdminDirectEmail,
+} from "./email.service";
+import type { SendAdminUserEmailInput } from "../validators/adminEmail.validator";
 import { consumeOtp } from "./otp.service";
 import { bytesToBuffer, resolveStoredIdDocument } from "../utils/upload";
 
@@ -298,6 +305,49 @@ export async function requestIdDocumentReupload(userId: string, adminId: string)
   queueEmail(() => sendKycReuploadRequest(user.email), `kyc-reupload:${user.email}`);
   await logAdminAction(adminId, "REQUEST_ID_REUPLOAD", `Asked ${user.email} to re-upload ID/passport photo`, userId);
   return { email: user.email };
+}
+
+/**
+ * Send a custom email to a registered user using the Gift Email delivery path.
+ * Recipient is always the email stored on the user record (never a free-form spoofed To).
+ */
+export async function sendDirectUserEmail(adminId: string, input: SendAdminUserEmailInput) {
+  const email = input.email?.trim().toLowerCase();
+  const user = input.userId
+    ? await prisma.user.findUnique({
+        where: { id: input.userId },
+        select: { id: true, email: true },
+      })
+    : email
+      ? await prisma.user.findUnique({
+          where: { email },
+          select: { id: true, email: true },
+        })
+      : null;
+
+  if (!user) {
+    throw ApiError.notFound("admin.email_user_not_found");
+  }
+
+  try {
+    await sendAdminDirectEmail(user.email, input.subject, input.body);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(
+      "[admin-email] delivery failed:",
+      error instanceof Error ? error.message : String(error)
+    );
+    throw ApiError.serviceUnavailable("admin.email_delivery_failed");
+  }
+
+  await logAdminAction(
+    adminId,
+    "SEND_USER_EMAIL",
+    `to=${user.email} subjectLen=${input.subject.trim().length} bodyLen=${input.body.trim().length}`,
+    user.id
+  );
+
+  return { to: user.email, subject: input.subject.trim() };
 }
 
 export async function approveUser(userId: string, adminId: string) {
