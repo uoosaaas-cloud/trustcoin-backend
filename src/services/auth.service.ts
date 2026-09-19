@@ -208,6 +208,17 @@ export async function loginUser(input: LoginInput): Promise<{ user: User; token:
   }
 
   if (!user.is_verified) {
+    // Unverified login is the OTP path: send a fresh EMAIL_VERIFY code, then
+    // the client continues on /already-registered/verify-email.
+    if (user.role !== "ADMIN") {
+      try {
+        await issueOtp(user.email, user.language || "ar", "EMAIL_VERIFY");
+      } catch (error) {
+        if (!(error instanceof ApiError && error.statusCode === 429)) {
+          throw error;
+        }
+      }
+    }
     throw ApiError.forbidden("auth.account_not_verified");
   }
 
