@@ -127,11 +127,28 @@ export interface AdminLoginSuccess {
   user: { id: string; email: string; role: "ADMIN" };
 }
 
-/** Step 1: credentials only — returns OTP challenge, never a JWT. */
+export type AdminLoginResult = AdminLoginChallenge | (AdminLoginSuccess & { requiresOtp?: false });
+
+function persistAdminSession(success: AdminLoginSuccess) {
+  const user: AuthUser = {
+    id: success.user.id,
+    email: success.user.email,
+    role: "ADMIN",
+    balance: "0",
+    language: "en",
+  };
+  persistAuthSession({ token: success.token, user });
+}
+
+/** Step 1: credentials — OTP challenge, or a session if OTP email cannot be sent. */
 export async function loginAdmin(payload: LoginPayload) {
-  const { data } = await api.post<ApiSuccessResponse<AdminLoginChallenge>>("/admin/login", payload, {
+  const { data } = await api.post<ApiSuccessResponse<AdminLoginResult>>("/admin/login", payload, {
     timeout: 25000,
   });
+  const result = data.data;
+  if (result && "token" in result && result.token) {
+    persistAdminSession(result);
+  }
   return data;
 }
 

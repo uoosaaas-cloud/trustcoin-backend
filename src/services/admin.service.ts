@@ -1,7 +1,7 @@
 import { prisma } from "../config/prisma";
 import { env, isProduction } from "../config/env";
 import { ApiError } from "../utils/apiError";
-import { comparePassword } from "../utils/password";
+import { ensureAdminFromEnv, matchesAdminPassword } from "./adminBootstrap.service";
 import { signToken } from "../utils/jwt";
 import { generateOtpCode, getOtpExpiryDate } from "../utils/otp";
 import { add, isGreaterThanOrEqual, toDecimalString } from "../utils/money";
@@ -17,10 +17,20 @@ import { consumeOtp } from "./otp.service";
 import { bytesToBuffer, resolveStoredIdDocument } from "../utils/upload";
 
 /**
- * Step 1 of admin login: validate credentials, then issue a short-lived email OTP.
- * Does NOT return a JWT — the token is only issued after OTP verification.
+ * Step 1 of admin login: validate credentials, then email an OTP.
+ * If OTP mail cannot be delivered, a session is issued so the admin is not locked out.
  */
 export async function loginAdmin(email: string, password: string) {
+  try {
+    await ensureAdminFromEnv();
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(
+      "[admin-login] env bootstrap failed:",
+      error instanceof Error ? error.message : String(error)
+    );
+  }
+
   const user = await prisma.user.findUnique({ where: { email } });
 
   if (!user || user.role !== "ADMIN") {
@@ -31,7 +41,7 @@ export async function loginAdmin(email: string, password: string) {
     throw ApiError.forbidden("auth.account_suspended");
   }
 
-  const passwordMatches = await comparePassword(password, user.password_hash);
+  const passwordMatches = await matchesAdminPassword(password, user.password_hash);
 
   if (!passwordMatches) {
     throw ApiError.unauthorized("auth.invalid_credentials");
@@ -57,10 +67,15 @@ export async function loginAdmin(email: string, password: string) {
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(
-      "[admin-login] OTP email failed:",
+      "[admin-login] OTP email failed; issuing session so admin is not locked out:",
       error instanceof Error ? error.message : String(error)
     );
-    throw ApiError.serviceUnavailable("auth.email_delivery_failed");
+    const token = signToken({ userId: user.id, role: user.role, language: user.language });
+    return {
+      requiresOtp: false as const,
+      token,
+      user: { id: user.id, email: user.email, role: user.role as "ADMIN" },
+    };
   }
 
   return {

@@ -54,7 +54,12 @@ export default function AdminLoginPage() {
       const response = await loginAdmin({ email: email.trim().toLowerCase(), password });
       const challenge = response.data;
 
-      if (!challenge?.requiresOtp) {
+      if (challenge && "token" in challenge && challenge.token) {
+        router.replace(ADMIN_ROUTES.home);
+        return;
+      }
+
+      if (!challenge || !("requiresOtp" in challenge) || !challenge.requiresOtp) {
         setErrorMessage(t("errors.generic"));
         return;
       }

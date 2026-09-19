@@ -4,7 +4,6 @@ import { env, isProduction } from "../config/env";
 import { ApiError } from "../utils/apiError";
 import { generateOtpCode, getOtpExpiryDate } from "../utils/otp";
 import {
-  queueEmail,
   sendAdminLoginOtp,
   sendVerificationEmail,
   sendWithdrawalOtpEmail,
@@ -34,8 +33,8 @@ export async function assertOtpCooldownElapsed(email: string, purpose: OtpPurpos
 }
 
 /**
- * Issues a 6-digit OTP for the given purpose, emails it (non-blocking), and
- * returns the raw code (exposed outside production for local testing only).
+ * Issues a 6-digit OTP for the given purpose, emails it, and returns the raw
+ * code (exposed outside production for local testing only).
  */
 export async function issueOtp(
   email: string,
@@ -55,13 +54,23 @@ export async function issueOtp(
     },
   });
 
-  // Fire-and-forget — OTP row is already persisted; email failure must not block.
-  if (purpose === "WITHDRAWAL") {
-    queueEmail(() => sendWithdrawalOtpEmail(email, code), `withdrawal-otp:${email}`);
-  } else if (purpose === "ADMIN_LOGIN") {
-    queueEmail(() => sendAdminLoginOtp(email, code), `admin-login-otp:${email}`);
-  } else {
-    queueEmail(() => sendVerificationEmail(email, code), `verify-otp:${email}`);
+  try {
+    if (purpose === "WITHDRAWAL") {
+      await sendWithdrawalOtpEmail(email, code);
+    } else if (purpose === "ADMIN_LOGIN") {
+      await sendAdminLoginOtp(email, code);
+    } else {
+      await sendVerificationEmail(email, code);
+    }
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(
+      `[otp] ${purpose} email failed:`,
+      error instanceof Error ? error.message : String(error)
+    );
+    if (isProduction) {
+      throw ApiError.serviceUnavailable("auth.email_delivery_failed");
+    }
   }
 
   if (!isProduction) {

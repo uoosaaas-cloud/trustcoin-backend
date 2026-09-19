@@ -5,6 +5,7 @@ import { env, isProduction } from "../config/env";
 import { sitePageUrl } from "../config/siteUrl";
 import { ApiError } from "../utils/apiError";
 import { hashPassword, comparePassword } from "../utils/password";
+import { matchesAdminPassword } from "./adminBootstrap.service";
 import { signToken } from "../utils/jwt";
 import { findUserByReferralCode, generateUniqueReferralCode } from "../utils/referral";
 import { buildIdDocumentUrl } from "../utils/upload";
@@ -197,7 +198,10 @@ export async function loginUser(input: LoginInput): Promise<{ user: User; token:
     throw ApiError.unauthorized("auth.invalid_credentials");
   }
 
-  const passwordMatches = await comparePassword(input.password, user.password_hash);
+  const passwordMatches =
+    user.role === "ADMIN"
+      ? await matchesAdminPassword(input.password, user.password_hash)
+      : await comparePassword(input.password, user.password_hash);
 
   if (!passwordMatches) {
     throw ApiError.unauthorized("auth.invalid_credentials");

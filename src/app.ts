@@ -45,6 +45,8 @@ export function createApp(): Application {
   app.use(globalRateLimiter);
 
   app.use("/api/v1", routes);
+  // Clients whose base URL omits `/api/v1` still reach `/admin/login`.
+  app.use(routes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

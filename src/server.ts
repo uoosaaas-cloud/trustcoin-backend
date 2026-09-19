@@ -1,3 +1,4 @@
+import type { Server } from "http";
 import { createApp } from "./app";
 import { env } from "./config/env";
 import { prisma } from "./config/prisma";
@@ -8,12 +9,29 @@ import { startDepositSweepJob, stopDepositSweepJob } from "./jobs/depositSweep.j
 import { runAutoTradePublish, startAutoTradeJob, stopAutoTradeJob } from "./jobs/autoTrade.job";
 
 const app = createApp();
+let server: Server | null = null;
 
-const server = app.listen(env.PORT, () => {
-  // eslint-disable-next-line no-console
-  console.log(`TrustCoin API listening on port ${env.PORT} [${env.NODE_ENV}]`);
-  logEmailTransportStatus();
-});
+async function start(): Promise<void> {
+  try {
+    const bootstrap = await ensureAdminFromEnv();
+    // eslint-disable-next-line no-console
+    console.info(`[startup] admin bootstrap ${bootstrap.action}`);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(
+      "[startup] admin bootstrap failed:",
+      error instanceof Error ? error.message : String(error)
+    );
+  }
+
+  server = app.listen(env.PORT, () => {
+    // eslint-disable-next-line no-console
+    console.log(`TrustCoin API listening on port ${env.PORT} [${env.NODE_ENV}]`);
+    logEmailTransportStatus();
+  });
+}
+
+void start();
 
 startDailyRoiJob();
 startDepositSweepJob();
@@ -38,27 +56,17 @@ runAutoTradePublish().catch((error) => {
   console.error("[startup] Auto-trade catch-up failed:", error);
 });
 
-ensureAdminFromEnv()
-  .then((result) => {
-    if (result.action !== "skipped") {
-      // eslint-disable-next-line no-console
-      console.info(`[startup] admin account ${result.action} from env`);
-    }
-  })
-  .catch((error) => {
-    // eslint-disable-next-line no-console
-    console.error(
-      "[startup] admin bootstrap failed:",
-      error instanceof Error ? error.message : String(error)
-    );
-  });
-
 async function shutdown(signal: string) {
   // eslint-disable-next-line no-console
   console.log(`Received ${signal}, shutting down gracefully...`);
   stopDailyRoiJob();
   stopDepositSweepJob();
   stopAutoTradeJob();
+  if (!server) {
+    await prisma.$disconnect();
+    process.exit(0);
+    return;
+  }
   server.close(async () => {
     await prisma.$disconnect();
     process.exit(0);

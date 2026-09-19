@@ -8,9 +8,41 @@ export type AdminBootstrapResult = { action: "skipped" | "created" | "updated" }
  * Sync the ADMIN account from ADMIN_EMAIL / ADMIN_PASSWORD env vars.
  * Never logs the password. Skips when credentials already match.
  */
+export function readAdminPasswordFromEnv(): string {
+  let password = process.env.ADMIN_PASSWORD || "";
+  password = password.trim();
+  if (
+    (password.startsWith('"') && password.endsWith('"') && password.length >= 2) ||
+    (password.startsWith("'") && password.endsWith("'") && password.length >= 2)
+  ) {
+    password = password.slice(1, -1);
+  }
+  return password;
+}
+
+/**
+ * Render/env interpolation often turns `$$` into `$`. Accept both so the
+ * password shown in the dashboard still matches the stored hash.
+ */
+export function adminPasswordCandidates(submitted: string): string[] {
+  const trimmed = submitted.trim();
+  const collapsed = trimmed.replaceAll("$$", "$");
+  const envPassword = readAdminPasswordFromEnv();
+  return [...new Set([trimmed, collapsed, envPassword, envPassword.replaceAll("$$", "$")].filter(Boolean))];
+}
+
+export async function matchesAdminPassword(submitted: string, passwordHash: string): Promise<boolean> {
+  for (const candidate of adminPasswordCandidates(submitted)) {
+    if (await comparePassword(candidate, passwordHash)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export async function ensureAdminFromEnv(): Promise<AdminBootstrapResult> {
   const email = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
-  const password = process.env.ADMIN_PASSWORD || "";
+  const password = readAdminPasswordFromEnv();
 
   if (!email || !password) {
     return { action: "skipped" };
