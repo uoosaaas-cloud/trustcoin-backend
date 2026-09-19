@@ -51,16 +51,18 @@ export async function listActiveTradesForUsers() {
   const trades = await prisma.trade.findMany({
     where: { is_active: true },
     orderBy: { created_at: "desc" },
-    take: 100,
+    take: 200,
   });
   return trades.map((trade) => serializeTrade(trade, "public"));
 }
 
 /** Admin list — includes inactive rows. */
 export async function listTradesForAdmin() {
+  await publishDueAutoTradesSafe();
+
   const trades = await prisma.trade.findMany({
     orderBy: { created_at: "desc" },
-    take: 200,
+    take: 300,
   });
   return trades.map((trade) => serializeTrade(trade, "admin"));
 }

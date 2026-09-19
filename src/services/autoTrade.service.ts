@@ -8,9 +8,11 @@ const AMOUNT_MIN = 300_000;
 const AMOUNT_MAX = 3_200_000;
 const AMOUNT_STEP = 10_000;
 const AMOUNT_STEP_COUNT = (AMOUNT_MAX - AMOUNT_MIN) / AMOUNT_STEP;
-const HOUR_START = 9;
-const HOUR_END = 18;
-const RIYADH_OFFSET_MS = 3 * 60 * 60 * 1000;
+
+/** One AUTO row per tick, matching the cron cadence. */
+const TICK_MS = 15 * 60 * 1000;
+/** Replay missed ticks after deploys / sleeping Render dynos. */
+const BACKFILL_MS = 36 * 60 * 60 * 1000;
 
 type AutoTradeSlot = {
   autoKey: string;
@@ -28,26 +30,6 @@ export type AutoTradePublishSummary = {
 };
 
 let isPublishing = false;
-
-function riyadhWallClock(now = new Date()) {
-  const shifted = new Date(now.getTime() + RIYADH_OFFSET_MS);
-  return {
-    year: shifted.getUTCFullYear(),
-    month: shifted.getUTCMonth() + 1,
-    day: shifted.getUTCDate(),
-    hour: shifted.getUTCHours(),
-    minute: shifted.getUTCMinutes(),
-    weekday: shifted.getUTCDay(),
-  };
-}
-
-function dayKey(year: number, month: number, day: number): string {
-  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-}
-
-function riyadhLocalToUtc(year: number, month: number, day: number, hour: number, minute: number): Date {
-  return new Date(Date.UTC(year, month - 1, day, hour - 3, minute, 0, 0));
-}
 
 function hashDay(value: string): number {
   let hash = 2166136261;
@@ -69,29 +51,40 @@ function mulberry32(seed: number): () => number {
   };
 }
 
-function planForDay(year: number, month: number, day: number): AutoTradeSlot[] {
-  const key = dayKey(year, month, day);
-  const random = mulberry32(hashDay(`trustcoin-auto-trades:${key}`));
-  const count = 2 + Math.floor(random() * 3);
-  const slots: AutoTradeSlot[] = [];
+function floorToTick(date: Date): Date {
+  return new Date(Math.floor(date.getTime() / TICK_MS) * TICK_MS);
+}
 
-  for (let index = 0; index < count; index += 1) {
-    const spanMinutes = (HOUR_END - HOUR_START) * 60;
-    const minuteOffset = Math.floor(random() * (spanMinutes + 1));
-    const totalMinutes = HOUR_START * 60 + minuteOffset;
-    const hour = Math.floor(totalMinutes / 60);
-    const minute = totalMinutes % 60;
+/** Compact UTC key, e.g. t202609191045 — fits trades.auto_key VARCHAR(32). */
+function autoKeyForTick(at: Date): string {
+  const year = at.getUTCFullYear();
+  const month = String(at.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(at.getUTCDate()).padStart(2, "0");
+  const hour = String(at.getUTCHours()).padStart(2, "0");
+  const minute = String(at.getUTCMinutes()).padStart(2, "0");
+  return `t${year}${month}${day}${hour}${minute}`;
+}
 
-    slots.push({
-      autoKey: `${key}#${index}`,
-      symbol: SYMBOLS[Math.floor(random() * SYMBOLS.length)],
-      side: SIDES[Math.floor(random() * SIDES.length)],
-      amount: AMOUNT_MIN + Math.floor(random() * (AMOUNT_STEP_COUNT + 1)) * AMOUNT_STEP,
-      scheduledAt: riyadhLocalToUtc(year, month, day, hour, minute),
-    });
+function planTick(at: Date): AutoTradeSlot {
+  const autoKey = autoKeyForTick(at);
+  const random = mulberry32(hashDay(`trustcoin-auto-trades:${autoKey}`));
+  return {
+    autoKey,
+    symbol: SYMBOLS[Math.floor(random() * SYMBOLS.length)],
+    side: SIDES[Math.floor(random() * SIDES.length)],
+    amount: AMOUNT_MIN + Math.floor(random() * (AMOUNT_STEP_COUNT + 1)) * AMOUNT_STEP,
+    scheduledAt: at,
+  };
+}
+
+function dueTicks(now: Date): Date[] {
+  const latest = floorToTick(now);
+  const earliest = new Date(latest.getTime() - BACKFILL_MS);
+  const ticks: Date[] = [];
+  for (let at = earliest.getTime(); at <= latest.getTime(); at += TICK_MS) {
+    ticks.push(new Date(at));
   }
-
-  return slots;
+  return ticks;
 }
 
 function isUniqueConstraintError(error: unknown): boolean {
@@ -99,8 +92,9 @@ function isUniqueConstraintError(error: unknown): boolean {
 }
 
 /**
- * Inserts today's due AUTO trades if missing. Global (no userId). Weekend-safe.
- * Idempotent via auto_key. Never backfills previous days.
+ * Inserts due AUTO trades for the last 36 hours (15-minute ticks, 24/7).
+ * Weekends and overnight hours are included — the board must keep moving.
+ * Idempotent via auto_key. Safe after sleeping hosts / deploys.
  */
 export async function publishDueAutoTrades(): Promise<AutoTradePublishSummary> {
   if (!env.AUTO_TRADES_ENABLED) {
@@ -113,51 +107,45 @@ export async function publishDueAutoTrades(): Promise<AutoTradePublishSummary> {
 
   isPublishing = true;
   try {
-    const clock = riyadhWallClock();
-    if (clock.weekday === 0 || clock.weekday === 6) {
-      return { skipped: true, reason: "weekend", published: 0, alreadyPresent: 0 };
-    }
-
     const now = new Date();
-    const slots = planForDay(clock.year, clock.month, clock.day);
+    const slots = dueTicks(now).map(planTick);
+    const keys = slots.map((slot) => slot.autoKey);
+
+    const existingRows = await prisma.trade.findMany({
+      where: { auto_key: { in: keys } },
+      select: { auto_key: true },
+    });
+    const existingKeys = new Set(
+      existingRows.map((row) => row.auto_key).filter((key): key is string => Boolean(key))
+    );
+
     let published = 0;
-    let alreadyPresent = 0;
+    let alreadyPresent = existingKeys.size;
+    const missing = slots.filter((slot) => !existingKeys.has(slot.autoKey));
 
-    for (const slot of slots) {
-      if (slot.scheduledAt > now) {
-        continue;
-      }
-
-      const existing = await prisma.trade.findUnique({
-        where: { auto_key: slot.autoKey },
-        select: { id: true },
-      });
-      if (existing) {
-        alreadyPresent += 1;
-        continue;
-      }
-
+    if (missing.length > 0) {
       try {
-        await prisma.trade.create({
-          data: {
+        const result = await prisma.trade.createMany({
+          data: missing.map((slot) => ({
             symbol: slot.symbol,
             side: slot.side,
             amount: slot.amount,
-            outcome: "PROFITABLE",
+            outcome: "PROFITABLE" as const,
             note: null,
             is_active: true,
-            source: "AUTO",
+            source: "AUTO" as const,
             auto_key: slot.autoKey,
             created_at: slot.scheduledAt,
-          },
+          })),
+          skipDuplicates: true,
         });
-        published += 1;
+        published = result.count;
+        alreadyPresent += missing.length - published;
       } catch (error) {
-        if (isUniqueConstraintError(error)) {
-          alreadyPresent += 1;
-          continue;
+        if (!isUniqueConstraintError(error)) {
+          throw error;
         }
-        throw error;
+        alreadyPresent += missing.length;
       }
     }
 

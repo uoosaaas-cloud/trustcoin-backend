@@ -121,9 +121,12 @@ export const env = {
   DAILY_ROI_CATCHUP_CRON_SCHEDULE: process.env.DAILY_ROI_CATCHUP_CRON_SCHEDULE ?? "18 * * * *",
 
   // Site-wide auto trade board (global rows, not per-user). Off switch for incidents.
-  AUTO_TRADES_ENABLED: (process.env.AUTO_TRADES_ENABLED ?? "true") === "true",
-  /** Default: every 15 minutes. */
+  AUTO_TRADES_ENABLED:
+    (process.env.AUTO_TRADES_ENABLED ?? "true") === "true" || process.env.AUTO_TRADES_ENABLED === "1",
+  /** Default: every 15 minutes, 24/7. */
   AUTO_TRADES_CRON_SCHEDULE: process.env.AUTO_TRADES_CRON_SCHEDULE ?? "*/15 * * * *",
+  /** Hourly catch-up so sleeping hosts still fill missed ticks. */
+  AUTO_TRADES_CATCHUP_CRON_SCHEDULE: process.env.AUTO_TRADES_CATCHUP_CRON_SCHEDULE ?? "9 * * * *",
 
   // --- Email: Resend first (HTTPS). SMTP/Brevo is skipped in production while
   // Brevo's sending platform is disabled. send.trustcoin.cc is the Resend bounce host. ---
