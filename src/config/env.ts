@@ -109,22 +109,24 @@ export const env = {
 
   ADMIN_MAX_FAILED_ATTEMPTS: Number(process.env.ADMIN_MAX_FAILED_ATTEMPTS ?? 5),
 
-  // Cron expression controlling when the daily ROI distribution job runs (default: every day at 00:00 server time).
+  // Cron expression for daily ROI (interpreted in UTC). Default: 00:00 UTC.
   DAILY_ROI_CRON_SCHEDULE: process.env.DAILY_ROI_CRON_SCHEDULE ?? "0 0 * * *",
+  // Extra catch-up so missed midnight ticks (sleeping hosts) still pay within the hour.
+  DAILY_ROI_CATCHUP_CRON_SCHEDULE: process.env.DAILY_ROI_CATCHUP_CRON_SCHEDULE ?? "18 * * * *",
 
   // Site-wide auto trade board (global rows, not per-user). Off switch for incidents.
   AUTO_TRADES_ENABLED: (process.env.AUTO_TRADES_ENABLED ?? "true") === "true",
   /** Default: every 15 minutes. */
   AUTO_TRADES_CRON_SCHEDULE: process.env.AUTO_TRADES_CRON_SCHEDULE ?? "*/15 * * * *",
 
-  // --- Email (Resend primary; SMTP kept as legacy fallback for mailer.ts) ---
+  // --- Email (SMTP/Brevo preferred when SMTP_USER+SMTP_PASS are set; Resend is fallback) ---
   RESEND_API_KEY: process.env.RESEND_API_KEY ?? "",
-  /** Must use a verified Resend domain in production, e.g. TrustCoin <noreply@trustcoin.cc>. */
+  /** Verified sender, e.g. TrustCoin <support@trustcoin.cc> or noreply@trustcoin.cc. */
   EMAIL_FROM: process.env.EMAIL_FROM ?? "TrustCoin <noreply@trustcoin.cc>",
   /** Inbox for new-withdrawal admin alerts (falls back to ADMIN_EMAIL). */
   ADMIN_ALERT_EMAIL: (process.env.ADMIN_ALERT_EMAIL ?? process.env.ADMIN_EMAIL ?? "").trim(),
 
-  // Legacy Nodemailer / Mailtrap (unused when RESEND_API_KEY is set).
+  // SMTP (Brevo: smtp-relay.brevo.com:587). Used when SMTP_USER and SMTP_PASS are set.
   SMTP_HOST: process.env.SMTP_HOST ?? "sandbox.smtp.mailtrap.io",
   SMTP_PORT: Number(process.env.SMTP_PORT ?? 2525),
   SMTP_SECURE: (process.env.SMTP_SECURE ?? "false") === "true",

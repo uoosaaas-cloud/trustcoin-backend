@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { getApiErrorMessage } from "@/lib/api";
 import { formatUsdt } from "@/lib/format";
 import {
+  durationKey,
   getPeriodReturnPercent,
   purchaseInvestment,
   type InvestmentPackage,
@@ -15,12 +16,6 @@ interface InvestModalProps {
   availableBalance: string;
   onClose: () => void;
   onSuccess: () => void;
-}
-
-function durationKey(days: number): "duration1m" | "duration3m" | "duration6m" {
-  if (days <= 30) return "duration1m";
-  if (days <= 90) return "duration3m";
-  return "duration6m";
 }
 
 export function InvestModal({ pkg, availableBalance, onClose, onSuccess }: InvestModalProps) {

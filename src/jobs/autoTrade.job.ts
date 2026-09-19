@@ -27,12 +27,16 @@ export function startAutoTradeJob(): ScheduledTask | null {
     return scheduledTask;
   }
 
-  scheduledTask = cron.schedule(env.AUTO_TRADES_CRON_SCHEDULE, () => {
-    runAutoTradePublish().catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error("[autoTradeJob] Unexpected error during scheduled run:", error);
-    });
-  });
+  scheduledTask = cron.schedule(
+    env.AUTO_TRADES_CRON_SCHEDULE,
+    () => {
+      runAutoTradePublish().catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error("[autoTradeJob] Unexpected error during scheduled run:", error);
+      });
+    },
+    { timezone: "UTC" }
+  );
 
   if (!isProduction) {
     // eslint-disable-next-line no-console

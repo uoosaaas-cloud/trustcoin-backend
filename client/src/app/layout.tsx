@@ -22,9 +22,9 @@ const notoSansArabic = Noto_Sans_Arabic({
 });
 
 export const metadata: Metadata = {
-  title: "TrustCoin — Invest with Confidence",
+  title: "TrustCoin — Forex Trading & Investment by AXS",
   description:
-    "TrustCoin is a secure, multilingual crypto investment platform. Create your account to start earning daily returns.",
+    "Officially presented by AXS. Secure forex packages, live trading signals, and daily yield distribution.",
 };
 
 export default function RootLayout({

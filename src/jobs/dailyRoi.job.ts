@@ -134,23 +134,43 @@ async function executeDailyRoiDistribution(
 }
 
 let scheduledTask: ScheduledTask | null = null;
+let catchupTask: ScheduledTask | null = null;
 
-/** Schedules the daily ROI distribution job per `DAILY_ROI_CRON_SCHEDULE` (default: every day at 00:00). */
+const CRON_TIMEZONE = "UTC";
+
+/** Schedules the daily ROI distribution job per `DAILY_ROI_CRON_SCHEDULE` (UTC). */
 export function startDailyRoiJob(): ScheduledTask {
-  if (scheduledTask) {
-    return scheduledTask;
+  if (!scheduledTask) {
+    scheduledTask = cron.schedule(
+      env.DAILY_ROI_CRON_SCHEDULE,
+      () => {
+        runDailyRoiDistribution().catch((error) => {
+          // eslint-disable-next-line no-console
+          console.error("[dailyRoiJob] Unexpected error during scheduled run:", error);
+        });
+      },
+      { timezone: CRON_TIMEZONE }
+    );
   }
 
-  scheduledTask = cron.schedule(env.DAILY_ROI_CRON_SCHEDULE, () => {
-    runDailyRoiDistribution().catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error("[dailyRoiJob] Unexpected error during scheduled run:", error);
-    });
-  });
+  if (!catchupTask) {
+    catchupTask = cron.schedule(
+      env.DAILY_ROI_CATCHUP_CRON_SCHEDULE,
+      () => {
+        runDailyRoiDistribution().catch((error) => {
+          // eslint-disable-next-line no-console
+          console.error("[dailyRoiJob] Unexpected error during hourly catch-up:", error);
+        });
+      },
+      { timezone: CRON_TIMEZONE }
+    );
+  }
 
   if (!isProduction) {
     // eslint-disable-next-line no-console
-    console.log(`[dailyRoiJob] Scheduled with cron expression "${env.DAILY_ROI_CRON_SCHEDULE}".`);
+    console.log(
+      `[dailyRoiJob] Scheduled "${env.DAILY_ROI_CRON_SCHEDULE}" UTC + catch-up "${env.DAILY_ROI_CATCHUP_CRON_SCHEDULE}" UTC.`
+    );
   }
 
   return scheduledTask;
@@ -158,5 +178,7 @@ export function startDailyRoiJob(): ScheduledTask {
 
 export function stopDailyRoiJob(): void {
   scheduledTask?.stop();
+  catchupTask?.stop();
   scheduledTask = null;
+  catchupTask = null;
 }

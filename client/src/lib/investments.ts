@@ -44,6 +44,12 @@ export async function getInvestmentPackages() {
   return data;
 }
 
+/** Current user's investments (active + completed), newest first. */
+export async function getMyInvestments() {
+  const { data } = await api.get<ApiSuccessResponse<InvestmentRecord[]>>("/investments/my");
+  return data;
+}
+
 export async function purchaseInvestment(payload: PurchaseInvestmentPayload) {
   const { data } = await api.post<ApiSuccessResponse<PurchaseInvestmentResponse>>(
     "/investments/purchase",
@@ -52,14 +58,129 @@ export async function purchaseInvestment(payload: PurchaseInvestmentPayload) {
   return data;
 }
 
+/** Estimated daily profit in USDT for an investment position. */
+export function getDailyProfitUsdt(
+  inv: Pick<InvestmentRecord, "current_amount" | "daily_profit_percent">
+): number {
+  const amount = Number(inv.current_amount);
+  const rate = Number(inv.daily_profit_percent);
+  if (!Number.isFinite(amount) || !Number.isFinite(rate)) return 0;
+  return (amount * rate) / 100;
+}
+
+/** Progress 0–100 through the lock window (clamped). Uses wall-clock timestamps from the API. */
+export function getInvestmentProgress(
+  inv: Pick<InvestmentRecord, "start_date" | "end_date" | "status">
+): number {
+  if (inv.status === "COMPLETED") return 100;
+  const start = new Date(inv.start_date).getTime();
+  const end = new Date(inv.end_date).getTime();
+  const now = Date.now();
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return 0;
+  return Math.min(100, Math.max(0, ((now - start) / (end - start)) * 100));
+}
+
 /**
- * Period return % for a package = daily rate × duration days
- * (shown as monthly / 3-month / 6-month depending on `duration_days`).
+ * Whole UTC calendar days remaining until maturity.
+ * Uses date-only UTC math so timezone offsets cannot collapse a multi-day
+ * package to "0 days" after the first local midnight.
  */
-export function getPeriodReturnPercent(pkg: Pick<InvestmentPackage, "daily_profit_percent" | "duration_days">): string {
+export function getDaysRemaining(
+  inv: Pick<InvestmentRecord, "end_date" | "status">
+): number {
+  if (inv.status === "COMPLETED") return 0;
+  const end = new Date(inv.end_date);
+  if (Number.isNaN(end.getTime())) return 0;
+  const now = new Date();
+  const endUtc = Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate());
+  const nowUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  return Math.max(0, Math.round((endUtc - nowUtc) / 86_400_000));
+}
+
+/** Accrual display step for live total earned (6 hours). */
+export const EARNINGS_ACCRUAL_STEP_MS = 6 * 60 * 60 * 1000;
+/** UI refresh cadence for the live earnings counter (must be << 6h so background tabs recover). */
+export const EARNINGS_TICK_MS = 30_000;
+
+/**
+ * Live accruing total earned for active packages.
+ * Advances in 6-hour steps from start, never below server total_earned.
+ * Safe after reload: depends only on start/end timestamps + Date.now().
+ */
+export function getLiveTotalEarned(
+  inv: Pick<
+    InvestmentRecord,
+    "status" | "start_date" | "end_date" | "current_amount" | "daily_profit_percent" | "total_earned"
+  >,
+  nowMs = Date.now()
+): number {
+  const serverTotal = Number(inv.total_earned);
+  if (inv.status !== "ACTIVE") {
+    return Number.isFinite(serverTotal) ? serverTotal : 0;
+  }
+
+  const start = new Date(inv.start_date).getTime();
+  const end = new Date(inv.end_date).getTime();
+  const amount = Number(inv.current_amount);
+  const dailyPct = Number(inv.daily_profit_percent);
+
+  if (
+    !Number.isFinite(start) ||
+    !Number.isFinite(end) ||
+    !Number.isFinite(amount) ||
+    !Number.isFinite(dailyPct) ||
+    end <= start
+  ) {
+    return Number.isFinite(serverTotal) ? serverTotal : 0;
+  }
+
+  const elapsedMs = Math.min(Math.max(0, nowMs - start), end - start);
+  const steppedMs = Math.floor(elapsedMs / EARNINGS_ACCRUAL_STEP_MS) * EARNINGS_ACCRUAL_STEP_MS;
+  const elapsedDays = steppedMs / 86_400_000;
+  const projected = amount * (dailyPct / 100) * elapsedDays;
+  const safeServer = Number.isFinite(serverTotal) ? serverTotal : 0;
+  return Math.max(safeServer, projected);
+}
+
+export type DurationKey = "duration7d" | "duration1m" | "duration3m" | "duration6m";
+
+export function durationKey(days: number): DurationKey {
+  const d = Math.round(Number(days));
+  if (!Number.isFinite(d) || d <= 0) return "duration1m";
+  if (d === 7) return "duration7d";
+  if (d === 30) return "duration1m";
+  if (d === 90) return "duration3m";
+  if (d === 180) return "duration6m";
+  if (d <= 10) return "duration7d";
+  if (d <= 45) return "duration1m";
+  if (d <= 120) return "duration3m";
+  return "duration6m";
+}
+
+export function durationKeyFromPackage(pkg: { duration_days: number; name?: string }): DurationKey {
+  const name = (pkg.name ?? "").toLowerCase();
+  if (/\b7\s*days?\b/.test(name) || name.includes("7-day")) return "duration7d";
+  if (/\b1\s*month\b/.test(name)) return "duration1m";
+  if (/\b3\s*months?\b/.test(name)) return "duration3m";
+  if (/\b6\s*months?\b/.test(name)) return "duration6m";
+  return durationKey(pkg.duration_days);
+}
+
+/**
+ * Period return % for a package = daily rate × duration days.
+ */
+export function getPeriodReturnPercent(
+  pkg: Pick<InvestmentPackage, "daily_profit_percent" | "duration_days">
+): string {
   const daily = Number(pkg.daily_profit_percent);
-  if (Number.isNaN(daily)) return "0.00";
-  return (daily * pkg.duration_days).toFixed(2);
+  const days = Number(pkg.duration_days);
+  if (!Number.isFinite(daily) || !Number.isFinite(days) || days <= 0) return "0";
+  const raw = daily * days;
+  const twoDp = Math.round(raw * 100) / 100;
+  if (Math.abs(twoDp - Math.round(twoDp)) < 0.02) {
+    return String(Math.round(twoDp));
+  }
+  return twoDp.toFixed(2);
 }
 
 /** Groups fixed-amount packages into amount tiers for the invest UI. */

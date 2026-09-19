@@ -129,7 +129,9 @@ export interface AdminLoginSuccess {
 
 /** Step 1: credentials only — returns OTP challenge, never a JWT. */
 export async function loginAdmin(payload: LoginPayload) {
-  const { data } = await api.post<ApiSuccessResponse<AdminLoginChallenge>>("/admin/login", payload);
+  const { data } = await api.post<ApiSuccessResponse<AdminLoginChallenge>>("/admin/login", payload, {
+    timeout: 25000,
+  });
   return data;
 }
 

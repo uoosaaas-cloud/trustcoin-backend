@@ -11,7 +11,7 @@ import {
 import type { MarketAssetId, MarketAssetPayload } from "@/lib/markets";
 import { fetchMarketAssets } from "@/lib/marketData";
 
-const REFRESH_MS = 45_000;
+const REFRESH_MS = 60_000;
 
 function formatUsdPrice(price: number, id: MarketAssetId): string {
   if (id === "trx") {

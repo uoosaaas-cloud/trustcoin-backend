@@ -13,8 +13,22 @@ import {
 import type { CreateInvestmentInput } from "../validators/investment.validator";
 import { debitAvailableBalance } from "./wallet.service";
 
+let packagesCache: { expiresAt: number; data: Awaited<ReturnType<typeof prisma.package.findMany>> } | null = null;
+const PACKAGES_CACHE_MS = 60_000;
+
 export async function listPackages() {
-  return prisma.package.findMany({ orderBy: [{ amount: "asc" }, { duration_days: "asc" }] });
+  const now = Date.now();
+  if (packagesCache && packagesCache.expiresAt > now) {
+    return packagesCache.data;
+  }
+
+  const data = await prisma.package.findMany({ orderBy: [{ amount: "asc" }, { duration_days: "asc" }] });
+  packagesCache = { expiresAt: now + PACKAGES_CACHE_MS, data };
+  return data;
+}
+
+export function invalidatePackagesCache(): void {
+  packagesCache = null;
 }
 
 export async function listUserInvestments(userId: string) {

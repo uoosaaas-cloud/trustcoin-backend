@@ -1,16 +1,84 @@
+import nodemailer from "nodemailer";
+import type { Transporter } from "nodemailer";
 import { Resend } from "resend";
 import { env, isProduction } from "../config/env";
 
 let resendClient: Resend | null = null;
+let smtpTransport: Transporter | null = null;
+
+function maskRecipient(email: string): string {
+  const [local, domain] = email.split("@");
+  if (!local || !domain) return "(invalid-recipient)";
+  const visible = local.length <= 1 ? "*" : `${local.slice(0, 1)}***`;
+  return `${visible}@${domain}`;
+}
+
+function isSmtpConfigured(): boolean {
+  const host = env.SMTP_HOST.trim();
+  const user = env.SMTP_USER.trim();
+  const pass = env.SMTP_PASSWORD.trim();
+  if (!host || !user || !pass) return false;
+  // Mailtrap sandbox never reaches real inboxes — ignore it in production.
+  if (isProduction && /mailtrap/i.test(host)) return false;
+  return true;
+}
+
+function isResendConfigured(): boolean {
+  return Boolean(env.RESEND_API_KEY.trim());
+}
+
+export type EmailProviderName = "smtp" | "resend" | "none";
+
+/** Safe summary for startup logs (never includes passwords or API keys). */
+export function describeEmailTransport(): { provider: EmailProviderName; host?: string; from: string } {
+  const from = env.EMAIL_FROM.trim();
+  if (isSmtpConfigured()) {
+    return { provider: "smtp", host: env.SMTP_HOST.trim(), from };
+  }
+  if (isResendConfigured()) {
+    return { provider: "resend", from };
+  }
+  return { provider: "none", from };
+}
+
+export function logEmailTransportStatus(): void {
+  const info = describeEmailTransport();
+  const fromHost = info.from.includes("@") ? info.from.slice(info.from.lastIndexOf("@")) : "(unset)";
+  // eslint-disable-next-line no-console
+  console.log(
+    `[email] provider=${info.provider}${info.host ? ` smtpHost=${info.host}` : ""} fromHost=${fromHost}`
+  );
+  if (isProduction && info.provider === "none") {
+    // eslint-disable-next-line no-console
+    console.error(
+      "[email] No delivery provider in production. Set SMTP_USER/SMTP_PASS (Brevo) or RESEND_API_KEY."
+    );
+  }
+}
 
 function getResend(): Resend | null {
-  if (!env.RESEND_API_KEY) {
+  if (!isResendConfigured()) {
     return null;
   }
   if (!resendClient) {
     resendClient = new Resend(env.RESEND_API_KEY);
   }
   return resendClient;
+}
+
+function getSmtpTransport(): Transporter {
+  if (!smtpTransport) {
+    smtpTransport = nodemailer.createTransport({
+      host: env.SMTP_HOST.trim(),
+      port: env.SMTP_PORT,
+      secure: env.SMTP_SECURE || env.SMTP_PORT === 465,
+      auth: {
+        user: env.SMTP_USER.trim(),
+        pass: env.SMTP_PASSWORD,
+      },
+    });
+  }
+  return smtpTransport;
 }
 
 function escapeHtml(value: string): string {
@@ -92,7 +160,29 @@ function ctaButton(label: string, href: string): string {
   `;
 }
 
-async function deliverEmail(params: {
+async function sendViaSmtp(params: {
+  from: string;
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+}): Promise<void> {
+  const info = await getSmtpTransport().sendMail({
+    from: params.from,
+    to: params.to,
+    subject: params.subject,
+    html: params.html,
+    text: params.text,
+  });
+  const accepted = Array.isArray(info.accepted) ? info.accepted.length : 0;
+  // eslint-disable-next-line no-console
+  console.info(
+    `[email] smtp accepted=${accepted} messageId=${info.messageId ?? "n/a"} to=${maskRecipient(params.to)}`
+  );
+}
+
+async function sendViaResend(params: {
+  from: string;
   to: string;
   subject: string;
   html: string;
@@ -100,24 +190,11 @@ async function deliverEmail(params: {
 }): Promise<void> {
   const client = getResend();
   if (!client) {
-    if (!isProduction) {
-      // eslint-disable-next-line no-console
-      console.warn(`[email] RESEND_API_KEY missing — skipped email to ${params.to}: ${params.subject}`);
-    }
-    return;
+    throw new Error("Resend client is not configured");
   }
 
-  const from = env.EMAIL_FROM.trim();
-  // Resend's onboarding address can only deliver to the account owner — reject
-  // it in production so user OTPs fail loudly instead of silently vanishing.
-  if (isProduction && /@resend\.dev\b/i.test(from)) {
-    throw new Error(
-      `EMAIL_FROM must use your verified domain (got "${from}"). Set EMAIL_FROM to e.g. TrustCoin <noreply@trustcoin.cc>.`
-    );
-  }
-
-  const { error } = await client.emails.send({
-    from,
+  const { data, error } = await client.emails.send({
+    from: params.from,
     to: params.to,
     subject: params.subject,
     html: params.html,
@@ -125,10 +202,72 @@ async function deliverEmail(params: {
   });
 
   if (error) {
-    throw new Error(typeof error === "object" && error && "message" in error
-      ? String((error as { message: string }).message)
-      : "Resend delivery failed");
+    throw new Error(
+      typeof error === "object" && error && "message" in error
+        ? String((error as { message: string }).message)
+        : "Resend delivery failed"
+    );
   }
+
+  const id = data && typeof data === "object" && "id" in data ? String((data as { id: string }).id) : "n/a";
+  // eslint-disable-next-line no-console
+  console.info(`[email] resend id=${id} to=${maskRecipient(params.to)}`);
+}
+
+async function deliverEmail(params: {
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+}): Promise<void> {
+  const from = env.EMAIL_FROM.trim();
+  const smtpReady = isSmtpConfigured();
+  const resendReady = isResendConfigured();
+
+  if (!smtpReady && !resendReady) {
+    // eslint-disable-next-line no-console
+    console.error(
+      `[email] skipped — no provider configured. to=${maskRecipient(params.to)} subject="${params.subject}"`
+    );
+    if (isProduction) {
+      throw new Error("Email delivery is not configured");
+    }
+    return;
+  }
+
+  // Resend's onboarding address can only deliver to the account owner.
+  if (isProduction && /@resend\.dev\b/i.test(from)) {
+    throw new Error(
+      `EMAIL_FROM must use your verified domain (got "${from}"). Set EMAIL_FROM to e.g. TrustCoin <noreply@trustcoin.cc>.`
+    );
+  }
+
+  // Prefer SMTP when credentials exist (Brevo/Zoho). Production DNS was set up
+  // for SMTP; Resend is kept as automatic fallback if SMTP rejects the send.
+  const providers: Array<"smtp" | "resend"> = [];
+  if (smtpReady) providers.push("smtp");
+  if (resendReady) providers.push("resend");
+
+  let lastError: unknown;
+  for (const provider of providers) {
+    try {
+      if (provider === "smtp") {
+        await sendViaSmtp({ ...params, from });
+      } else {
+        await sendViaResend({ ...params, from });
+      }
+      return;
+    } catch (error) {
+      lastError = error;
+      // eslint-disable-next-line no-console
+      console.error(
+        `[email] ${provider} failed to=${maskRecipient(params.to)} subject="${params.subject}":`,
+        error instanceof Error ? error.message : String(error)
+      );
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("Email delivery failed");
 }
 
 /**

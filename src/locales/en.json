@@ -22,6 +22,7 @@
     "register_success": "Account created successfully. Please check your email for the verification code.",
     "otp_sent": "Verification code sent to your email.",
     "admin_otp_sent": "A verification code was sent to your admin email. Enter it to complete sign-in.",
+    "email_delivery_failed": "We could not send the verification email. Check SMTP/Resend settings and try again.",
     "otp_verified": "Email verified successfully.",
     "otp_invalid": "Invalid or expired verification code.",
     "login_success": "Logged in successfully.",

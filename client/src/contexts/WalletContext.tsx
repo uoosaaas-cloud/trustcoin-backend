@@ -65,8 +65,15 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Initial load + silent 10s polling while authenticated.
+  // Initial load + silent polling while authenticated (skip admin portal).
   useEffect(() => {
+    const path = typeof window !== "undefined" ? window.location.pathname : "";
+    const isAdminSurface = path.includes("secret-admin-portal");
+
+    if (isAdminSurface || !getStoredAuthToken()) {
+      return;
+    }
+
     void refreshWallet({ silent: false });
 
     const timerId = window.setInterval(() => {

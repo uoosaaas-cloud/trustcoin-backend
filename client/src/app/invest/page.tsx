@@ -5,23 +5,19 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { AppNav } from "@/components/AppNav";
 import { InvestModal } from "@/components/InvestModal";
+import { MyInvestments } from "@/components/MyInvestments";
 import { TrustComplianceBlock } from "@/components/TrustCompliance";
 import { useWallet } from "@/contexts/WalletContext";
 import { useSilentPoll } from "@/hooks/useSilentPoll";
 import { getApiErrorMessage, getStoredAuthToken } from "@/lib/api";
 import { formatUsdt } from "@/lib/format";
 import {
+  durationKey,
   getInvestmentPackages,
   getPeriodReturnPercent,
   groupPackagesByTier,
   type InvestmentPackage,
 } from "@/lib/investments";
-
-function durationKey(days: number): "duration1m" | "duration3m" | "duration6m" {
-  if (days <= 30) return "duration1m";
-  if (days <= 90) return "duration3m";
-  return "duration6m";
-}
 
 export default function InvestPage() {
   const router = useRouter();
@@ -35,6 +31,7 @@ export default function InvestPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<InvestmentPackage | null>(null);
+  const [myPackagesRefresh, setMyPackagesRefresh] = useState(0);
 
   useEffect(() => {
     if (!getStoredAuthToken()) {
@@ -93,6 +90,7 @@ export default function InvestPage() {
 
   async function handlePurchaseSuccess() {
     await refreshWallet({ silent: true });
+    setMyPackagesRefresh((n) => n + 1);
     setSuccessMessage(t("successBanner"));
   }
 
@@ -134,6 +132,8 @@ export default function InvestPage() {
           )}
           <p className="mt-1.5 text-[13px] text-slate-500">{t("availableHint")}</p>
         </div>
+
+        <MyInvestments refreshToken={myPackagesRefresh} />
 
         {errorMessage ? (
           <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">

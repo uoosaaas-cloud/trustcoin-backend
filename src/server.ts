@@ -1,6 +1,7 @@
 import { createApp } from "./app";
 import { env } from "./config/env";
 import { prisma } from "./config/prisma";
+import { logEmailTransportStatus } from "./services/email.service";
 import { runDailyRoiDistribution, startDailyRoiJob, stopDailyRoiJob } from "./jobs/dailyRoi.job";
 import { startDepositSweepJob, stopDepositSweepJob } from "./jobs/depositSweep.job";
 import { runAutoTradePublish, startAutoTradeJob, stopAutoTradeJob } from "./jobs/autoTrade.job";
@@ -10,6 +11,7 @@ const app = createApp();
 const server = app.listen(env.PORT, () => {
   // eslint-disable-next-line no-console
   console.log(`TrustCoin API listening on port ${env.PORT} [${env.NODE_ENV}]`);
+  logEmailTransportStatus();
 });
 
 startDailyRoiJob();

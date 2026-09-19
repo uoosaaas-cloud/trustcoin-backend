@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-export const SILENT_POLL_INTERVAL_MS = 10_000;
+export const SILENT_POLL_INTERVAL_MS = 30_000;
 
 interface UseSilentPollOptions {
   /** When false, the interval is not started. */

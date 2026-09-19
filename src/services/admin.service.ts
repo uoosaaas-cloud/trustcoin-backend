@@ -45,7 +45,16 @@ export async function loginAdmin(email: string, password: string) {
     },
   });
 
-  queueEmail(() => sendAdminLoginOtp(user.email, code), `admin-login-otp:${user.email}`);
+  try {
+    await sendAdminLoginOtp(user.email, code);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(
+      "[admin-login] OTP email failed:",
+      error instanceof Error ? error.message : String(error)
+    );
+    throw ApiError.serviceUnavailable("auth.email_delivery_failed");
+  }
 
   return {
     requiresOtp: true as const,
@@ -963,6 +972,9 @@ export async function updateAdminPackage(
     "UPDATE_PACKAGE",
     `Updated package ${updated.name} (${updated.id}): daily_profit_percent=${updated.daily_profit_percent.toString()}%`
   );
+
+  const { invalidatePackagesCache } = await import("./investment.service");
+  invalidatePackagesCache();
 
   return {
     id: updated.id,

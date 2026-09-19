@@ -21,7 +21,17 @@ export const authMiddleware = asyncHandler(async (req: Request, _res: Response, 
     throw ApiError.unauthorized();
   }
 
-  const user = await prisma.user.findUnique({ where: { id: payload.userId } });
+  const user = await prisma.user.findUnique({
+    where: { id: payload.userId },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      language: true,
+      status: true,
+      id_reupload_requested_at: true,
+    },
+  });
 
   if (!user) {
     throw ApiError.unauthorized();
