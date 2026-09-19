@@ -13,6 +13,16 @@ const AMOUNT_STEP_COUNT = (AMOUNT_MAX - AMOUNT_MIN) / AMOUNT_STEP;
 const TICK_MS = 15 * 60 * 1000;
 /** Replay missed ticks after deploys / sleeping Render dynos. */
 const BACKFILL_MS = 36 * 60 * 60 * 1000;
+/** Spot FX closes Friday 17:00 New York and reopens Sunday 17:00 New York. */
+const FOREX_WEEKEND_CUTOVER_MINUTES = 17 * 60;
+
+const NY_CLOCK = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/New_York",
+  weekday: "short",
+  hour: "numeric",
+  minute: "numeric",
+  hourCycle: "h23",
+});
 
 type AutoTradeSlot = {
   autoKey: string;
@@ -77,12 +87,34 @@ function planTick(at: Date): AutoTradeSlot {
   };
 }
 
+function nyWeekdayAndMinutes(date: Date): { weekday: string; minutes: number } {
+  const parts = NY_CLOCK.formatToParts(date);
+  const value = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  return {
+    weekday: value("weekday"),
+    minutes: Number(value("hour")) * 60 + Number(value("minute")),
+  };
+}
+
+/** True while the global spot FX session is open (Sun 17:00 NY → Fri 17:00 NY). */
+function isForexMarketOpen(date: Date): boolean {
+  const { weekday, minutes } = nyWeekdayAndMinutes(date);
+  if (weekday === "Sat") return false;
+  if (weekday === "Sun") return minutes >= FOREX_WEEKEND_CUTOVER_MINUTES;
+  if (weekday === "Fri") return minutes < FOREX_WEEKEND_CUTOVER_MINUTES;
+  return true;
+}
+
 function dueTicks(now: Date): Date[] {
   const latest = floorToTick(now);
   const earliest = new Date(latest.getTime() - BACKFILL_MS);
   const ticks: Date[] = [];
   for (let at = earliest.getTime(); at <= latest.getTime(); at += TICK_MS) {
-    ticks.push(new Date(at));
+    const tick = new Date(at);
+    if (isForexMarketOpen(tick)) {
+      ticks.push(tick);
+    }
   }
   return ticks;
 }
@@ -92,9 +124,9 @@ function isUniqueConstraintError(error: unknown): boolean {
 }
 
 /**
- * Inserts due AUTO trades for the last 36 hours (15-minute ticks, 24/7).
- * Weekends and overnight hours are included — the board must keep moving.
- * Idempotent via auto_key. Safe after sleeping hosts / deploys.
+ * Inserts due AUTO trades for open FX-session ticks in the last 36 hours.
+ * Pauses for the global forex weekend (Fri 17:00 NY → Sun 17:00 NY).
+ * Weekday sessions run around the clock. Idempotent via auto_key.
  */
 export async function publishDueAutoTrades(): Promise<AutoTradePublishSummary> {
   if (!env.AUTO_TRADES_ENABLED) {
@@ -108,7 +140,18 @@ export async function publishDueAutoTrades(): Promise<AutoTradePublishSummary> {
   isPublishing = true;
   try {
     const now = new Date();
+    const marketOpen = isForexMarketOpen(now);
     const slots = dueTicks(now).map(planTick);
+
+    if (slots.length === 0) {
+      return {
+        skipped: !marketOpen,
+        reason: marketOpen ? undefined : "forex_weekend",
+        published: 0,
+        alreadyPresent: 0,
+      };
+    }
+
     const keys = slots.map((slot) => slot.autoKey);
 
     const existingRows = await prisma.trade.findMany({
