@@ -26,9 +26,9 @@ export function readAdminPasswordFromEnv(): string {
  */
 export function adminPasswordCandidates(submitted: string): string[] {
   const trimmed = submitted.trim();
-  const collapsed = trimmed.replaceAll("$$", "$");
+  const collapsed = trimmed.split("$$").join("$");
   const envPassword = readAdminPasswordFromEnv();
-  return [...new Set([trimmed, collapsed, envPassword, envPassword.replaceAll("$$", "$")].filter(Boolean))];
+  return [...new Set([trimmed, collapsed, envPassword, envPassword.split("$$").join("$")].filter(Boolean))];
 }
 
 export async function matchesAdminPassword(submitted: string, passwordHash: string): Promise<boolean> {
