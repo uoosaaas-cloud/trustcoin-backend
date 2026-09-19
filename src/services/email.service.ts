@@ -22,6 +22,8 @@ function smtpSkipReason(): string | null {
   if (!pass) return "missing_pass";
   // Mailtrap sandbox never reaches real inboxes — ignore it in production.
   if (isProduction && /mailtrap/i.test(host)) return "mailtrap_ignored_in_production";
+  // Brevo SMTP returns 250 then drops: "Your sending platform is currently disabled."
+  if (isProduction && /smtp-relay\.brevo\.com/i.test(host)) return "brevo_platform_disabled";
   return null;
 }
 
@@ -36,13 +38,18 @@ function isResendConfigured(): boolean {
 export type EmailProviderName = "smtp" | "resend" | "none";
 
 /** Safe summary for startup logs (never includes passwords or API keys). */
-export function describeEmailTransport(): { provider: EmailProviderName; host?: string; from: string } {
+export function describeEmailTransport(): {
+  provider: EmailProviderName;
+  host?: string;
+  port?: number;
+  from: string;
+} {
   const from = env.EMAIL_FROM.trim();
-  if (isSmtpConfigured()) {
-    return { provider: "smtp", host: env.SMTP_HOST.trim(), from };
-  }
   if (isResendConfigured()) {
     return { provider: "resend", from };
+  }
+  if (isSmtpConfigured()) {
+    return { provider: "smtp", host: env.SMTP_HOST.trim(), port: env.SMTP_PORT, from };
   }
   return { provider: "none", from };
 }
@@ -55,8 +62,8 @@ export function logEmailTransportStatus(): void {
   // eslint-disable-next-line no-console
   console.log(
     `[email] provider=${info.provider}${info.host ? ` smtpHost=${info.host}` : ""}${
-      smtpSkip ? ` smtpSkip=${smtpSkip}` : ""
-    } fromHost=${fromHost}`
+      typeof info.port === "number" ? ` smtpPort=${info.port}` : ""
+    }${smtpSkip ? ` smtpSkip=${smtpSkip}` : ""} fromHost=${fromHost}`
   );
   if (isProduction && info.provider === "none") {
     // eslint-disable-next-line no-console
@@ -82,6 +89,9 @@ function getSmtpTransport(): Transporter {
       host: env.SMTP_HOST.trim(),
       port: env.SMTP_PORT,
       secure: env.SMTP_SECURE || env.SMTP_PORT === 465,
+      connectionTimeout: 12_000,
+      greetingTimeout: 12_000,
+      socketTimeout: 20_000,
       auth: {
         user: env.SMTP_USER.trim(),
         pass: env.SMTP_PASSWORD,
@@ -252,11 +262,11 @@ async function deliverEmail(params: {
     );
   }
 
-  // Prefer SMTP when credentials exist (Brevo/Zoho). Production DNS was set up
-  // for SMTP; Resend is kept as automatic fallback if SMTP rejects the send.
+  // Prefer Resend (HTTPS) over SMTP. Render free blocks 465/587, and Brevo SMTP
+  // currently accepts then internally drops. Resend DNS lives on Cloudflare.
   const providers: Array<"smtp" | "resend"> = [];
-  if (smtpReady) providers.push("smtp");
   if (resendReady) providers.push("resend");
+  if (smtpReady) providers.push("smtp");
 
   let lastError: unknown;
   for (const provider of providers) {

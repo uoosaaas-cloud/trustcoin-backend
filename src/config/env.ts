@@ -125,16 +125,20 @@ export const env = {
   /** Default: every 15 minutes. */
   AUTO_TRADES_CRON_SCHEDULE: process.env.AUTO_TRADES_CRON_SCHEDULE ?? "*/15 * * * *",
 
-  // --- Email (SMTP/Brevo preferred when SMTP_USER+SMTP_PASS are set; Resend is fallback) ---
+  // --- Email: Resend first (HTTPS). SMTP/Brevo is skipped in production while
+  // Brevo's sending platform is disabled. send.trustcoin.cc is the Resend bounce host. ---
   RESEND_API_KEY: process.env.RESEND_API_KEY ?? "",
   /** Verified sender, e.g. TrustCoin <support@trustcoin.cc> or noreply@trustcoin.cc. */
   EMAIL_FROM: process.env.EMAIL_FROM ?? "TrustCoin <noreply@trustcoin.cc>",
   /** Inbox for new-withdrawal admin alerts (falls back to ADMIN_EMAIL). */
   ADMIN_ALERT_EMAIL: (process.env.ADMIN_ALERT_EMAIL ?? process.env.ADMIN_EMAIL ?? "").trim(),
 
-  // SMTP (Brevo: smtp-relay.brevo.com:587). Used when SMTP_USER and SMTP_PASS are set.
+  // SMTP (Brevo). Render free instances block outbound 25/465/587; use 2525.
   SMTP_HOST: process.env.SMTP_HOST ?? "sandbox.smtp.mailtrap.io",
-  SMTP_PORT: Number(process.env.SMTP_PORT ?? 2525),
+  SMTP_PORT: (() => {
+    const parsed = Number(process.env.SMTP_PORT);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 2525;
+  })(),
   SMTP_SECURE: (process.env.SMTP_SECURE ?? "false") === "true",
   SMTP_USER: process.env.SMTP_USER ?? "",
   SMTP_PASSWORD: process.env.SMTP_PASS ?? process.env.SMTP_PASSWORD ?? "",
