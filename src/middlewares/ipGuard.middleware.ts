@@ -14,6 +14,12 @@ export function getClientIp(req: Request): string {
 
 /** Blocks requests from IP addresses already recorded in the BannedIp table. Intended for admin routes. */
 export const ipGuardMiddleware = asyncHandler(async (req: Request, _res: Response, next: NextFunction) => {
+  // Temporary disable: keep the ban table and this middleware, skip enforcement.
+  if (!env.ADMIN_IP_BAN_ENABLED) {
+    next();
+    return;
+  }
+
   const ip = getClientIp(req);
 
   const banned = await prisma.bannedIp.findUnique({ where: { ip_address: ip } });
@@ -36,6 +42,11 @@ const failedAttemptCounts = new Map<string, number>();
  * into `BannedIp` and blocked by `ipGuardMiddleware` from then on.
  */
 export async function recordFailedAdminAttempt(ip: string): Promise<void> {
+  // Temporary disable: do not persist or enforce IP bans.
+  if (!env.ADMIN_IP_BAN_ENABLED) {
+    return;
+  }
+
   const currentCount = (failedAttemptCounts.get(ip) ?? 0) + 1;
   failedAttemptCounts.set(ip, currentCount);
 

@@ -15,6 +15,7 @@ import { sendAdminUserEmailSchema } from "../validators/adminEmail.validator";
 const router = Router();
 
 // Every admin route is protected from banned IPs first.
+// Enforcement is currently skipped unless ADMIN_IP_BAN_ENABLED=true.
 router.use(ipGuardMiddleware);
 
 router.post("/login", adminLoginRateLimiter, validateBody(loginSchema), adminController.login);

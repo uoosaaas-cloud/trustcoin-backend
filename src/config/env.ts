@@ -108,6 +108,12 @@ export const env = {
   PASSWORD_RESET_EXPIRY_MINUTES: Number(process.env.PASSWORD_RESET_EXPIRY_MINUTES ?? 30),
 
   ADMIN_MAX_FAILED_ATTEMPTS: Number(process.env.ADMIN_MAX_FAILED_ATTEMPTS ?? 5),
+  /**
+   * Temporary kill-switch for admin IP bans. Code is kept; set to "true" to
+   * enforce BannedIp again. Default false so a locked-out admin can recover.
+   */
+  ADMIN_IP_BAN_ENABLED:
+    (process.env.ADMIN_IP_BAN_ENABLED ?? "false") === "true" || process.env.ADMIN_IP_BAN_ENABLED === "1",
 
   // Cron expression for daily ROI (interpreted in UTC). Default: 00:00 UTC.
   DAILY_ROI_CRON_SCHEDULE: process.env.DAILY_ROI_CRON_SCHEDULE ?? "0 0 * * *",
