@@ -457,8 +457,8 @@
     "status": {
       "PENDING": "Pending",
       "COMPLETED": "Completed",
-      "FAILED": "Rejected",
-      "REJECTED": "Rejected"
+      "FAILED": "Cancelled",
+      "REJECTED": "Cancelled"
     },
     "errors": {
       "amountRequired": "Please enter a valid amount of at least 20 USDT.",

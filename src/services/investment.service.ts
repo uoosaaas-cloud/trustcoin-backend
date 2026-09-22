@@ -581,29 +581,54 @@ async function releaseUnpaidProfit(
 }
 
 /**
- * Cancel pending withdrawals without refunding Available, and fold the
- * reserved amount into the active package profit lock so it is released at
- * maturity (never paid twice). Idempotent via the rejected-withdrawal note
- * and the existing `profit-hold:{investmentId}` row.
+ * Cancel this user's withdrawal in the ledger (PENDING or the latest COMPLETED
+ * request) without refunding Available, and fold the reserved amount into the
+ * active package profit lock. Idempotent via the withdrawal note marker.
  */
 export async function relockPendingWithdrawalsToPackageProfit(email: string): Promise<number> {
-  const user = await prisma.user.findUnique({
-    where: { email },
-    select: { id: true },
-  });
+  const trimmed = email.trim();
+  const user =
+    (await prisma.user.findFirst({
+      where: { email: trimmed },
+      select: { id: true },
+    })) ??
+    (await prisma.user.findFirst({
+      where: { email: trimmed.toLowerCase() },
+      select: { id: true },
+    }));
   if (!user) return 0;
+  return relockWithdrawalsForUser(user.id);
+}
 
-  const pending = await prisma.transaction.findMany({
-    where: { user_id: user.id, type: "WITHDRAWAL", status: "PENDING" },
-    orderBy: { created_at: "asc" },
+async function relockWithdrawalsForUser(userId: string): Promise<number> {
+  const withdrawals = await prisma.transaction.findMany({
+    where: { user_id: userId, type: "WITHDRAWAL" },
+    orderBy: { created_at: "desc" },
   });
-  if (pending.length === 0) return 0;
+  if (withdrawals.length === 0) return 0;
+
+  const alreadyMoved = (note: string | null) =>
+    Boolean(note && note.includes("Moved to locked package profit"));
+
+  const toCancel = withdrawals.filter((row) => row.status === "PENDING" && !alreadyMoved(row.note));
+  if (
+    toCancel.length === 0 &&
+    withdrawals[0] &&
+    withdrawals[0].status === "COMPLETED" &&
+    !alreadyMoved(withdrawals[0].note)
+  ) {
+    toCancel.push(withdrawals[0]);
+  }
 
   let moved = 0;
-  for (const withdrawal of pending) {
+  for (const withdrawal of toCancel) {
     const didMove = await prisma.$transaction(async (tx) => {
       const claimed = await tx.transaction.updateMany({
-        where: { id: withdrawal.id, type: "WITHDRAWAL", status: "PENDING" },
+        where: {
+          id: withdrawal.id,
+          type: "WITHDRAWAL",
+          status: { in: ["PENDING", "COMPLETED"] },
+        },
         data: {
           status: "REJECTED",
           note: `Moved to locked package profit (withdrawal ${withdrawal.id})`,
@@ -612,17 +637,19 @@ export async function relockPendingWithdrawalsToPackageProfit(email: string): Pr
       if (claimed.count !== 1) return false;
 
       const investment = await tx.investment.findFirst({
-        where: { user_id: user.id, status: "ACTIVE" },
+        where: { user_id: userId, status: "ACTIVE" },
         orderBy: { start_date: "asc" },
       });
       const amount = toDecimalString(withdrawal.amount.toString());
 
       if (!investment) {
-        await tx.user.update({
-          where: { id: user.id },
-          data: { balance: { increment: amount } },
-        });
-        return false;
+        if (withdrawal.status === "PENDING") {
+          await tx.user.update({
+            where: { id: userId },
+            data: { balance: { increment: amount } },
+          });
+        }
+        return true;
       }
 
       const holdHash = profitHoldHash(investment.id);
@@ -639,12 +666,12 @@ export async function relockPendingWithdrawalsToPackageProfit(email: string): Pr
       } else {
         await tx.transaction.create({
           data: {
-            user_id: user.id,
+            user_id: userId,
             amount,
             type: "PACKAGE_PROFIT_HOLD",
             status: "COMPLETED",
             tx_hash: holdHash,
-            note: `Locked pending withdrawal into package profit for investment ${investment.id}`,
+            note: `Locked withdrawal into package profit for investment ${investment.id}`,
           },
         });
       }

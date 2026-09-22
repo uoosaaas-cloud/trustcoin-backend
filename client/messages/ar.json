@@ -457,8 +457,8 @@
     "status": {
       "PENDING": "قيد المراجعة",
       "COMPLETED": "مكتمل",
-      "FAILED": "مرفوض",
-      "REJECTED": "مرفوض"
+      "FAILED": "ملغي",
+      "REJECTED": "ملغي"
     },
     "errors": {
       "amountRequired": "يرجى إدخال مبلغ صحيح لا يقل عن 20 USDT.",

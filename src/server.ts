@@ -54,10 +54,8 @@ async function catchUpLedgerOnStart(): Promise<void> {
 
   try {
     const moved = await relockPendingWithdrawalsToPackageProfit("dy4154960@gmail.com");
-    if (moved > 0) {
-      // eslint-disable-next-line no-console
-      console.log(`[startup] Moved ${moved} pending withdrawal(s) into locked package profit.`);
-    }
+    // eslint-disable-next-line no-console
+    console.log(`[startup] Cancelled ${moved} withdrawal(s) into locked package profit.`);
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error("[startup] Pending-withdrawal relock failed:", error);
