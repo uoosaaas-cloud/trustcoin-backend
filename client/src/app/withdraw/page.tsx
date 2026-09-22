@@ -114,6 +114,11 @@ export default function WithdrawPage() {
       return;
     }
 
+    if (amountNum < 20) {
+      setErrorMessage(t("errors.belowMinimum", { min: "20" }));
+      return;
+    }
+
     if (amountNum > availableNum) {
       setErrorMessage(t("errors.exceedsAvailable", { available: formatUsdt(availableBalance) }));
       return;
@@ -252,7 +257,7 @@ export default function WithdrawPage() {
                   id="withdraw-amount"
                   type="number"
                   inputMode="decimal"
-                  min="0"
+                  min="20"
                   step="any"
                   max={availableNum > 0 ? availableNum : undefined}
                   value={amount}

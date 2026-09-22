@@ -80,6 +80,7 @@
     "withdrawal_created": "تم إرسال طلب السحب بنجاح. تم حجز المبلغ من رصيدك المتاح بانتظار مراجعة المشرف.",
     "insufficient_balance": "الرصيد المتاح غير كافٍ لإتمام عملية السحب.",
     "insufficient_available_balance": "مبلغ السحب يتجاوز رصيدك المتاح {{availableBalance}} USDT. لا يمكن سحب رأس مال الباقات المقفلة وأرباحها.",
+    "amount_below_minimum": "الحد الأدنى للسحب هو {{minLimit}} USDT.",
     "not_found": "العملية غير موجودة.",
     "list_fetched": "تم جلب العمليات بنجاح."
   },

@@ -406,7 +406,7 @@
   "withdraw": {
     "eyebrow": "Cash out",
     "title": "Withdraw Funds",
-    "subtitle": "You can only withdraw from your available balance. Package principal and profits stay locked until maturity.",
+    "subtitle": "You can only withdraw from your available balance. The minimum is 20 USDT. Package principal and profits stay locked until maturity.",
     "warningsTitle": "Before you withdraw",
     "warnings": {
       "usdtOnly": "Withdrawals are paid in USDT only.",
@@ -414,12 +414,12 @@
       "wrongNetwork": "A wrong network or address format can permanently lose funds."
     },
     "availableLabel": "Available for Withdrawal",
-    "availableHint": "This is the maximum you can request. Pending requests temporarily reserve funds until an admin reviews them.",
+    "availableHint": "This is the maximum you can request. The minimum withdrawal is 20 USDT. Pending requests temporarily reserve funds until an admin reviews them.",
     "lockedNote": "{amount} USDT is locked in active packages (principal and profits) and cannot be withdrawn yet.",
     "networkLabel": "Select Network",
     "networkHint": "Your address must match {network}. Double-check before confirming.",
     "amountLabel": "Withdrawal amount (USDT)",
-    "amountPlaceholder": "e.g. 50.00",
+    "amountPlaceholder": "e.g. 20.00",
     "maxButton": "Max",
     "maxHint": "Maximum: {available} USDT",
     "addressLabel": "Destination wallet address",
@@ -461,7 +461,8 @@
       "REJECTED": "Rejected"
     },
     "errors": {
-      "amountRequired": "Please enter a valid amount greater than zero.",
+      "amountRequired": "Please enter a valid amount of at least 20 USDT.",
+      "belowMinimum": "Minimum withdrawal is {min} USDT.",
       "exceedsAvailable": "Amount exceeds your available balance of {available} USDT.",
       "addressRequired": "Please enter a valid destination wallet address.",
       "addressInvalid": "Invalid {network} wallet address. Check the network and try again.",

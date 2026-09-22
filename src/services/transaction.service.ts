@@ -1,6 +1,7 @@
 import { prisma } from "../config/prisma";
 import { env } from "../config/env";
 import { ApiError } from "../utils/apiError";
+import { MIN_WITHDRAWAL_USDT } from "../constants/withdrawals";
 import { isGreaterThanOrEqual, toDecimalString } from "../utils/money";
 import { debitAvailableBalance, getAvailableBalance } from "./wallet.service";
 import { settleUserActiveInvestments } from "./investment.service";
@@ -49,6 +50,14 @@ export async function sendWithdrawalOtp(userId: string): Promise<string> {
  */
 export async function createWithdrawal(userId: string, input: CreateWithdrawalInput) {
   const amount = toDecimalString(input.amount);
+
+  if (!isGreaterThanOrEqual(amount, MIN_WITHDRAWAL_USDT)) {
+    throw ApiError.badRequest(
+      "transactions.amount_below_minimum",
+      { minLimit: MIN_WITHDRAWAL_USDT, requested: amount },
+      { minLimit: MIN_WITHDRAWAL_USDT }
+    );
+  }
 
   await settleUserActiveInvestments(userId);
 

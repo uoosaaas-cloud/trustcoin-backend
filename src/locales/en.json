@@ -80,6 +80,7 @@
     "withdrawal_created": "Withdrawal request submitted successfully. The amount is reserved from your available balance pending admin review.",
     "insufficient_balance": "Insufficient available balance for this withdrawal.",
     "insufficient_available_balance": "Withdrawal amount exceeds your available balance of {{availableBalance}} USDT. Locked package principal and profits cannot be withdrawn.",
+    "amount_below_minimum": "Minimum withdrawal is {{minLimit}} USDT.",
     "not_found": "Transaction not found.",
     "list_fetched": "Transactions fetched successfully."
   },

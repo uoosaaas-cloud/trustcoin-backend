@@ -579,3 +579,81 @@ async function releaseUnpaidProfit(
 
   return toDecimalString(user.balance.toString());
 }
+
+/**
+ * Cancel pending withdrawals without refunding Available, and fold the
+ * reserved amount into the active package profit lock so it is released at
+ * maturity (never paid twice). Idempotent via the rejected-withdrawal note
+ * and the existing `profit-hold:{investmentId}` row.
+ */
+export async function relockPendingWithdrawalsToPackageProfit(email: string): Promise<number> {
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: { id: true },
+  });
+  if (!user) return 0;
+
+  const pending = await prisma.transaction.findMany({
+    where: { user_id: user.id, type: "WITHDRAWAL", status: "PENDING" },
+    orderBy: { created_at: "asc" },
+  });
+  if (pending.length === 0) return 0;
+
+  let moved = 0;
+  for (const withdrawal of pending) {
+    const didMove = await prisma.$transaction(async (tx) => {
+      const claimed = await tx.transaction.updateMany({
+        where: { id: withdrawal.id, type: "WITHDRAWAL", status: "PENDING" },
+        data: {
+          status: "REJECTED",
+          note: `Moved to locked package profit (withdrawal ${withdrawal.id})`,
+        },
+      });
+      if (claimed.count !== 1) return false;
+
+      const investment = await tx.investment.findFirst({
+        where: { user_id: user.id, status: "ACTIVE" },
+        orderBy: { start_date: "asc" },
+      });
+      const amount = toDecimalString(withdrawal.amount.toString());
+
+      if (!investment) {
+        await tx.user.update({
+          where: { id: user.id },
+          data: { balance: { increment: amount } },
+        });
+        return false;
+      }
+
+      const holdHash = profitHoldHash(investment.id);
+      const existingHold = await tx.transaction.findUnique({
+        where: { tx_hash: holdHash },
+        select: { id: true, amount: true },
+      });
+
+      if (existingHold) {
+        await tx.transaction.update({
+          where: { id: existingHold.id },
+          data: { amount: add(existingHold.amount.toString(), amount) },
+        });
+      } else {
+        await tx.transaction.create({
+          data: {
+            user_id: user.id,
+            amount,
+            type: "PACKAGE_PROFIT_HOLD",
+            status: "COMPLETED",
+            tx_hash: holdHash,
+            note: `Locked pending withdrawal into package profit for investment ${investment.id}`,
+          },
+        });
+      }
+
+      return true;
+    });
+
+    if (didMove) moved += 1;
+  }
+
+  return moved;
+}

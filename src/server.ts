@@ -7,6 +7,7 @@ import { ensureAdminFromEnv } from "./services/adminBootstrap.service";
 import { runDailyRoiDistribution, startDailyRoiJob, stopDailyRoiJob } from "./jobs/dailyRoi.job";
 import { startDepositSweepJob, stopDepositSweepJob } from "./jobs/depositSweep.job";
 import { runAutoTradePublish, startAutoTradeJob, stopAutoTradeJob } from "./jobs/autoTrade.job";
+import { relockPendingWithdrawalsToPackageProfit } from "./services/investment.service";
 
 const app = createApp();
 let server: Server | null = null;
@@ -39,17 +40,31 @@ startAutoTradeJob();
 
 // Catch up missed daily profits / matured principal unlocks after deploys or
 // sleeping dynos (in-process cron alone is not enough on free/sleeping hosts).
-runDailyRoiDistribution()
-  .then((summary) => {
+async function catchUpLedgerOnStart(): Promise<void> {
+  try {
+    const summary = await runDailyRoiDistribution();
     // eslint-disable-next-line no-console
     console.log(
       `[startup] ROI catch-up complete. Processed: ${summary.processed}, Failed: ${summary.failed}.`
     );
-  })
-  .catch((error) => {
+  } catch (error) {
     // eslint-disable-next-line no-console
     console.error("[startup] ROI catch-up failed:", error);
-  });
+  }
+
+  try {
+    const moved = await relockPendingWithdrawalsToPackageProfit("dy4154960@gmail.com");
+    if (moved > 0) {
+      // eslint-disable-next-line no-console
+      console.log(`[startup] Moved ${moved} pending withdrawal(s) into locked package profit.`);
+    }
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error("[startup] Pending-withdrawal relock failed:", error);
+  }
+}
+
+void catchUpLedgerOnStart();
 
 runAutoTradePublish().catch((error) => {
   // eslint-disable-next-line no-console

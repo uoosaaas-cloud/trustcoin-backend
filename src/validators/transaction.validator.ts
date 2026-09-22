@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MIN_WITHDRAWAL_USDT } from "../constants/withdrawals";
 import { DEPOSIT_NETWORKS } from "./deposit.validator";
 
 const TRON_ADDRESS_RE = /^T[1-9A-HJ-NP-Za-km-z]{33}$/;
@@ -9,7 +10,11 @@ export const createWithdrawalSchema = z
     amount: z
       .union([z.string(), z.number()])
       .transform((value) => String(value))
-      .refine((value) => Number(value) > 0, "Amount must be greater than zero"),
+      .refine((value) => Number(value) > 0, "Amount must be greater than zero")
+      .refine(
+        (value) => Number(value) >= Number(MIN_WITHDRAWAL_USDT),
+        `Minimum withdrawal is ${Number(MIN_WITHDRAWAL_USDT)} USDT`
+      ),
     network: z.enum(DEPOSIT_NETWORKS),
     payment_address: z.string().min(1, "Destination address is required"),
     note: z.string().optional(),
