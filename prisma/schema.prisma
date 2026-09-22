@@ -32,6 +32,9 @@ enum TransactionType {
   DEPOSIT
   WITHDRAWAL
   PROFIT_DISTRIBUTION
+  PROFIT_ACCRUED
+  PACKAGE_PROFIT_HOLD
+  PACKAGE_PROFIT_RELEASE
   PACKAGE_RETURN
   PACKAGE_PURCHASE
   REFERRAL_BONUS_ADDED
@@ -221,8 +224,8 @@ model Investment {
   invested_amount      Decimal          @db.Decimal(18, 4)
   // Immutable snapshot of the original principal at creation time (for auditing).
   base_amount          Decimal          @db.Decimal(18, 4)
-  // Working capital the daily ROI is computed on (equals invested_amount in
-  // the live simple-interest model). Principal return at maturity pays this.
+  // Principal locked until maturity. Daily ROI uses invested_amount (simple
+  // interest). Accrued yield lives in total_earned until package completion.
   current_amount       Decimal          @db.Decimal(18, 4)
   daily_profit_percent Decimal          @db.Decimal(5, 4)
   total_earned         Decimal          @default(0.00) @db.Decimal(18, 4)

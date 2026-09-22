@@ -32,7 +32,7 @@ export async function debitAvailableBalance(
 export interface WalletBalanceSummary {
   /** Available for withdrawal / new investments (User.balance). */
   availableBalance: string;
-  /** Capital locked in ACTIVE investment packages (`current_amount` sum). */
+  /** Principal + accrued profit locked in ACTIVE packages until maturity. */
   lockedBalance: string;
   /** Total Balance = Locked + Available. */
   totalBalance: string;
@@ -47,7 +47,7 @@ export interface WalletBalanceSummary {
  * Computes the user's balance breakdown.
  *
  * - Available = `User.balance`
- * - Locked = sum of ACTIVE investment `current_amount`
+ * - Locked = sum of ACTIVE (`current_amount` + `total_earned`)
  * - Pending referral bonus = `User.pending_referral_bonus` (not withdrawable)
  * - Total = Available + Locked
  *
@@ -72,7 +72,7 @@ export async function getWalletBalanceSummary(userId: string): Promise<WalletBal
   const [lockedAgg, pendingAgg] = await Promise.all([
     prisma.investment.aggregate({
       where: { user_id: userId, status: "ACTIVE" },
-      _sum: { current_amount: true },
+      _sum: { current_amount: true, total_earned: true },
     }),
     prisma.transaction.aggregate({
       where: { user_id: userId, type: "WITHDRAWAL", status: "PENDING" },
@@ -81,7 +81,10 @@ export async function getWalletBalanceSummary(userId: string): Promise<WalletBal
   ]);
 
   const availableBalance = toDecimalString(user.balance.toString());
-  const lockedBalance = toDecimalString(lockedAgg._sum.current_amount?.toString() ?? "0");
+  const lockedBalance = add(
+    lockedAgg._sum.current_amount?.toString() ?? "0",
+    lockedAgg._sum.total_earned?.toString() ?? "0"
+  );
   const pendingWithdrawalBalance = toDecimalString(pendingAgg._sum.amount?.toString() ?? "0");
   const pendingReferralBonus = toDecimalString(user.pending_referral_bonus.toString());
   const totalBalance = add(availableBalance, lockedBalance);

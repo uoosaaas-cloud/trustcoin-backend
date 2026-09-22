@@ -3,6 +3,7 @@ import { env } from "../config/env";
 import { ApiError } from "../utils/apiError";
 import { isGreaterThanOrEqual, toDecimalString } from "../utils/money";
 import { debitAvailableBalance, getAvailableBalance } from "./wallet.service";
+import { settleUserActiveInvestments } from "./investment.service";
 import { issueOtp, consumeOtp } from "./otp.service";
 import {
   queueEmail,
@@ -48,6 +49,8 @@ export async function sendWithdrawalOtp(userId: string): Promise<string> {
  */
 export async function createWithdrawal(userId: string, input: CreateWithdrawalInput) {
   const amount = toDecimalString(input.amount);
+
+  await settleUserActiveInvestments(userId);
 
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) {

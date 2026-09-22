@@ -38,7 +38,7 @@ let isRunning = false;
 
 /**
  * Runs one daily-ROI distribution pass over ACTIVE investments.
- * Profit is computed on each investment's `current_amount` (idempotent per UTC day).
+ * Profit is computed on each investment's `invested_amount` (idempotent per UTC day).
  */
 
 export async function runDailyRoiDistribution(
@@ -74,6 +74,7 @@ async function executeDailyRoiDistribution(
     include: {
       package: { select: { name: true } },
     },
+    orderBy: [{ user_id: "asc" }, { id: "asc" }],
   });
 
   if (investmentId && activeInvestments.length === 0) {
@@ -84,7 +85,7 @@ async function executeDailyRoiDistribution(
     const todayKey = utcDayKey();
     const previews: DailyRoiPreviewItem[] = activeInvestments.map((investment) => {
       const dailyProfit = calculateDailyProfit(
-        investment.current_amount.toString(),
+        investment.invested_amount.toString(),
         investment.daily_profit_percent.toString()
       );
       const matured = new Date() >= investment.end_date;

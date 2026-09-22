@@ -181,9 +181,9 @@ export async function listUsers(search?: string, status?: string): Promise<Admin
       ? trimmedStatus
       : undefined;
 
-  // Unlock matured packages before reporting locked/available balances.
-  const { settleOverdueInvestments } = await import("./investment.service");
-  await settleOverdueInvestments();
+  // Relock unwithdrawn profits and unlock matured packages before reporting.
+  const { settleAllActiveInvestments } = await import("./investment.service");
+  await settleAllActiveInvestments();
 
   const users = await prisma.user.findMany({
     where: {
@@ -219,7 +219,7 @@ export async function listUsers(search?: string, status?: string): Promise<Admin
     prisma.investment.groupBy({
       by: ["user_id"],
       where: { user_id: { in: userIds }, status: "ACTIVE" },
-      _sum: { current_amount: true },
+      _sum: { current_amount: true, total_earned: true },
     }),
     prisma.investment.findMany({
       where: { user_id: { in: userIds }, status: "ACTIVE" },
@@ -229,7 +229,10 @@ export async function listUsers(search?: string, status?: string): Promise<Admin
   ]);
 
   const lockedByUser = new Map(
-    lockedGroups.map((g) => [g.user_id, toDecimalString(g._sum.current_amount?.toString() ?? "0")])
+    lockedGroups.map((g) => [
+      g.user_id,
+      add(g._sum.current_amount?.toString() ?? "0", g._sum.total_earned?.toString() ?? "0"),
+    ])
   );
 
   const packagesByUser = new Map<string, AdminUserListItem["activePackages"]>();

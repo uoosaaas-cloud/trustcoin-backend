@@ -44,6 +44,10 @@ export function isPositive(a: Moneyish): boolean {
   return toBig(a).isGreaterThan(0);
 }
 
+export function minMoney(a: Moneyish, b: Moneyish): string {
+  return toBig(a).isLessThan(toBig(b)) ? toDecimalString(a) : toDecimalString(b);
+}
+
 /**
  * Computes `percent`% of `amount`. `percent` is a plain percentage number,
  * e.g. 5 => 5%, 0.75 => 0.75%.
