@@ -582,9 +582,10 @@ async function releaseUnpaidProfit(
 
 /**
  * One-time repair for an account whose approved withdrawal was undone on startup.
- * Restores admin-approved rows to COMPLETED, drops withdrawal amounts that were
- * stuffed into the profit-hold, and debits any amount that was refunded back
- * to Available. Idempotent via `withdraw-approval-repair:{userId}`.
+ * Restores admin-approved rows to COMPLETED and drops withdrawal amounts that
+ * were stuffed into the profit-hold. The balance debit is a separate one-time
+ * clawback so a later rejection cannot be charged twice.
+ * Idempotent via `withdraw-approval-repair:{userId}`.
  */
 export async function repairApprovedWithdrawalAccounting(email: string): Promise<boolean> {
   const trimmed = email.trim();
@@ -673,11 +674,6 @@ export async function repairApprovedWithdrawalAccounting(email: string): Promise
       : "0.0000";
     const available = await getAvailableBalance(user.id, tx);
     const fullyCovered = !isPositive(refunded) || isGreaterThanOrEqual(available, refunded);
-
-    if (fullyCovered && isPositive(refunded)) {
-      await debitAvailableBalance(user.id, refunded, tx);
-    }
-
     if (!fullyCovered) return;
 
     await tx.transaction.create({
@@ -693,4 +689,69 @@ export async function repairApprovedWithdrawalAccounting(email: string): Promise
   });
 
   return true;
+}
+
+/**
+ * One-time removal of a withdrawal that was already sent on-chain.
+ * Rejecting the later request refunded the same funds into Available.
+ * Idempotent via `already-paid-clawback:{amount}:{userId}`.
+ */
+export async function clawbackAlreadyPaidWithdrawal(
+  emails: string[],
+  amount: string
+): Promise<"missing" | "already" | "short" | "debited"> {
+  let user: { id: string } | null = null;
+  for (const email of emails) {
+    user = await prisma.user.findFirst({
+      where: { email: email.trim() },
+      select: { id: true },
+    });
+    if (user) break;
+    user = await prisma.user.findFirst({
+      where: { email: email.trim().toLowerCase() },
+      select: { id: true },
+    });
+    if (user) break;
+  }
+  if (!user) return "missing";
+
+  const clawbackHash = `already-paid-clawback:${amount}:${user.id}`;
+  const existing = await prisma.transaction.findUnique({
+    where: { tx_hash: clawbackHash },
+    select: { id: true },
+  });
+  if (existing) return "already";
+
+  let outcome: "already" | "short" | "debited" = "short";
+  await prisma.$transaction(async (tx) => {
+    const again = await tx.transaction.findUnique({
+      where: { tx_hash: clawbackHash },
+      select: { id: true },
+    });
+    if (again) {
+      outcome = "already";
+      return;
+    }
+
+    const available = await getAvailableBalance(user.id, tx);
+    if (!isGreaterThanOrEqual(available, amount)) {
+      outcome = "short";
+      return;
+    }
+
+    await debitAvailableBalance(user.id, amount, tx);
+    await tx.transaction.create({
+      data: {
+        user_id: user.id,
+        amount: "0.0000",
+        type: "PACKAGE_PROFIT_HOLD",
+        status: "COMPLETED",
+        tx_hash: clawbackHash,
+        note: `Removed ${amount} USDT already sent on the first approved withdrawal`,
+      },
+    });
+    outcome = "debited";
+  });
+
+  return outcome;
 }
