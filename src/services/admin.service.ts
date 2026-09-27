@@ -685,6 +685,20 @@ export async function listPendingWithdrawals() {
   });
 }
 
+/** Completed withdrawals kept on the admin screen as the success record. */
+export async function listCompletedWithdrawals() {
+  return prisma.transaction.findMany({
+    where: { type: "WITHDRAWAL", status: "COMPLETED" },
+    include: {
+      user: {
+        select: { id: true, email: true, status: true, balance: true },
+      },
+    },
+    orderBy: { created_at: "desc" },
+    take: 50,
+  });
+}
+
 /**
  * Rescue only: credits a leftover PENDING deposit ledger row.
  * Normal deposits auto-credit on-chain detection — admins should not need this.
@@ -775,9 +789,9 @@ export async function rejectWithdrawal(transactionId: string, adminId: string) {
 }
 
 /**
- * Approves a pending withdrawal as COMPLETED in the ledger only.
- * On-chain USDT payout is manual (admin sends from master wallet).
- * Race-safe: only one concurrent call can claim PENDING → COMPLETED.
+ * Approves a pending withdrawal as COMPLETED.
+ * The amount was already removed from Available when the user submitted the
+ * request. Approval must not credit it back. Reject is the only path that refunds.
  */
 export async function approveWithdrawal(transactionId: string, adminId: string) {
   return prisma.$transaction(async (tx) => {

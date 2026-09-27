@@ -121,6 +121,11 @@ export const getPendingWithdrawals = asyncHandler(async (req: Request, res: Resp
   sendSuccess(res, 200, translate("common.fetched", req.lang), withdrawals);
 });
 
+export const getCompletedWithdrawals = asyncHandler(async (req: Request, res: Response) => {
+  const withdrawals = await adminService.listCompletedWithdrawals();
+  sendSuccess(res, 200, translate("common.fetched", req.lang), withdrawals);
+});
+
 export const approveDeposit = asyncHandler(async (req: Request, res: Response) => {
   const { transactionId } = req.params;
   const transaction = await adminService.approveDeposit(transactionId, req.user!.id);

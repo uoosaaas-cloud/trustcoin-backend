@@ -7,7 +7,7 @@ import { ensureAdminFromEnv } from "./services/adminBootstrap.service";
 import { runDailyRoiDistribution, startDailyRoiJob, stopDailyRoiJob } from "./jobs/dailyRoi.job";
 import { startDepositSweepJob, stopDepositSweepJob } from "./jobs/depositSweep.job";
 import { runAutoTradePublish, startAutoTradeJob, stopAutoTradeJob } from "./jobs/autoTrade.job";
-import { relockPendingWithdrawalsToPackageProfit } from "./services/investment.service";
+import { repairApprovedWithdrawalAccounting } from "./services/investment.service";
 
 const app = createApp();
 let server: Server | null = null;
@@ -53,12 +53,14 @@ async function catchUpLedgerOnStart(): Promise<void> {
   }
 
   try {
-    const moved = await relockPendingWithdrawalsToPackageProfit("dy4154960@gmail.com");
-    // eslint-disable-next-line no-console
-    console.log(`[startup] Cancelled ${moved} withdrawal(s) into locked package profit.`);
+    const repaired = await repairApprovedWithdrawalAccounting("dy4154960@gmail.com");
+    if (repaired) {
+      // eslint-disable-next-line no-console
+      console.log("[startup] Kept approved withdrawals deducted from available balance.");
+    }
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error("[startup] Pending-withdrawal relock failed:", error);
+    console.error("[startup] Approved-withdrawal repair failed:", error);
   }
 }
 

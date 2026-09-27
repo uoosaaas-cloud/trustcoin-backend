@@ -581,106 +581,116 @@ async function releaseUnpaidProfit(
 }
 
 /**
- * Cancel this user's withdrawal in the ledger (PENDING or the latest COMPLETED
- * request) without refunding Available, and fold the reserved amount into the
- * active package profit lock. Idempotent via the withdrawal note marker.
+ * One-time repair for an account whose approved withdrawal was undone on startup.
+ * Restores admin-approved rows to COMPLETED, drops withdrawal amounts that were
+ * stuffed into the profit-hold, and debits any amount that was refunded back
+ * to Available. Idempotent via `withdraw-approval-repair:{userId}`.
  */
-export async function relockPendingWithdrawalsToPackageProfit(email: string): Promise<number> {
+export async function repairApprovedWithdrawalAccounting(email: string): Promise<boolean> {
   const trimmed = email.trim();
   const user =
-    (await prisma.user.findFirst({
-      where: { email: trimmed },
-      select: { id: true },
-    })) ??
+    (await prisma.user.findFirst({ where: { email: trimmed }, select: { id: true } })) ??
     (await prisma.user.findFirst({
       where: { email: trimmed.toLowerCase() },
       select: { id: true },
     }));
-  if (!user) return 0;
-  return relockWithdrawalsForUser(user.id);
-}
+  if (!user) return false;
 
-async function relockWithdrawalsForUser(userId: string): Promise<number> {
-  const withdrawals = await prisma.transaction.findMany({
-    where: { user_id: userId, type: "WITHDRAWAL" },
-    orderBy: { created_at: "desc" },
+  const repairHash = `withdraw-approval-repair:${user.id}`;
+  const existing = await prisma.transaction.findUnique({
+    where: { tx_hash: repairHash },
+    select: { id: true },
   });
-  if (withdrawals.length === 0) return 0;
+  if (existing) return false;
 
-  const alreadyMoved = (note: string | null) =>
-    Boolean(note && note.includes("Moved to locked package profit"));
+  const MOVE_NOTE = "Moved to locked package profit";
 
-  const toCancel = withdrawals.filter((row) => row.status === "PENDING" && !alreadyMoved(row.note));
-  if (
-    toCancel.length === 0 &&
-    withdrawals[0] &&
-    withdrawals[0].status === "COMPLETED" &&
-    !alreadyMoved(withdrawals[0].note)
-  ) {
-    toCancel.push(withdrawals[0]);
-  }
-
-  let moved = 0;
-  for (const withdrawal of toCancel) {
-    const didMove = await prisma.$transaction(async (tx) => {
-      const claimed = await tx.transaction.updateMany({
-        where: {
-          id: withdrawal.id,
-          type: "WITHDRAWAL",
-          status: { in: ["PENDING", "COMPLETED"] },
-        },
-        data: {
-          status: "REJECTED",
-          note: `Moved to locked package profit (withdrawal ${withdrawal.id})`,
-        },
-      });
-      if (claimed.count !== 1) return false;
-
-      const investment = await tx.investment.findFirst({
-        where: { user_id: userId, status: "ACTIVE" },
-        orderBy: { start_date: "asc" },
-      });
-      const amount = toDecimalString(withdrawal.amount.toString());
-
-      if (!investment) {
-        if (withdrawal.status === "PENDING") {
-          await tx.user.update({
-            where: { id: userId },
-            data: { balance: { increment: amount } },
-          });
-        }
-        return true;
-      }
-
-      const holdHash = profitHoldHash(investment.id);
-      const existingHold = await tx.transaction.findUnique({
-        where: { tx_hash: holdHash },
-        select: { id: true, amount: true },
-      });
-
-      if (existingHold) {
-        await tx.transaction.update({
-          where: { id: existingHold.id },
-          data: { amount: add(existingHold.amount.toString(), amount) },
-        });
-      } else {
-        await tx.transaction.create({
-          data: {
-            user_id: userId,
-            amount,
-            type: "PACKAGE_PROFIT_HOLD",
-            status: "COMPLETED",
-            tx_hash: holdHash,
-            note: `Locked withdrawal into package profit for investment ${investment.id}`,
-          },
-        });
-      }
-
-      return true;
+  await prisma.$transaction(async (tx) => {
+    const again = await tx.transaction.findUnique({
+      where: { tx_hash: repairHash },
+      select: { id: true },
     });
+    if (again) return;
 
-    if (didMove) moved += 1;
-  }
+    const logs = await tx.adminLog.findMany({
+      where: { user_id: user.id, action: "APPROVE_WITHDRAWAL" },
+      select: { details: true },
+    });
+    const approvedIds = new Set<string>();
+    for (const log of logs) {
+      const match = log.details?.match(/\(tx ([^)]+)\)/);
+      if (match?.[1]) approvedIds.add(match[1]);
+    }
 
-  return moved;
+    if (approvedIds.size > 0) {
+      await tx.transaction.updateMany({
+        where: { id: { in: [...approvedIds] }, user_id: user.id, type: "WITHDRAWAL" },
+        data: { status: "COMPLETED" },
+      });
+    }
+
+    const [withdrawals, holds, distributions] = await Promise.all([
+      tx.transaction.findMany({
+        where: { user_id: user.id, type: "WITHDRAWAL" },
+        select: { id: true, amount: true, note: true },
+      }),
+      tx.transaction.findMany({
+        where: { user_id: user.id, type: "PACKAGE_PROFIT_HOLD" },
+        select: { id: true, amount: true },
+      }),
+      tx.transaction.findMany({
+        where: { user_id: user.id, type: "PROFIT_DISTRIBUTION", status: "COMPLETED" },
+        select: { amount: true },
+      }),
+    ]);
+
+    const movedSum = withdrawals
+      .filter((row) => row.note?.includes(MOVE_NOTE) && approvedIds.has(row.id))
+      .reduce((total, row) => add(total, row.amount.toString()), "0.0000");
+    const distributed = distributions.reduce(
+      (total, row) => add(total, row.amount.toString()),
+      "0.0000"
+    );
+    const holdSum = holds.reduce((total, row) => add(total, row.amount.toString()), "0.0000");
+    const excessHold = isGreaterThanOrEqual(holdSum, distributed)
+      ? subtract(holdSum, distributed)
+      : "0.0000";
+
+    let remainingExcess = excessHold;
+    for (const hold of holds) {
+      if (!isPositive(remainingExcess)) break;
+      const cut = minMoney(hold.amount.toString(), remainingExcess);
+      if (!isPositive(cut)) continue;
+      await tx.transaction.update({
+        where: { id: hold.id },
+        data: { amount: subtract(hold.amount.toString(), cut) },
+      });
+      remainingExcess = subtract(remainingExcess, cut);
+    }
+
+    const refunded = isGreaterThanOrEqual(movedSum, excessHold)
+      ? subtract(movedSum, excessHold)
+      : "0.0000";
+    const available = await getAvailableBalance(user.id, tx);
+    const fullyCovered = !isPositive(refunded) || isGreaterThanOrEqual(available, refunded);
+
+    if (fullyCovered && isPositive(refunded)) {
+      await debitAvailableBalance(user.id, refunded, tx);
+    }
+
+    if (!fullyCovered) return;
+
+    await tx.transaction.create({
+      data: {
+        user_id: user.id,
+        amount: "0.0000",
+        type: "PACKAGE_PROFIT_HOLD",
+        status: "COMPLETED",
+        tx_hash: repairHash,
+        note: "Repaired an approved withdrawal so it stays out of available balance",
+      },
+    });
+  });
+
+  return true;
 }

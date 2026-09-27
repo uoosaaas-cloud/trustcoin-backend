@@ -43,6 +43,7 @@ router.delete("/banned-ips/:ip", adminController.unbanIp);
 
 router.get("/transactions/pending", adminController.getPendingTransactions);
 router.get("/withdrawals/pending", adminController.getPendingWithdrawals);
+router.get("/withdrawals/completed", adminController.getCompletedWithdrawals);
 router.post("/transactions/:transactionId/approve-deposit", adminController.approveDeposit);
 router.post("/transactions/:transactionId/approve-withdrawal", adminController.approveWithdrawal);
 router.post("/transactions/:transactionId/reject-withdrawal", adminController.rejectWithdrawal);
