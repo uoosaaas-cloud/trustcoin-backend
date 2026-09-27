@@ -180,7 +180,15 @@ export async function getReferralStats(
 
   const totalCommission = toDecimalString(releasedAgg._sum.bonus_amount?.toString() ?? "0");
   const pendingEarnings = toDecimalString(user.pending_referral_bonus.toString());
-  const count = user.referrals_count > 0 ? user.referrals_count : totalReferrals;
+  // Live count is the source of truth. The stored counter drifts when a
+  // referred account is removed, and must not inflate the dashboard.
+  const count = totalReferrals;
+  if (user.referrals_count !== totalReferrals) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { referrals_count: totalReferrals },
+    });
+  }
   const link = buildReferralLink(user.referral_code);
 
   return {

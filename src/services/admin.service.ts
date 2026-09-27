@@ -4,7 +4,7 @@ import { ApiError } from "../utils/apiError";
 import { ensureAdminFromEnv, matchesAdminPassword } from "./adminBootstrap.service";
 import { signToken } from "../utils/jwt";
 import { generateOtpCode, getOtpExpiryDate } from "../utils/otp";
-import { add, isGreaterThanOrEqual, toDecimalString } from "../utils/money";
+import { add, isGreaterThanOrEqual, isPositive, minMoney, toDecimalString } from "../utils/money";
 import {
   queueEmail,
   sendAdminLoginOtp,
@@ -396,8 +396,51 @@ export async function deleteUser(userId: string, adminId: string) {
   if (!user) throw ApiError.notFound("auth.user_not_found");
   if (user.role === "ADMIN") throw ApiError.badRequest("errors.forbidden");
 
-  await logAdminAction(adminId, "DELETE_USER", `Deleted user ${user.email}`, userId);
-  await prisma.user.delete({ where: { id: userId } });
+  await prisma.$transaction(async (tx) => {
+    if (user.referred_by_id) {
+      await tx.user.updateMany({
+        where: { id: user.referred_by_id, referrals_count: { gt: 0 } },
+        data: { referrals_count: { decrement: 1 } },
+      });
+    }
+
+    // Open commissions live on the referrer. Deleting the referee cascades the
+    // reward row, so release that lock first or the amount stays stuck.
+    const openRewards = await tx.referralReward.findMany({
+      where: {
+        referee_id: userId,
+        referrer_id: { not: userId },
+        status: { in: ["PENDING_PACKAGE_ACTIVE", "PACKAGE_COMPLETED_AWAITING_ADMIN"] },
+      },
+      select: { referrer_id: true, bonus_amount: true },
+    });
+
+    const lockedByReferrer = new Map<string, string>();
+    for (const reward of openRewards) {
+      lockedByReferrer.set(
+        reward.referrer_id,
+        add(lockedByReferrer.get(reward.referrer_id) ?? "0", reward.bonus_amount.toString())
+      );
+    }
+
+    for (const [referrerId, amount] of lockedByReferrer) {
+      const referrer = await tx.user.findUnique({
+        where: { id: referrerId },
+        select: { pending_referral_bonus: true },
+      });
+      if (!referrer) continue;
+      const cut = minMoney(toDecimalString(referrer.pending_referral_bonus.toString()), amount);
+      if (!isPositive(cut)) continue;
+      await tx.user.update({
+        where: { id: referrerId },
+        data: { pending_referral_bonus: { decrement: cut } },
+      });
+    }
+
+    await tx.user.delete({ where: { id: userId } });
+  });
+
+  await logAdminAction(adminId, "DELETE_USER", `Deleted user ${user.email}`);
   return { id: userId, email: user.email };
 }
 
@@ -452,14 +495,47 @@ export interface AdminReferralOverview {
     commissionEarned: string;
     pendingCommission: string;
   }>;
+  referrerCards: AdminReferrerCard[];
   auditRows: AdminReferralAuditRow[];
+}
+
+export interface AdminReferrerCardReferee {
+  id: string;
+  email: string;
+  status: string;
+  registration_status: "SUCCESS" | "PENDING_KYC";
+  created_at: Date;
+  reward_status: string | null;
+  bonus_amount: string | null;
+  package_name: string | null;
+}
+
+export interface AdminReferrerCard {
+  id: string;
+  email: string;
+  referral_code: string;
+  referredCount: number;
+  commissionEarned: string;
+  pendingCommission: string;
+  referees: AdminReferrerCardReferee[];
 }
 
 export async function getReferralAdminOverview(): Promise<AdminReferralOverview> {
   const [referredUsers, releasedRewards, pendingRewards, allRewards] = await Promise.all([
     prisma.user.findMany({
       where: { referred_by_id: { not: null } },
-      select: { referred_by_id: true },
+      select: {
+        id: true,
+        email: true,
+        status: true,
+        is_verified: true,
+        created_at: true,
+        referred_by_id: true,
+        referredBy: {
+          select: { id: true, email: true, referral_code: true },
+        },
+      },
+      orderBy: { created_at: "desc" },
     }),
     prisma.referralReward.findMany({
       where: { status: "APPROVED_RELEASED" },
@@ -632,13 +708,72 @@ export async function getReferralAdminOverview(): Promise<AdminReferralOverview>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
 
+  const rewardStatusPriority: Record<string, number> = {
+    PACKAGE_COMPLETED_AWAITING_ADMIN: 4,
+    PENDING_PACKAGE_ACTIVE: 3,
+    APPROVED_RELEASED: 2,
+    REJECTED: 1,
+  };
+  const rewardsByReferee = new Map<string, (typeof allRewards)[number][]>();
+  for (const reward of allRewards) {
+    const list = rewardsByReferee.get(reward.referee_id) ?? [];
+    list.push(reward);
+    rewardsByReferee.set(reward.referee_id, list);
+  }
+
+  const cardsByReferrer = new Map<string, AdminReferrerCard>();
+  for (const referee of referredUsers) {
+    const referrer = referee.referredBy;
+    if (!referrer || !referee.referred_by_id) continue;
+
+    let card = cardsByReferrer.get(referrer.id);
+    if (!card) {
+      card = {
+        id: referrer.id,
+        email: referrer.email,
+        referral_code: referrer.referral_code,
+        referredCount: 0,
+        commissionEarned: toDecimalString(commissionByReferrer.get(referrer.id) ?? "0"),
+        pendingCommission: toDecimalString(pendingByReferrer.get(referrer.id) ?? "0"),
+        referees: [],
+      };
+      cardsByReferrer.set(referrer.id, card);
+    }
+
+    const refereeRewards = rewardsByReferee.get(referee.id) ?? [];
+    const leadReward = refereeRewards.reduce<(typeof allRewards)[number] | null>((best, reward) => {
+      if (!best) return reward;
+      const bestRank = rewardStatusPriority[best.status] ?? 0;
+      const nextRank = rewardStatusPriority[reward.status] ?? 0;
+      return nextRank > bestRank ? reward : best;
+    }, null);
+
+    card.referredCount += 1;
+    card.referees.push({
+      id: referee.id,
+      email: referee.email,
+      status: referee.status,
+      registration_status:
+        referee.status === "ACTIVE" || referee.is_verified ? "SUCCESS" : "PENDING_KYC",
+      created_at: referee.created_at,
+      reward_status: leadReward?.status ?? null,
+      bonus_amount: leadReward ? toDecimalString(leadReward.bonus_amount.toString()) : null,
+      package_name: leadReward?.investment.package.name ?? null,
+    });
+  }
+
+  const referrerCards = [...cardsByReferrer.values()].sort(
+    (a, b) => b.referredCount - a.referredCount || a.email.localeCompare(b.email)
+  );
+
   return {
-    totalReferrers: topReferrers.length,
+    totalReferrers: referrerCards.length,
     totalReferredUsers: referredUsers.length,
     totalCommissionPaid: toDecimalString(totalCommission),
     totalPendingCommission: toDecimalString(totalPending),
     awaitingAdminCount,
     topReferrers: topReferrers.slice(0, 20),
+    referrerCards,
     auditRows,
   };
 }
