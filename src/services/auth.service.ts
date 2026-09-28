@@ -245,6 +245,10 @@ export async function requestPasswordReset(email: string): Promise<{ resetLink?:
   const user = await prisma.user.findUnique({ where: { email } });
 
   if (!user) {
+    // Same public response as a real send, so the form cannot be used to
+    // discover which addresses are registered.
+    // eslint-disable-next-line no-console
+    console.info("[auth] password-reset skipped: no matching account");
     return {};
   }
 

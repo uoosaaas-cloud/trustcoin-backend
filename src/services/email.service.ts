@@ -367,20 +367,20 @@ export async function sendWithdrawalOtpEmail(toEmail: string, code: string): Pro
   });
 }
 
-/** رابط إعادة تعيين كلمة المرور. */
+/** رابط إعادة تعيين كلمة المرور. ليست رسالة رمز رقمي. */
 export async function sendPasswordResetEmail(toEmail: string, resetLink: string): Promise<void> {
-  const subject = "إعادة تعيين كلمة المرور — TrustCoin";
+  const subject = "TrustCoin password reset — إعادة تعيين كلمة المرور";
   const html = wrapTrustCoinEmail({
     title: "إعادة تعيين كلمة المرور",
     bodyHtml: `
-      <p style="margin:0;">تلقّينا طلباً لإعادة تعيين كلمة مرور حسابك.</p>
-      <p style="margin:14px 0 0;">اضغط الزر أدناه للمتابعة. الرابط صالح لفترة محدودة.</p>
+      <p style="margin:0;">تلقّينا طلباً لإعادة تعيين كلمة مرور حسابك في TrustCoin.</p>
+      <p style="margin:14px 0 0;">هذه الرسالة تحتوي على <strong>رابط</strong>، وليس رمزاً رقمياً. اضغط الزر أو انسخ الرابط. إذا لم تجدها في الوارد، افتح البريد غير الهام (Spam).</p>
       ${ctaButton("إعادة تعيين كلمة المرور", resetLink)}
       <p style="margin:0;font-size:12px;color:#64748b;word-break:break-all;direction:ltr;text-align:left;">
         ${escapeHtml(resetLink)}
       </p>
     `,
-    footerNote: "إذا لم تطلب إعادة التعيين، تجاهل هذه الرسالة — لن يتم تغيير شيء.",
+    footerNote: "إذا لم تطلب إعادة التعيين، تجاهل هذه الرسالة — لن يتم تغيير شيء. الرابط صالح لنحو 30 دقيقة.",
   });
 
   await deliverEmail({
