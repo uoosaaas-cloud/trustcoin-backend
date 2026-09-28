@@ -14,7 +14,13 @@ import {
 } from "./email.service";
 import type { SendAdminUserEmailInput } from "../validators/adminEmail.validator";
 import { consumeOtp } from "./otp.service";
-import { bytesToBuffer, resolveStoredIdDocument } from "../utils/upload";
+import {
+  bytesToBuffer,
+  DEPOSIT_PROOFS_DIR,
+  ID_DOCUMENTS_DIR,
+  removeUploadIfPresent,
+  resolveStoredIdDocument,
+} from "../utils/upload";
 
 /**
  * Step 1 of admin login: validate credentials, then email an OTP.
@@ -391,10 +397,19 @@ export async function blockUser(userId: string, adminId: string) {
   return updated;
 }
 
+/** True only when `email` appears as its own address, not inside a longer one. */
+function detailsNameThisEmail(details: string | null, email: string): boolean {
+  if (!details || !email) return false;
+  const escaped = email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(?:^|[^A-Za-z0-9._%+\\-])${escaped}(?=$|[^A-Za-z0-9._%+\\-])`, "i").test(details);
+}
+
 export async function deleteUser(userId: string, adminId: string) {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) throw ApiError.notFound("auth.user_not_found");
   if (user.role === "ADMIN") throw ApiError.badRequest("errors.forbidden");
+
+  const filesToRemove: Array<{ path: string | null; directory: string }> = [];
 
   await prisma.$transaction(async (tx) => {
     if (user.referred_by_id) {
@@ -437,10 +452,42 @@ export async function deleteUser(userId: string, adminId: string) {
       });
     }
 
+    const proofs = await tx.depositRequest.findMany({
+      where: { user_id: userId, proof_image: { not: null } },
+      select: { proof_image: true },
+    });
+    if (user.id_document_path) {
+      filesToRemove.push({ path: user.id_document_path, directory: ID_DOCUMENTS_DIR });
+    }
+    for (const proof of proofs) {
+      filesToRemove.push({ path: proof.proof_image, directory: DEPOSIT_PROOFS_DIR });
+    }
+
+    // OTP rows store the email with no user foreign key, so they survive a cascade.
+    await tx.otpVerification.deleteMany({ where: { email: user.email } });
+
+    const logCandidates = await tx.adminLog.findMany({
+      where: {
+        OR: [{ user_id: userId }, { details: { contains: user.email } }],
+      },
+      select: { id: true, user_id: true, details: true },
+    });
+    const logIds = logCandidates
+      .filter((row) => row.user_id === userId || detailsNameThisEmail(row.details, user.email))
+      .map((row) => row.id);
+    if (logIds.length > 0) {
+      await tx.adminLog.deleteMany({ where: { id: { in: logIds } } });
+    }
+
     await tx.user.delete({ where: { id: userId } });
   });
 
-  await logAdminAction(adminId, "DELETE_USER", `Deleted user ${user.email}`);
+  for (const file of filesToRemove) {
+    removeUploadIfPresent(file.path, file.directory);
+  }
+
+  // Record the action without the email, so the deleted account leaves no name behind.
+  await logAdminAction(adminId, "DELETE_USER", "Deleted a user account");
   return { id: userId, email: user.email };
 }
 

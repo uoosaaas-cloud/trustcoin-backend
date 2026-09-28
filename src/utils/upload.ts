@@ -12,6 +12,7 @@ import { ApiError } from "./apiError";
  */
 export const UPLOADS_ROOT = path.join(process.cwd(), "uploads");
 export const ID_DOCUMENTS_DIR = path.join(UPLOADS_ROOT, "id-documents");
+export const DEPOSIT_PROOFS_DIR = path.join(UPLOADS_ROOT, "deposit-proofs");
 
 const ALLOWED_HEADER_MIME_TYPES = new Set([
   "image/jpeg",
@@ -110,6 +111,21 @@ export function readUploadedImage(file: Express.Multer.File): {
   }
   const filename = `${crypto.randomBytes(16).toString("hex")}${extensionForMime(sniffed)}`;
   return { filename, mime: sniffed, data };
+}
+
+/** Remove one uploaded file by its stored name. Ignores anything outside `directory`. */
+export function removeUploadIfPresent(relativePath: string | null | undefined, directory: string): void {
+  if (!relativePath) return;
+  const filename = path.basename(relativePath);
+  if (!filename || filename === "." || filename === "..") return;
+  const root = path.resolve(directory);
+  const target = path.resolve(root, filename);
+  if (!target.startsWith(`${root}${path.sep}`)) return;
+  try {
+    fs.rmSync(target, { force: true });
+  } catch {
+    // A missing disk copy is not a reason to keep the account row.
+  }
 }
 
 export function readIdDocumentFromDisk(relativePath: string): Buffer | null {
