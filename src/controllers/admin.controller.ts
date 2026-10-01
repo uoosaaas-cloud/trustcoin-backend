@@ -170,6 +170,13 @@ export const triggerDepositSweep = asyncHandler(async (req: Request, res: Respon
     dryRun: input.dryRun,
     force: input.force,
   });
+  if (input.force && input.depositAddressId && !input.dryRun) {
+    await adminService.logAdminAction(
+      req.user!.id,
+      "RETRY_DEPOSIT_SWEEP",
+      "Retried one deposit move to the master wallet"
+    );
+  }
   sendSuccess(res, 200, translate("deposits.sweep_triggered", req.lang), summary);
 });
 

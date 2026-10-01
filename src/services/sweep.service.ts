@@ -142,11 +142,19 @@ async function releaseSweepLock(addressId: string): Promise<void> {
 }
 
 /** Missing energy is a platform funding pause, not a broken deposit address. */
-function isEnergyFundingBlock(message: string | null | undefined): boolean {
+export function isEnergyFundingBlock(message: string | null | undefined): boolean {
   return Boolean(message && message.includes("Insufficient energy"));
 }
 
-const ENERGY_RETRY_COOLDOWN_MS = 10 * 60 * 1000;
+/** Latest sweep on this address stopped because Feee energy was not available. */
+async function waitingForAdminEnergyRetry(depositAddressId: string): Promise<boolean> {
+  const latest = await prisma.depositSweep.findFirst({
+    where: { deposit_address_id: depositAddressId },
+    orderBy: { created_at: "desc" },
+    select: { error_message: true },
+  });
+  return isEnergyFundingBlock(latest?.error_message);
+}
 
 async function countRecentFailures(depositAddressId: string): Promise<number> {
   return prisma.depositSweep.count({
@@ -297,24 +305,6 @@ async function sweepOneAddress(
     };
   }
 
-  if (!options.force) {
-    const latest = await prisma.depositSweep.findFirst({
-      where: { deposit_address_id: depositAddress.id },
-      orderBy: { created_at: "desc" },
-      select: { error_message: true, created_at: true },
-    });
-    if (
-      isEnergyFundingBlock(latest?.error_message) &&
-      Date.now() - latest!.created_at.getTime() < ENERGY_RETRY_COOLDOWN_MS
-    ) {
-      return {
-        ...base,
-        status: "SKIPPED",
-        error: "Energy funding is blocked — waiting 10 minutes before the next attempt.",
-      };
-    }
-  }
-
   let usdtBalance: string;
   try {
     usdtBalance = await readUsdtBalance(network, depositAddress.address);
@@ -355,6 +345,16 @@ async function sweepOneAddress(
       console.error(`[sweep] On-chain credit failed for ${depositAddress.address}: ${message}`);
       return { ...base, status: "FAILED", error: `On-chain credit failed: ${message}` };
     }
+  }
+
+  // The user is already credited. Moving USDT to the master wallet waits for the admin button.
+  if (!options.force && (await waitingForAdminEnergyRetry(depositAddress.id))) {
+    return {
+      ...base,
+      status: "SKIPPED",
+      balanceCredited,
+      error: "Waiting for an admin retry after energy is funded.",
+    };
   }
 
   if (options.dryRun) {

@@ -14,6 +14,7 @@ import {
 } from "./email.service";
 import type { SendAdminUserEmailInput } from "../validators/adminEmail.validator";
 import { consumeOtp } from "./otp.service";
+import { isEnergyFundingBlock } from "./sweep.service";
 import {
   bytesToBuffer,
   DEPOSIT_PROOFS_DIR,
@@ -1288,6 +1289,9 @@ export interface AdminDepositMonitoring {
     created_at: Date;
     user: { id: string; email: string; status: string };
     depositAddress: string | null;
+    depositAddressId: string | null;
+    /** True when the automatic move to the master wallet stopped for lack of energy. */
+    awaitingEnergyRetry: boolean;
   }>;
   subWallets: Array<{
     id: string;
@@ -1349,7 +1353,7 @@ export async function getDepositMonitoringOverview(): Promise<AdminDepositMonito
       take: 50,
       include: {
         user: { select: { id: true, email: true, status: true } },
-        depositAddress: { select: { address: true } },
+        depositAddress: { select: { id: true, address: true } },
       },
     }),
     prisma.userDepositAddress.findMany({
@@ -1383,6 +1387,30 @@ export async function getDepositMonitoringOverview(): Promise<AdminDepositMonito
       },
     }),
   ]);
+
+  const unsweptAddressIds = [
+    ...new Set(
+      recentApprovedClaims
+        .filter((claim) => !claim.sweep_tx_hash && claim.depositAddress?.id)
+        .map((claim) => claim.depositAddress!.id)
+    ),
+  ];
+  const energyBlockedAddressIds = new Set<string>();
+  if (unsweptAddressIds.length > 0) {
+    const sweepRows = await prisma.depositSweep.findMany({
+      where: { deposit_address_id: { in: unsweptAddressIds } },
+      orderBy: { created_at: "desc" },
+      select: { deposit_address_id: true, error_message: true },
+    });
+    const seen = new Set<string>();
+    for (const row of sweepRows) {
+      if (seen.has(row.deposit_address_id)) continue;
+      seen.add(row.deposit_address_id);
+      if (isEnergyFundingBlock(row.error_message)) {
+        energyBlockedAddressIds.add(row.deposit_address_id);
+      }
+    }
+  }
 
   return {
     systemWallets: {
@@ -1419,6 +1447,10 @@ export async function getDepositMonitoringOverview(): Promise<AdminDepositMonito
       created_at: c.created_at,
       user: c.user,
       depositAddress: c.depositAddress?.address ?? null,
+      depositAddressId: c.depositAddress?.id ?? null,
+      awaitingEnergyRetry: Boolean(
+        !c.sweep_tx_hash && c.depositAddress?.id && energyBlockedAddressIds.has(c.depositAddress.id)
+      ),
     })),
     subWallets: subWallets.map((w) => ({
       id: w.id,
