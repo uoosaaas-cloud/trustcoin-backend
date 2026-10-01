@@ -141,12 +141,20 @@ async function releaseSweepLock(addressId: string): Promise<void> {
   });
 }
 
+/** Missing energy is a platform funding pause, not a broken deposit address. */
+function isEnergyFundingBlock(message: string | null | undefined): boolean {
+  return Boolean(message && message.includes("Insufficient energy"));
+}
+
+const ENERGY_RETRY_COOLDOWN_MS = 10 * 60 * 1000;
+
 async function countRecentFailures(depositAddressId: string): Promise<number> {
   return prisma.depositSweep.count({
     where: {
       deposit_address_id: depositAddressId,
       status: "FAILED",
       created_at: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+      NOT: { error_message: { contains: "Insufficient energy" } },
     },
   });
 }
@@ -289,6 +297,24 @@ async function sweepOneAddress(
     };
   }
 
+  if (!options.force) {
+    const latest = await prisma.depositSweep.findFirst({
+      where: { deposit_address_id: depositAddress.id },
+      orderBy: { created_at: "desc" },
+      select: { error_message: true, created_at: true },
+    });
+    if (
+      isEnergyFundingBlock(latest?.error_message) &&
+      Date.now() - latest!.created_at.getTime() < ENERGY_RETRY_COOLDOWN_MS
+    ) {
+      return {
+        ...base,
+        status: "SKIPPED",
+        error: "Energy funding is blocked — waiting 10 minutes before the next attempt.",
+      };
+    }
+  }
+
   let usdtBalance: string;
   try {
     usdtBalance = await readUsdtBalance(network, depositAddress.address);
@@ -427,12 +453,15 @@ async function sweepOneAddress(
     privateKeyHex = undefined;
     const message = safeErrorMessage(error);
 
+    // No TRX was spent and no USDT moved. Do not burn the 5-strike lock on this.
+    const status = isEnergyFundingBlock(message) ? "SKIPPED" : "FAILED";
+
     await persistSweepRecord({
       depositAddress,
       network,
       amountUsdt: usdtBalance,
       toAddress,
-      status: "FAILED",
+      status,
       attemptCount,
       errorMessage: message,
     }).catch((persistError) => {
@@ -441,9 +470,9 @@ async function sweepOneAddress(
     });
 
     // eslint-disable-next-line no-console
-    console.error(`[sweep] FAILED ${network} ${depositAddress.address}: ${message}`);
+    console.error(`[sweep] ${status} ${network} ${depositAddress.address}: ${message}`);
 
-    return { ...base, status: "FAILED", error: message };
+    return { ...base, status, error: message };
   } finally {
     await releaseSweepLock(depositAddress.id).catch(() => undefined);
   }

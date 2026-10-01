@@ -405,6 +405,10 @@ async function ensureEnergyForTransfer(
   const shortfall = requiredEnergy - resourcesBefore.energyLeft;
   const rentAmount = Math.max(65_000, shortfall + 10_000);
 
+  let feeeBlockReason = env.TRON_ENERGY_API_KEY
+    ? "Feee rental did not run"
+    : "TRON_ENERGY_API_KEY is not set";
+
   if (env.TRON_ENERGY_API_KEY) {
     const probe = await probeFeeeApiKey();
     const estimatedTrx = estimateFeeeOrderTrx(rentAmount);
@@ -443,11 +447,15 @@ async function ensureEnergyForTransfer(
             `for ${fromAddress}. Wait a few seconds and retry (do not burn TRX for energy).`
         );
       }
-    } else {
+      feeeBlockReason = energy.reason ?? "Feee accepted the probe but did not rent energy";
+    } else if (!probe.ok) {
+      feeeBlockReason = `Feee probe failed (code=${probe.code}): ${probe.msg}`;
       // eslint-disable-next-line no-console
-      console.warn(
-        `[tron] Feee balance ${probe.trxBalance ?? 0} TRX too low for ~${estimatedTrx} TRX order.`
-      );
+      console.warn(`[tron] ${feeeBlockReason}`);
+    } else {
+      feeeBlockReason = `Feee balance ${probe.trxBalance ?? 0} TRX is below ~${estimatedTrx} TRX`;
+      // eslint-disable-next-line no-console
+      console.warn(`[tron] ${feeeBlockReason}`);
     }
   }
 
@@ -468,7 +476,7 @@ async function ensureEnergyForTransfer(
 
   throw new Error(
     `Insufficient energy (${after.energyLeft}/${requiredEnergy}) for ${fromAddress}. ` +
-      `Fund Feee (≥ ${estimateFeeeOrderTrx(rentAmount)} TRX) or enable TRON_ENERGY_TRX_BURN_FALLBACK.`
+      `${feeeBlockReason}. Burn fallback is ${env.TRON_ENERGY_TRX_BURN_FALLBACK ? "on" : "off"}.`
   );
 }
 
